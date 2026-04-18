@@ -1,0 +1,81 @@
+services:
+  web:
+    build:
+      context: .
+      target: development
+    container_name: viralspy_dev_web
+    command: bin/rails server -b 0.0.0.0 -p 3000
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    ports:
+      - "3000:3000"
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgresql://viralspy:viralspy@db:5432/viralspy_development
+      REDIS_URL: redis://redis:6379/0
+      SIDEKIQ_REDIS_URL: redis://redis:6379/1
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  sidekiq:
+    build:
+      context: .
+      target: development
+    container_name: viralspy_dev_sidekiq
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgresql://viralspy:viralspy@db:5432/viralspy_development
+      REDIS_URL: redis://redis:6379/0
+      SIDEKIQ_REDIS_URL: redis://redis:6379/1
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: viralspy_dev_db
+    environment:
+      POSTGRES_USER: viralspy
+      POSTGRES_PASSWORD: viralspy
+      POSTGRES_DB: viralspy_development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U viralspy -d viralspy_development"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: viralspy_dev_redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+  bundle_cache:

@@ -1,0 +1,89 @@
+services:
+  web:
+    build:
+      context: .
+      target: production
+    image: viralspy:latest
+    container_name: viralspy_web
+    restart: unless-stopped
+    command: bin/rails server -b 0.0.0.0 -p 3000
+    environment:
+      RAILS_ENV: production
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_SERVE_STATIC_FILES: "true"
+    env_file:
+      - .env.production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.viralspy.rule=Host(`viralspy.curt.com.br`)"
+      - "traefik.http.routers.viralspy.tls.certresolver=le"
+    networks:
+      - traefik
+      - internal
+
+  sidekiq:
+    build:
+      context: .
+      target: production
+    image: viralspy:latest
+    container_name: viralspy_sidekiq
+    restart: unless-stopped
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    environment:
+      RAILS_ENV: production
+    env_file:
+      - .env.production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: viralspy_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: viralspy
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: viralspy_production
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U viralspy -d viralspy_production"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: viralspy_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - internal
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  traefik:
+    external: true
+  internal:
+    driver: bridge

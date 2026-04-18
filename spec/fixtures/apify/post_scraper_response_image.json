@@ -1,0 +1,14 @@
+{
+  "id": "0001",
+  "type": "GraphImage",
+  "shortCode": "ABC",
+  "caption": "Foto única",
+  "hashtags": [],
+  "mentions": [],
+  "url": "https://www.instagram.com/p/ABC/",
+  "commentsCount": 3,
+  "likesCount": 10,
+  "displayUrl": "https://scontent.cdninstagram.com/img.jpg",
+  "timestamp": "2025-12-01T10:00:00.000Z",
+  "ownerUsername": "foo"
+}

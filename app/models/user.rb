@@ -8,6 +8,6 @@ class User < ApplicationRecord
   validates :last_name, presence: true
 
   def full_name
-    [first_name, last_name].compact.join(' ').presence || email
+    [ first_name, last_name ].compact.join(" ").presence || email
   end
 end

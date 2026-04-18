@@ -38,7 +38,7 @@ Rails.application.configure do
   config.active_storage.service = :test
 
   config.action_mailer.perform_caching = false
-  config.action_mailer.default_url_options = { host: 'localhost' }
+  config.action_mailer.default_url_options = { host: "localhost" }
 
   config.hosts.clear
   config.hosts << "www.example.com"

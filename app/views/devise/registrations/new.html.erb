@@ -16,7 +16,7 @@
 
         <div>
           <%= label_tag "user[account_name]", t('devise.registrations.account_name_label'), class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= text_field_tag "user[account_name]", nil, required: true, autofocus: true,
+          <%= text_field_tag "user[account_name]", nil, required: true, autofocus: true, autocomplete: "organization",
                 class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
         </div>
 

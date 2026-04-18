@@ -19,7 +19,7 @@ class ApplicationController < ActionController::Base
   end
 
   def user_not_authorized
-    flash[:alert] = I18n.t('errors.not_authorized')
+    flash[:alert] = I18n.t("errors.not_authorized")
     redirect_back fallback_location: dashboard_path
   end
 end

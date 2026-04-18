@@ -11,7 +11,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
         unless @account.save
           build_resource(sign_up_params)
-          resource.errors.add(:base, I18n.t('errors.signup.account_invalid'))
+          resource.errors.add(:base, I18n.t("errors.signup.account_invalid"))
           clean_up_passwords(resource)
           set_minimum_password_length
           render :new, status: :unprocessable_entity and return

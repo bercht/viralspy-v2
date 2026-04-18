@@ -1,4 +1,4 @@
-class LlmUsageLog < ApplicationRecord
+class LLMUsageLog < ApplicationRecord
   acts_as_tenant :account
 
   belongs_to :account

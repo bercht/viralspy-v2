@@ -26,7 +26,7 @@ RSpec.describe 'Multi-tenancy isolation', type: :model do
       expect(Analysis.count).to eq(1)
       expect(Post.count).to eq(1)
       expect(ContentSuggestion.count).to eq(1)
-      expect(LlmUsageLog.count).to eq(1)
+      expect(LLMUsageLog.count).to eq(1)
       expect(TranscriptionUsageLog.count).to eq(1)
     end
 
@@ -35,7 +35,7 @@ RSpec.describe 'Multi-tenancy isolation', type: :model do
       expect(Analysis.count).to eq(1)
       expect(Post.count).to eq(1)
       expect(ContentSuggestion.count).to eq(1)
-      expect(LlmUsageLog.count).to eq(0)
+      expect(LLMUsageLog.count).to eq(0)
       expect(TranscriptionUsageLog.count).to eq(0)
     end
   end
@@ -56,7 +56,7 @@ RSpec.describe 'Multi-tenancy isolation', type: :model do
     }.to raise_error(ActsAsTenant::Errors::NoTenantSet)
 
     expect {
-      LlmUsageLog.create!(account: account_a, provider: 'openai', model: 'gpt-4o-mini')
+      LLMUsageLog.create!(account: account_a, provider: 'openai', model: 'gpt-4o-mini')
     }.to raise_error(ActsAsTenant::Errors::NoTenantSet)
 
     expect {

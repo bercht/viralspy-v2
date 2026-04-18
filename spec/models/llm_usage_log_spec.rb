@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe LlmUsageLog, type: :model do
+RSpec.describe LLMUsageLog, type: :model do
   let(:account) { create(:account) }
   let(:competitor) { ActsAsTenant.with_tenant(account) { create(:competitor, account: account) } }
   let(:analysis) { ActsAsTenant.with_tenant(account) { create(:analysis, account: account, competitor: competitor) } }
@@ -64,7 +64,7 @@ RSpec.describe LlmUsageLog, type: :model do
         ActsAsTenant.with_tenant(account) do
           older = create(:llm_usage_log, account: account, created_at: 2.days.ago)
           newer = create(:llm_usage_log, account: account, created_at: 1.hour.ago)
-          expect(LlmUsageLog.recent.first).to eq(newer)
+          expect(LLMUsageLog.recent.first).to eq(newer)
         end
       end
     end
@@ -74,8 +74,8 @@ RSpec.describe LlmUsageLog, type: :model do
         ActsAsTenant.with_tenant(account) do
           reel_log = create(:llm_usage_log, account: account, use_case: 'reel_analysis')
           other_log = create(:llm_usage_log, account: account, use_case: 'caption_gen')
-          expect(LlmUsageLog.by_use_case('reel_analysis')).to include(reel_log)
-          expect(LlmUsageLog.by_use_case('reel_analysis')).not_to include(other_log)
+          expect(LLMUsageLog.by_use_case('reel_analysis')).to include(reel_log)
+          expect(LLMUsageLog.by_use_case('reel_analysis')).not_to include(other_log)
         end
       end
     end
@@ -84,7 +84,7 @@ RSpec.describe LlmUsageLog, type: :model do
   describe 'multi-tenancy' do
     it 'raises when created without tenant' do
       expect {
-        LlmUsageLog.create!(account: account, provider: 'openai', model: 'gpt-4o-mini')
+        LLMUsageLog.create!(account: account, provider: 'openai', model: 'gpt-4o-mini')
       }.to raise_error(ActsAsTenant::Errors::NoTenantSet)
     end
 
@@ -94,7 +94,7 @@ RSpec.describe LlmUsageLog, type: :model do
       ActsAsTenant.with_tenant(other_account) { create(:llm_usage_log, account: other_account) }
 
       ActsAsTenant.with_tenant(account) do
-        expect(LlmUsageLog.count).to eq(1)
+        expect(LLMUsageLog.count).to eq(1)
       end
     end
   end

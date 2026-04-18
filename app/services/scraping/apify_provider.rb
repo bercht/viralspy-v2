@@ -49,7 +49,7 @@ module Scraping
 
         post_run = client.start_run(
           actor_id: POST_ACTOR_ID,
-          input: post_input(post_urls)
+          input: post_input(post_urls, normalized_handle)
         )
         posts_run_id = post_run["id"]
 
@@ -90,14 +90,14 @@ module Scraping
 
     def profile_input(handle, max_posts)
       {
-        "username"     => [ handle ],
-        "resultsLimit" => max_posts,
-        "resultsType"  => "details"
+        "usernames"     => [ handle ],
+        "resultsLimit" => max_posts
       }
     end
 
-    def post_input(urls)
+    def post_input(urls, handle)
       {
+        "username"     => [ handle ],
         "directUrls"   => urls,
         "resultsLimit" => urls.size
       }

@@ -13,6 +13,7 @@ VCR.configure do |config|
   config.cassette_library_dir = "spec/fixtures/vcr_cassettes"
   config.hook_into :webmock
   config.configure_rspec_metadata!
+  config.default_cassette_options = { record: :none }
   config.filter_sensitive_data("<APIFY_TOKEN>") { ENV["APIFY_API_TOKEN"] }
   config.filter_sensitive_data("<OPENAI_KEY>") { ENV["OPENAI_API_KEY"] }
   config.filter_sensitive_data("<ANTHROPIC_KEY>") { ENV["ANTHROPIC_API_KEY"] }

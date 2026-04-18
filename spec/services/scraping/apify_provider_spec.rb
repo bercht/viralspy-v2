@@ -17,7 +17,7 @@ RSpec.describe Scraping::ApifyProvider do
     before do
       allow(client).to receive(:start_run).with(
         actor_id: "apify~instagram-profile-scraper",
-        input: hash_including("username" => [ handle ])
+        input: hash_including("usernames" => [ handle ])
       ).and_return({ "id" => "profile_run_1" })
 
       allow(client).to receive(:get_run).with("profile_run_1")
@@ -201,7 +201,7 @@ RSpec.describe Scraping::ApifyProvider do
 
       expect(client).to have_received(:start_run)
         .with(actor_id: "apify~instagram-profile-scraper",
-              input: hash_including("username" => [ "curtbercht" ]))
+              input: hash_including("usernames" => [ "curtbercht" ]))
     end
 
     it "raises ArgumentError on invalid handle" do

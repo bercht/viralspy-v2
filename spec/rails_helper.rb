@@ -18,6 +18,8 @@ VCR.configure do |config|
   config.filter_sensitive_data("<ANTHROPIC_KEY>") { ENV["ANTHROPIC_API_KEY"] }
 end
 
+Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
+
 begin
   ActiveRecord::Migration.maintain_test_schema!
 rescue ActiveRecord::PendingMigrationError => e

@@ -10,6 +10,8 @@ class Competitor < ApplicationRecord
 
   before_validation :normalize_handle
 
+  has_many :analyses, dependent: :destroy
+
   scope :recent, -> { order(created_at: :desc) }
 
   private

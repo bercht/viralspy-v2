@@ -31,6 +31,16 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
 
   config.include FactoryBot::Syntax::Methods
+
+  config.around(:each) do |example|
+    if example.metadata[:skip_tenant]
+      example.run
+    else
+      ActsAsTenant.without_tenant do
+        example.run
+      end
+    end
+  end
 end
 
 Shoulda::Matchers.configure do |config|

@@ -1,8 +1,9 @@
 require "spec_helper"
-ENV["RAILS_ENV"] ||= "test"
+ENV["RAILS_ENV"] = "test"
 require_relative "../config/environment"
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require "rspec/rails"
+require "shoulda/matchers"
 
 require "webmock/rspec"
 WebMock.disable_net_connect!(allow_localhost: true)
@@ -30,6 +31,21 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
 
   config.include FactoryBot::Syntax::Methods
+  config.include Devise::Test::IntegrationHelpers, type: :request
+
+  config.before(:each, type: :request) do
+    host! "localhost"
+  end
+
+  config.around(:each) do |example|
+    if example.metadata[:skip_tenant]
+      example.run
+    else
+      ActsAsTenant.without_tenant do
+        example.run
+      end
+    end
+  end
 end
 
 Shoulda::Matchers.configure do |config|

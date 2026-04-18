@@ -1,0 +1,32 @@
+pt-BR:
+  errors:
+    not_authorized: "Você não tem permissão para essa ação."
+    signup:
+      account_invalid: "Não foi possível criar a conta da empresa. Tente novamente."
+  devise:
+    registrations:
+      signed_up: "Bem-vindo! Sua conta foi criada com sucesso."
+      new:
+        title: "Criar conta"
+        submit: "Criar conta"
+      account_name_label: "Nome da empresa / imobiliária"
+      first_name_label: "Nome"
+      last_name_label: "Sobrenome"
+      email_label: "Email"
+      password_label: "Senha"
+      password_confirmation_label: "Confirme a senha"
+      already_registered: "Já tenho conta"
+    sessions:
+      new:
+        title: "Entrar"
+        submit: "Entrar"
+        forgot_password: "Esqueci minha senha"
+        no_account: "Ainda não tenho conta"
+    passwords:
+      new:
+        title: "Recuperar senha"
+        submit: "Enviar instruções"
+        back_to_login: "Voltar para o login"
+      edit:
+        title: "Definir nova senha"
+        submit: "Atualizar senha"

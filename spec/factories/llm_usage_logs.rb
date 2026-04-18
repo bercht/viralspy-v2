@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :llm_usage_log do
-    association :account
+    account
     provider { 'openai' }
     model { 'gpt-4o-mini' }
     use_case { 'reel_analysis' }

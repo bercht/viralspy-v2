@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :transcription_usage_log do
-    association :account
+    account
     provider { 'openai' }
     model { 'gpt-4o-mini-transcribe' }
     audio_duration_seconds { 45 }

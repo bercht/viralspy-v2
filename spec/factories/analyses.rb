@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :analysis do
+    account
     competitor { association(:competitor, account: account) }
-    account { competitor&.account || create(:account) }
     status { :pending }
     raw_data { {} }
     profile_metrics { {} }

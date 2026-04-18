@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :content_suggestion do
-    account { analysis&.account || create(:account) }
+    account
     analysis { association(:analysis, account: account) }
     sequence(:position) { |n| n }
     content_type { :reel }

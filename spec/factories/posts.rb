@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :post do
-    analysis { association(:analysis, account: account) }
-    account { analysis&.account || competitor&.account || create(:account) }
-    competitor { analysis&.competitor || association(:competitor, account: account) }
+    account
+    competitor { association(:competitor, account: account) }
+    analysis { association(:analysis, account: account, competitor: competitor) }
     sequence(:instagram_post_id) { |n| "post_ig_#{n}" }
     sequence(:shortcode) { |n| "ABC#{n}XYZ" }
     post_type { :reel }

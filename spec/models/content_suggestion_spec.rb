@@ -108,7 +108,7 @@ RSpec.describe ContentSuggestion, type: :model do
           third = create(:content_suggestion, account: account, analysis: analysis, position: 3)
           first = create(:content_suggestion, account: account, analysis: analysis, position: 1)
           second = create(:content_suggestion, account: account, analysis: analysis, position: 2)
-          expect(ContentSuggestion.ordered).to eq([first, second, third])
+          expect(ContentSuggestion.ordered).to eq([ first, second, third ])
         end
       end
     end

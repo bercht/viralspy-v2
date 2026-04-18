@@ -14,7 +14,7 @@ RSpec.describe Competitor, type: :model do
 
     it 'accepts valid handle formats' do
       ActsAsTenant.with_tenant(account) do
-        valid_handles = ['foo', 'foo_bar', 'foo.bar', 'Foo123', 'a' * 30]
+        valid_handles = [ 'foo', 'foo_bar', 'foo.bar', 'Foo123', 'a' * 30 ]
         valid_handles.each do |h|
           competitor = build(:competitor, account: account, instagram_handle: h)
           expect(competitor).to be_valid, "expected '#{h}' to be valid"
@@ -24,7 +24,7 @@ RSpec.describe Competitor, type: :model do
 
     it 'rejects invalid handle formats' do
       ActsAsTenant.with_tenant(account) do
-        invalid_handles = ['foo bar', 'foo@bar', 'foo-bar', 'a' * 31, '']
+        invalid_handles = [ 'foo bar', 'foo@bar', 'foo-bar', 'a' * 31, '' ]
         invalid_handles.each do |h|
           competitor = build(:competitor, account: account, instagram_handle: h)
           expect(competitor).not_to be_valid, "expected '#{h}' to be invalid"
@@ -93,7 +93,7 @@ RSpec.describe Competitor, type: :model do
       ActsAsTenant.with_tenant(account) do
         older = create(:competitor, account: account, created_at: 2.days.ago)
         newer = create(:competitor, account: account, created_at: 1.hour.ago)
-        expect(Competitor.recent).to eq([newer, older])
+        expect(Competitor.recent).to eq([ newer, older ])
       end
     end
   end

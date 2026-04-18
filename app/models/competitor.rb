@@ -17,6 +17,6 @@ class Competitor < ApplicationRecord
   private
 
   def normalize_handle
-    self.instagram_handle = instagram_handle.to_s.strip.sub(/\A@/, '').downcase
+    self.instagram_handle = instagram_handle.to_s.strip.sub(/\A@/, "").downcase
   end
 end

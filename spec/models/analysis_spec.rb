@@ -83,7 +83,7 @@ RSpec.describe Analysis, type: :model do
         ActsAsTenant.with_tenant(account) do
           older = create(:analysis, account: account, competitor: competitor, created_at: 2.days.ago)
           newer = create(:analysis, account: account, competitor: competitor, created_at: 1.hour.ago)
-          expect(Analysis.recent).to eq([newer, older])
+          expect(Analysis.recent).to eq([ newer, older ])
         end
       end
     end

@@ -79,4 +79,3 @@ group :test do
   gem "vcr"
   gem "shoulda-matchers"
 end
-

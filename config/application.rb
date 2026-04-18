@@ -25,7 +25,7 @@ module App
 
     config.time_zone = "America/Sao_Paulo"
     config.i18n.default_locale = :"pt-BR"
-    config.i18n.available_locales = [:"pt-BR"]
+    config.i18n.available_locales = [ :"pt-BR" ]
     config.active_job.queue_adapter = :sidekiq
 
     config.generators.system_tests = nil

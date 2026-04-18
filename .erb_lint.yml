@@ -1,0 +1,11 @@
+---
+EnableDefaultLinters: true
+linters:
+  FinalNewline:
+    enabled: true
+  TrailingWhitespace:
+    enabled: true
+  ParserErrors:
+    enabled: true
+  ErbSafety:
+    enabled: true

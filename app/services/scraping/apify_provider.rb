@@ -3,7 +3,7 @@ module Scraping
     PROFILE_ACTOR_ID = "apify~instagram-profile-scraper".freeze
     POST_ACTOR_ID    = "apify~instagram-post-scraper".freeze
 
-    RETRYABLE_ERRORS = [Scraping::RateLimitError, Scraping::TimeoutError].freeze
+    RETRYABLE_ERRORS = [ Scraping::RateLimitError, Scraping::TimeoutError ].freeze
     RETRY_BACKOFF_SECONDS = 2
 
     def initialize(client: Scraping::Apify::Client.new, sleeper: ->(s) { sleep s })
@@ -90,7 +90,7 @@ module Scraping
 
     def profile_input(handle, max_posts)
       {
-        "username"     => [handle],
+        "username"     => [ handle ],
         "resultsLimit" => max_posts,
         "resultsType"  => "details"
       }

@@ -28,7 +28,7 @@ RSpec.describe Scraping::BaseProvider do
     end
 
     it "raises ArgumentError on malformed handle" do
-      ["foo bar", "foo/bar", "foo@bar", "a\\b", "#hashtag"].each do |bad|
+      [ "foo bar", "foo/bar", "foo@bar", "a\\b", "#hashtag" ].each do |bad|
         expect { provider.scrape_profile(handle: bad, max_posts: 5) }
           .to raise_error(ArgumentError, /invalid instagram handle/)
       end

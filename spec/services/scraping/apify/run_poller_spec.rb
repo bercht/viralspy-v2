@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe Scraping::Apify::RunPoller do
   let(:client) { instance_double(Scraping::Apify::Client) }
   let(:run_id) { "run_abc" }
-  let(:no_sleep) { ->(_) {} }
+  let(:no_sleep) { ->(_) { } }
 
   def make_poller(**opts)
     described_class.new(

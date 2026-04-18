@@ -4,14 +4,14 @@ RSpec.describe Scraping::Result do
   describe ".success" do
     it "creates a successful result" do
       result = described_class.success(
-        posts: [{ id: "a" }],
+        posts: [ { id: "a" } ],
         profile_data: { handle: "foo" },
         run_id: "run_123"
       )
 
       expect(result).to be_success
       expect(result).not_to be_failure
-      expect(result.posts).to eq([{ id: "a" }])
+      expect(result.posts).to eq([ { id: "a" } ])
       expect(result.profile_data).to eq({ handle: "foo" })
       expect(result.run_id).to eq("run_123")
       expect(result.error).to be_nil

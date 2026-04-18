@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe Scraping::ApifyProvider do
   let(:client) { instance_double(Scraping::Apify::Client) }
-  let(:no_sleep) { ->(_) {} }
+  let(:no_sleep) { ->(_) { } }
   let(:provider) { described_class.new(client: client, sleeper: no_sleep) }
 
   let(:handle) { "curtbercht" }
@@ -17,14 +17,14 @@ RSpec.describe Scraping::ApifyProvider do
     before do
       allow(client).to receive(:start_run).with(
         actor_id: "apify~instagram-profile-scraper",
-        input: hash_including("username" => [handle])
+        input: hash_including("username" => [ handle ])
       ).and_return({ "id" => "profile_run_1" })
 
       allow(client).to receive(:get_run).with("profile_run_1")
                                          .and_return({ "status" => "SUCCEEDED" })
 
       allow(client).to receive(:get_dataset_items).with("profile_run_1")
-                                                    .and_return([profile_fixture])
+                                                    .and_return([ profile_fixture ])
 
       allow(client).to receive(:start_run).with(
         actor_id: "apify~instagram-post-scraper",
@@ -35,7 +35,7 @@ RSpec.describe Scraping::ApifyProvider do
                                          .and_return({ "status" => "SUCCEEDED" })
 
       allow(client).to receive(:get_dataset_items).with("posts_run_1")
-                                                    .and_return([reel_fixture, carousel_fixture, image_fixture])
+                                                    .and_return([ reel_fixture, carousel_fixture, image_fixture ])
     end
 
     it "returns success with profile_data and posts" do
@@ -71,7 +71,7 @@ RSpec.describe Scraping::ApifyProvider do
       allow(client).to receive(:start_run).and_return({ "id" => "profile_run_zero" })
       allow(client).to receive(:get_run).and_return({ "status" => "SUCCEEDED" })
       allow(client).to receive(:get_dataset_items).with("profile_run_zero")
-                                                    .and_return([{ "username" => handle, "latestPosts" => [] }])
+                                                    .and_return([ { "username" => handle, "latestPosts" => [] } ])
     end
 
     it "returns success with empty posts (does not call post-scraper)" do
@@ -158,7 +158,7 @@ RSpec.describe Scraping::ApifyProvider do
       end
 
       allow(client).to receive(:get_run).and_return({ "status" => "SUCCEEDED" })
-      allow(client).to receive(:get_dataset_items).with("profile_run").and_return([profile_fixture])
+      allow(client).to receive(:get_dataset_items).with("profile_run").and_return([ profile_fixture ])
       allow(client).to receive(:get_dataset_items).with("posts_run").and_return([])
 
       result = provider.scrape_profile(handle: handle, max_posts: max_posts)
@@ -195,13 +195,13 @@ RSpec.describe Scraping::ApifyProvider do
     it "normalizes handle (strip, remove leading @, lowercase)" do
       allow(client).to receive(:start_run).and_return({ "id" => "r" })
       allow(client).to receive(:get_run).and_return({ "status" => "SUCCEEDED" })
-      allow(client).to receive(:get_dataset_items).and_return([{ "username" => "ok" }], [])
+      allow(client).to receive(:get_dataset_items).and_return([ { "username" => "ok" } ], [])
 
       provider.scrape_profile(handle: "  @CurtBercht  ", max_posts: 10)
 
       expect(client).to have_received(:start_run)
         .with(actor_id: "apify~instagram-profile-scraper",
-              input: hash_including("username" => ["curtbercht"]))
+              input: hash_including("username" => [ "curtbercht" ]))
     end
 
     it "raises ArgumentError on invalid handle" do

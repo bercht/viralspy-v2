@@ -45,7 +45,7 @@ RSpec.describe Scraping::Apify::Parser do
   describe ".parse_posts" do
     it "maps a reel (type=Video productType=clips)" do
       raw = JSON.parse(File.read("spec/fixtures/apify/post_scraper_response_reel.json"))
-      post = described_class.parse_posts([raw]).first
+      post = described_class.parse_posts([ raw ]).first
 
       expect(post[:post_type]).to eq(:reel)
       expect(post[:instagram_post_id]).to eq("3739257410524297440")
@@ -62,7 +62,7 @@ RSpec.describe Scraping::Apify::Parser do
 
     it "maps a carousel (type=Sidecar) without video_url" do
       raw = JSON.parse(File.read("spec/fixtures/apify/post_scraper_response_carousel.json"))
-      post = described_class.parse_posts([raw]).first
+      post = described_class.parse_posts([ raw ]).first
 
       expect(post[:post_type]).to eq(:carousel)
       expect(post[:video_url]).to be_nil
@@ -72,7 +72,7 @@ RSpec.describe Scraping::Apify::Parser do
 
     it "maps an image (type=GraphImage)" do
       raw = JSON.parse(File.read("spec/fixtures/apify/post_scraper_response_image.json"))
-      post = described_class.parse_posts([raw]).first
+      post = described_class.parse_posts([ raw ]).first
 
       expect(post[:post_type]).to eq(:image)
       expect(post[:video_url]).to be_nil
@@ -81,7 +81,7 @@ RSpec.describe Scraping::Apify::Parser do
 
     it "filters out unknown types (IGTV, stories, lives)" do
       raw = JSON.parse(File.read("spec/fixtures/apify/post_scraper_response_unknown.json"))
-      expect(described_class.parse_posts([raw])).to eq([])
+      expect(described_class.parse_posts([ raw ])).to eq([])
     end
 
     it "filters out Video items that are NOT clips (e.g. legacy IGTV)" do
@@ -91,7 +91,7 @@ RSpec.describe Scraping::Apify::Parser do
         "productType" => "feed",
         "shortCode" => "OLD"
       }
-      expect(described_class.parse_posts([raw])).to eq([])
+      expect(described_class.parse_posts([ raw ])).to eq([])
     end
 
     it "parses arrays: multiple posts of different types in same payload" do
@@ -100,7 +100,7 @@ RSpec.describe Scraping::Apify::Parser do
       image = JSON.parse(File.read("spec/fixtures/apify/post_scraper_response_image.json"))
       unknown = JSON.parse(File.read("spec/fixtures/apify/post_scraper_response_unknown.json"))
 
-      posts = described_class.parse_posts([reel, carousel, image, unknown])
+      posts = described_class.parse_posts([ reel, carousel, image, unknown ])
 
       expect(posts.map { |p| p[:post_type] }).to eq(%i[reel carousel image])
     end
@@ -120,7 +120,7 @@ RSpec.describe Scraping::Apify::Parser do
         "hashtags" => nil,
         "mentions" => nil
       }
-      post = described_class.parse_posts([raw]).first
+      post = described_class.parse_posts([ raw ]).first
 
       expect(post[:post_type]).to eq(:carousel)
       expect(post[:instagram_post_id]).to eq("123")
@@ -133,7 +133,7 @@ RSpec.describe Scraping::Apify::Parser do
 
     it "does not prefix hashtags with #" do
       raw = { "type" => "Sidecar", "hashtags" => %w[imoveis corretor casa], "id" => "x" }
-      post = described_class.parse_posts([raw]).first
+      post = described_class.parse_posts([ raw ]).first
       expect(post[:hashtags]).to eq(%w[imoveis corretor casa])
       expect(post[:hashtags].none? { |h| h.start_with?("#") }).to be true
     end

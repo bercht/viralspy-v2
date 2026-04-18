@@ -16,7 +16,7 @@ RSpec.describe Scraping::Apify::Client do
       stub_request(:post, "https://api.apify.com/v2/acts/apify~instagram-profile-scraper/runs")
         .with(
           headers: { "Authorization" => "Bearer #{token}", "Content-Type" => "application/json" },
-          body: { "username" => ["foo"] }.to_json
+          body: { "username" => [ "foo" ] }.to_json
         )
         .to_return(
           status: 201,
@@ -26,7 +26,7 @@ RSpec.describe Scraping::Apify::Client do
 
       data = client.start_run(
         actor_id: "apify~instagram-profile-scraper",
-        input: { "username" => ["foo"] }
+        input: { "username" => [ "foo" ] }
       )
 
       expect(data).to eq({ "id" => "run_abc", "status" => "READY" })
@@ -89,7 +89,7 @@ RSpec.describe Scraping::Apify::Client do
         .with(query: { format: "json", clean: "true" })
         .to_return(
           status: 200,
-          body: [{ "shortCode" => "ABC" }, { "shortCode" => "DEF" }].to_json,
+          body: [ { "shortCode" => "ABC" }, { "shortCode" => "DEF" } ].to_json,
           headers: { "Content-Type" => "application/json" }
         )
 

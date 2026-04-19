@@ -44,6 +44,10 @@ RUN rm -rf tmp/cache spec
 # ─── Production ────────────────────────────────────────────────────────────────
 FROM base AS production
 
+ENV RAILS_ENV=production \
+    RAILS_LOG_TO_STDOUT=true \
+    RAILS_SERVE_STATIC_FILES=true
+
 RUN groupadd --gid 1000 rails && \
     useradd --uid 1000 --gid rails --shell /bin/bash --create-home rails
 

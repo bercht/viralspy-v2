@@ -12,20 +12,13 @@
   </head>
 
   <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
-    <% if notice.present? %>
-      <div class="mx-auto max-w-3xl px-4 pt-4">
-        <div class="rounded-md bg-green-50 p-4 text-sm text-green-800 border border-green-200">
-          <%= notice %>
-        </div>
-      </div>
+    <% if user_signed_in? %>
+      <%= render "shared/navbar" %>
     <% end %>
-    <% if alert.present? %>
-      <div class="mx-auto max-w-3xl px-4 pt-4">
-        <div class="rounded-md bg-red-50 p-4 text-sm text-red-800 border border-red-200">
-          <%= alert %>
-        </div>
-      </div>
-    <% end %>
-    <%= yield %>
+
+    <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <%= render "shared/flash" %>
+      <%= yield %>
+    </main>
   </body>
 </html>

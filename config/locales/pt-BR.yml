@@ -30,3 +30,127 @@ pt-BR:
       edit:
         title: "Definir nova senha"
         submit: "Atualizar senha"
+
+  nav:
+    dashboard: "Dashboard"
+    competitors: "Concorrentes"
+    logout: "Sair"
+
+  time:
+    formats:
+      short: "%d/%m/%Y %H:%M"
+      long: "%d de %B de %Y às %H:%M"
+  date:
+    formats:
+      short: "%d/%m/%Y"
+
+  dashboard:
+    title: "Dashboard"
+    subtitle: "Visão geral dos seus concorrentes e análises"
+    new_competitor: "Novo concorrente"
+    recent_competitors: "Concorrentes recentes"
+    recent_analyses: "Análises recentes"
+    no_competitors: "Nenhum concorrente adicionado ainda."
+    no_analyses: "Nenhuma análise rodada ainda."
+    analyses_count:
+      zero: "sem análises"
+      one: "1 análise"
+      other: "%{count} análises"
+
+  analysis:
+    status:
+      pending: "Aguardando"
+      scraping: "Capturando posts"
+      scoring: "Pontuando"
+      transcribing: "Transcrevendo"
+      analyzing: "Analisando"
+      generating_suggestions: "Gerando sugestões"
+      completed: "Concluída"
+      failed: "Falhou"
+
+  post_type:
+    reel: "Reel"
+    reel_plural: "Reels"
+    carousel: "Carrossel"
+    carousel_plural: "Carrosséis"
+    image: "Imagem"
+    image_plural: "Imagens"
+
+  competitors:
+    created: "Concorrente adicionado."
+    destroyed: "Concorrente removido."
+    index:
+      title: "Concorrentes"
+      subtitle: "Perfis do Instagram que você está monitorando"
+      new: "Adicionar concorrente"
+      handle: "Perfil"
+      analyses: "Análises"
+      added: "Adicionado em"
+      view: "Ver →"
+      empty: "Você ainda não adicionou nenhum concorrente."
+    new:
+      title: "Novo concorrente"
+      subtitle: "Adicione um perfil do Instagram para começar a analisar"
+    form:
+      handle: "Nome de usuário no Instagram"
+      handle_hint: "Sem @. Exemplo: imobiliariaxyz"
+      cancel: "Cancelar"
+      submit: "Adicionar"
+    show:
+      followers: "seguidores"
+      no_data_yet: "Rode uma análise para capturar dados do perfil."
+      new_analysis: "Nova análise"
+      delete: "Excluir"
+      delete_confirm: "Tem certeza? Todas as análises e sugestões serão removidas."
+      analyses_history: "Histórico de análises"
+      no_analyses: "Nenhuma análise rodada ainda. Clique em 'Nova análise' para começar."
+      posts_scraped:
+        zero: "Sem posts capturados"
+        one: "1 post capturado"
+        other: "%{count} posts capturados"
+
+  analyses:
+    started: "Análise iniciada. Isso pode levar alguns minutos."
+    create_failed: "Não foi possível iniciar a análise."
+    show:
+      title: "Análise"
+      in_progress:
+        pending: "Aguardando início..."
+        scraping: "Capturando posts do Instagram..."
+        scoring: "Calculando pontuações..."
+        transcribing: "Transcrevendo áudio dos reels..."
+        analyzing: "Analisando conteúdo..."
+        generating_suggestions: "Gerando sugestões..."
+        description: "Estamos processando a análise. Isso pode levar 3-4 minutos."
+        refresh_hint: "Atualize a página em alguns instantes para ver o progresso."
+      failed:
+        title: "A análise falhou"
+        default_message: "Algo deu errado. Tente rodar uma nova análise."
+        retry: "Rodar nova análise"
+      profile_metrics:
+        title: "Métricas do perfil"
+        posts_per_week: "Posts/semana"
+        avg_likes: "Média de curtidas"
+        avg_comments: "Média de comentários"
+        engagement_rate: "Engajamento"
+        content_mix: "Mix de conteúdo"
+        top_hashtags: "Hashtags mais usadas"
+      top_posts:
+        title: "Top posts analisados"
+        score: "Score"
+        no_caption: "(sem caption)"
+      suggestions:
+        title: "Sugestões de conteúdo"
+        save: "Salvar"
+        discard: "Descartar"
+        saved: "Salva"
+        discarded: "Descartada"
+        format_details: "Detalhes do formato"
+        rationale: "Por quê?"
+
+  content_suggestions:
+    updated:
+      saved: "Sugestão salva."
+      discarded: "Sugestão descartada."
+      draft: "Sugestão restaurada."
+    update_failed: "Não foi possível atualizar a sugestão."

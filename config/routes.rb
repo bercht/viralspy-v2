@@ -3,11 +3,18 @@ Rails.application.routes.draw do
     registrations: "users/registrations"
   }
 
-  authenticate :user do
-    get "/dashboard", to: "dashboard#show", as: :dashboard
+  authenticated :user do
+    root to: "dashboard#index", as: :authenticated_root
+  end
+  root to: redirect("/users/sign_in")
+
+  get "dashboard", to: "dashboard#index", as: :dashboard
+
+  resources :competitors, only: [ :index, :new, :create, :show, :destroy ] do
+    resources :analyses, only: [ :create, :show ]
   end
 
-  root to: redirect("/dashboard")
+  resources :content_suggestions, only: [ :update ]
 
   get "up" => "rails/health#show", as: :rails_health_check
 end

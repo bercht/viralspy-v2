@@ -64,13 +64,22 @@ chmod 600 .env.production
 nano .env.production
 ```
 
-### Postgres
+### Postgres e DATABASE_URL
 
 ```bash
 POSTGRES_USER=viralspy
 POSTGRES_PASSWORD=<gerar senha forte: openssl rand -hex 24>
 POSTGRES_DB=viralspy_production
+
+# DATABASE_URL — obrigatória. Construir a partir dos valores acima:
+# postgres://<POSTGRES_USER>:<POSTGRES_PASSWORD>@db:5432/<POSTGRES_DB>
+# Exemplo (substitua SENHA pela senha gerada acima):
+DATABASE_URL=postgres://viralspy:SENHA@db:5432/viralspy_production
 ```
+
+> ⚠️ **`DATABASE_URL` é obrigatória.** Sem ela, o container web entra em crash loop
+> com erro `PG::ConnectionBad`. O `config/database.yml` tem fallback defensivo
+> usando `POSTGRES_*`, mas explicitar `DATABASE_URL` é mais confiável.
 
 ### Rails
 
@@ -335,6 +344,54 @@ Let's Encrypt ainda emitindo cert. Aguardar 30s e tentar de novo.
 ```bash
 docker compose --env-file .env.production exec web bin/rails db:migrate:status
 docker compose --env-file .env.production exec web bin/rails db:migrate
+```
+
+### Web em crash loop com "PG::ConnectionBad"
+
+Sintomas:
+```
+web   Restarting (1) X seconds ago
+```
+
+E nos logs:
+```
+PG::ConnectionBad: password authentication failed for user "viralspy"
+```
+
+Causas prováveis, em ordem:
+
+**1. Senha do Postgres no `.env.production` mudou mas volume já existe com senha antiga**
+
+```bash
+docker compose --env-file .env.production down
+docker volume rm viralspy-v2_postgres_data
+docker compose --env-file .env.production up -d
+```
+
+⚠️ Isso apaga o banco. Só fazer se for primeira execução ou tiver backup.
+
+**2. `DATABASE_URL` com valores de dev no `.env.production`**
+
+```bash
+grep -E "^DATABASE_URL|^RAILS_ENV" .env.production
+```
+
+Se mostrar `viralspy:viralspy` ou `_development` ou `RAILS_ENV=development`, corrigir:
+
+```bash
+# Remove linhas erradas
+sed -i '/^DATABASE_URL=/d' .env.production
+sed -i '/^RAILS_ENV=development/d' .env.production
+
+# Adiciona DATABASE_URL correta
+source .env.production
+echo "DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}" >> .env.production
+
+# Valida
+docker compose --env-file .env.production config | grep -E "DATABASE_URL|RAILS_ENV"
+
+# Reinicia
+docker compose --env-file .env.production up -d --force-recreate web sidekiq
 ```
 
 ### Limpar tudo e recomeçar do zero (CUIDADO — apaga banco)

@@ -3,6 +3,12 @@ default: &default
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   url: <%= ENV["DATABASE_URL"] %>
+  <% if ENV["DATABASE_URL"].to_s.empty? %>
+  host: <%= ENV.fetch("POSTGRES_HOST", "db") %>
+  username: <%= ENV["POSTGRES_USER"] %>
+  password: <%= ENV["POSTGRES_PASSWORD"] %>
+  database: <%= ENV["POSTGRES_DB"] %>
+  <% end %>
 
 development:
   <<: *default
@@ -10,6 +16,9 @@ development:
 test:
   <<: *default
   url: <%= ENV["DATABASE_URL"]&.gsub("_development", "_test") %>
+  <% if ENV["DATABASE_URL"].to_s.empty? %>
+  database: <%= ENV.fetch("POSTGRES_DB", "viralspy_test").sub("_production", "_test").sub("_development", "_test") %>_test
+  <% end %>
 
 production:
   <<: *default

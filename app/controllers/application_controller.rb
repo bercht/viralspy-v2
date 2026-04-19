@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user!
   before_action :set_current_tenant
 
-  helper_method :current_tenant
+  helper_method :current_tenant, :current_account
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
@@ -16,6 +16,10 @@ class ApplicationController < ActionController::Base
 
   def current_tenant
     ActsAsTenant.current_tenant
+  end
+
+  def current_account
+    current_tenant
   end
 
   def user_not_authorized

@@ -1,0 +1,59 @@
+<div class="mb-8 flex items-center justify-between">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900"><%= t("dashboard.title") %></h1>
+    <p class="mt-1 text-sm text-gray-600"><%= t("dashboard.subtitle") %></p>
+  </div>
+  <%= link_to t("dashboard.new_competitor"), new_competitor_path,
+      class: "rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800" %>
+</div>
+
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+  <section class="rounded-lg border border-gray-200 bg-white p-6">
+    <h2 class="mb-4 text-lg font-semibold text-gray-900"><%= t("dashboard.recent_competitors") %></h2>
+
+    <% if @competitors.any? %>
+      <ul class="divide-y divide-gray-200">
+        <% @competitors.each do |competitor| %>
+          <li class="py-3">
+            <%= link_to competitor_path(competitor), class: "flex items-center justify-between hover:bg-gray-50" do %>
+              <div>
+                <p class="text-sm font-medium text-gray-900">@<%= competitor.instagram_handle %></p>
+                <p class="text-xs text-gray-500">
+                  <%= t("dashboard.analyses_count", count: competitor.analyses.size) %>
+                </p>
+              </div>
+              <span class="text-sm text-gray-400">&rarr;</span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-sm text-gray-500"><%= t("dashboard.no_competitors") %></p>
+    <% end %>
+  </section>
+
+  <section class="rounded-lg border border-gray-200 bg-white p-6">
+    <h2 class="mb-4 text-lg font-semibold text-gray-900"><%= t("dashboard.recent_analyses") %></h2>
+
+    <% if @recent_analyses.any? %>
+      <ul class="divide-y divide-gray-200">
+        <% @recent_analyses.each do |analysis| %>
+          <li class="py-3">
+            <%= link_to competitor_analysis_path(analysis.competitor, analysis),
+                class: "flex items-center justify-between hover:bg-gray-50" do %>
+              <div>
+                <p class="text-sm font-medium text-gray-900">@<%= analysis.competitor.instagram_handle %></p>
+                <p class="text-xs text-gray-500">
+                  <%= l(analysis.created_at, format: :short) %>
+                </p>
+              </div>
+              <%= render "shared/status_badge", status: analysis.status %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-sm text-gray-500"><%= t("dashboard.no_analyses") %></p>
+    <% end %>
+  </section>
+</div>

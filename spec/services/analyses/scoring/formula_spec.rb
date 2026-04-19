@@ -36,9 +36,10 @@ RSpec.describe Analyses::Scoring::Formula do
       end
 
       it "comments weigh 3x more than likes" do
-        fixed_time = 2.days.ago
-        post_more_comments = build_post(likes_count: 100, comments_count: 100, posted_at: fixed_time)
-        post_more_likes    = build_post(likes_count: 400, comments_count: 0,   posted_at: fixed_time)
+        # Use posts > 7 days old so maturity_boost is capped at 1.0, isolating engagement calculation
+        old_time = 10.days.ago
+        post_more_comments = build_post(likes_count: 100, comments_count: 100, posted_at: old_time)
+        post_more_likes    = build_post(likes_count: 400, comments_count: 0,   posted_at: old_time)
 
         score_comments = described_class.calculate(post: post_more_comments, followers: 10_000)
         score_likes    = described_class.calculate(post: post_more_likes,    followers: 10_000)

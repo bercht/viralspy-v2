@@ -14,8 +14,8 @@ module Analyses
         base_rate = engagement.to_f / followers
 
         days = days_since(post.posted_at)
-        maturity = [days / 7.0, 1.0].min
-        maturity_boost = 1.0 / [maturity, 0.1].max
+        maturity = [ days / 7.0, 1.0 ].min
+        maturity_boost = 1.0 / [ maturity, 0.1 ].max
 
         (base_rate * maturity_boost * 1_000_000).round(4)
       end
@@ -29,7 +29,7 @@ module Analyses
       end
 
       def days_since(posted_at)
-        [((Time.current - posted_at) / 1.day), 0.25].max
+        [ ((Time.current - posted_at) / 1.day), 0.25 ].max
       end
     end
   end

@@ -118,7 +118,7 @@ module Analyses
       variance = intervals.sum { |i| (i - mean)**2 } / intervals.size
       std_dev = Math.sqrt(variance)
       cv = std_dev / mean
-      [1.0 - cv, 0.0].max.round(2)
+      [ 1.0 - cv, 0.0 ].max.round(2)
     end
   end
 end

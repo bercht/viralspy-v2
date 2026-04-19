@@ -3,6 +3,7 @@ FactoryBot.define do
     account
     competitor { association(:competitor, account: account) }
     status { :pending }
+    max_posts { 50 }
     raw_data { {} }
     profile_metrics { {} }
     insights { {} }
@@ -46,6 +47,11 @@ FactoryBot.define do
       started_at { 5.minutes.ago }
       finished_at { 2.minutes.ago }
       error_message { 'Apify scraping failed: rate limit' }
+    end
+
+    trait :refining do
+      status { :refining }
+      started_at { 5.minutes.ago }
     end
   end
 end

@@ -3,7 +3,7 @@ module Analyses
     module Formula
       module_function
 
-      MIN_INTERACTIONS = 10
+      MIN_INTERACTIONS = 3
       MIN_AGE = 6.hours
 
       def calculate(post:, followers:)

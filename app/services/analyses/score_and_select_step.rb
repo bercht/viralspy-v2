@@ -1,11 +1,5 @@
 module Analyses
   class ScoreAndSelectStep
-    SELECTION_LIMITS = {
-      "reel"     => 12,
-      "carousel" => 5,
-      "image"    => 3
-    }.freeze
-
     def self.call(analysis)
       new(analysis).call
     end
@@ -46,7 +40,10 @@ module Analyses
     end
 
     def select_top_per_type
-      SELECTION_LIMITS.each do |type, limit|
+      Post.post_types.each_key do |type|
+        limit = Analyses::Scoring::Selector.select_count(type, analysis.max_posts)
+        next if limit.zero?
+
         top_ids = analysis.posts
                           .where(post_type: type)
                           .where("quality_score > 0")

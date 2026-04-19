@@ -48,7 +48,7 @@ module Analyses
 
     def run_scraper
       provider = Scraping::Factory.build
-      max_posts = ENV.fetch("SCRAPING_POSTS_PER_ANALYSIS", "30").to_i
+      max_posts = analysis.max_posts || ENV.fetch("SCRAPING_POSTS_PER_ANALYSIS", "50").to_i
       provider.scrape_profile(handle: competitor.instagram_handle, max_posts: max_posts)
     end
 

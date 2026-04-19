@@ -81,10 +81,16 @@ RSpec.describe Analyses::Scoring::Formula do
     end
 
     context "ineligibility" do
-      it "returns 0.0 for posts with fewer than 10 interactions" do
-        post = build_post(likes_count: 5, comments_count: 3, posted_at: 2.days.ago)
+      it "returns 0.0 for posts with fewer than 3 interactions" do
+        post = build_post(likes_count: 1, comments_count: 1, posted_at: 2.days.ago)
 
         expect(described_class.calculate(post: post, followers: 10_000)).to eq(0.0)
+      end
+
+      it "returns score > 0 for post with exactly 3 interactions" do
+        post = build_post(likes_count: 2, comments_count: 1, posted_at: 2.days.ago)
+
+        expect(described_class.calculate(post: post, followers: 10_000)).to be > 0
       end
 
       it "returns 0.0 for posts newer than 6 hours" do
@@ -113,14 +119,14 @@ RSpec.describe Analyses::Scoring::Formula do
     end
 
     context ".eligible?" do
-      it "returns true for a post with >= 10 interactions and >= 6 hours old" do
-        post = build_post(likes_count: 8, comments_count: 3, posted_at: 12.hours.ago)
+      it "returns true for a post with >= 3 interactions and >= 6 hours old" do
+        post = build_post(likes_count: 2, comments_count: 1, posted_at: 12.hours.ago)
 
         expect(described_class.eligible?(post)).to be(true)
       end
 
-      it "returns false for post with < 10 interactions" do
-        post = build_post(likes_count: 5, comments_count: 4, posted_at: 12.hours.ago)
+      it "returns false for post with < 3 interactions" do
+        post = build_post(likes_count: 1, comments_count: 1, posted_at: 12.hours.ago)
 
         expect(described_class.eligible?(post)).to be(false)
       end

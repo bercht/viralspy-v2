@@ -7,7 +7,7 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
   let(:competitor) do
     create(:competitor, account: account, instagram_handle: "testcorretor", followers_count: 5_000)
   end
-  let(:analysis) { create(:analysis, account: account, competitor: competitor, status: :pending) }
+  let(:analysis) { create(:analysis, account: account, competitor: competitor, status: :pending, max_posts: 30) }
 
   # --- Scraping mock ---
 
@@ -195,14 +195,15 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
 
     # Stub LLM::Gateway.build_provider so the real constructor (which requires API keys) is bypassed.
     # LLM::Gateway.complete still runs fully — including UsageLogger.log — just with mocked providers.
-    openai_resp = build_llm_response(reel_insights_json, model: "gpt-4o-mini", provider: :openai)
-    openai_stub = instance_double(LLM::Providers::OpenAI)
-    allow(openai_stub).to receive(:complete).and_return(openai_resp)
-    allow(LLM::Gateway).to receive(:build_provider).with(:openai).and_return(openai_stub)
+    # AnalyzeStep (3 calls) + GenerateSuggestionsStep (1 call) all use :anthropic + claude-opus-4-7
+    reel_resp     = build_llm_response(reel_insights_json, model: "claude-opus-4-7", provider: :anthropic)
+    carousel_resp = build_llm_response(carousel_insights_json, model: "claude-opus-4-7", provider: :anthropic)
+    image_resp    = build_llm_response(image_insights_json, model: "claude-opus-4-7", provider: :anthropic)
+    gen_resp      = build_llm_response(suggestions_json, model: "claude-opus-4-7", provider: :anthropic)
 
-    anthropic_resp = build_llm_response(suggestions_json, model: "claude-3-5-sonnet-20241022", provider: :anthropic)
     anthropic_stub = instance_double(LLM::Providers::Anthropic)
-    allow(anthropic_stub).to receive(:complete).and_return(anthropic_resp)
+    allow(anthropic_stub).to receive(:complete)
+      .and_return(reel_resp, carousel_resp, image_resp, gen_resp)
     allow(LLM::Gateway).to receive(:build_provider).with(:anthropic).and_return(anthropic_stub)
   end
 

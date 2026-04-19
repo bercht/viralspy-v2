@@ -9,7 +9,7 @@ RSpec.describe Analyses::ScoreAndSelectStep do
   end
   let(:analysis) do
     ActsAsTenant.with_tenant(account) do
-      create(:analysis, account: account, competitor: competitor, status: :scoring)
+      create(:analysis, account: account, competitor: competitor, status: :scoring, max_posts: 30)
     end
   end
 
@@ -28,7 +28,7 @@ RSpec.describe Analyses::ScoreAndSelectStep do
     ActsAsTenant.with_tenant(account) do
       create(:post,
         account: account, competitor: competitor, analysis: analysis,
-        post_type: type, likes_count: 2, comments_count: 1, posted_at: 2.days.ago)
+        post_type: type, likes_count: 1, comments_count: 0, posted_at: 2.days.ago)
     end
   end
 
@@ -163,7 +163,7 @@ RSpec.describe Analyses::ScoreAndSelectStep do
         scored_count = analysis.posts.where.not(quality_score: nil).count
         expect(scored_count).to eq(4)
 
-        ineligible = analysis.posts.find_by(likes_count: 2)
+        ineligible = analysis.posts.find_by(likes_count: 1)
         expect(ineligible.quality_score).to eq(0.0)
       end
     end
@@ -179,6 +179,41 @@ RSpec.describe Analyses::ScoreAndSelectStep do
 
         expect(high_reel.reload.selected_for_analysis).to be(true)
         expect(low_reel.reload.selected_for_analysis).to be(true) # both selected since only 2 reels and limit is 12
+      end
+    end
+
+    context "proportional selection with max_posts=50 (caps apply)" do
+      let(:analysis) do
+        ActsAsTenant.with_tenant(account) do
+          create(:analysis, account: account, competitor: competitor, status: :scoring, max_posts: 50)
+        end
+      end
+
+      before do
+        create_eligible_posts(count: 30, type: :reel)
+        create_eligible_posts(count: 8, type: :carousel)
+        create_eligible_posts(count: 4, type: :image)
+      end
+
+      it "selects up to cap (20) reels" do
+        ActsAsTenant.with_tenant(account) do
+          described_class.call(analysis)
+          expect(analysis.posts.where(post_type: :reel, selected_for_analysis: true).count).to eq(20)
+        end
+      end
+
+      it "selects up to cap (8) carousels" do
+        ActsAsTenant.with_tenant(account) do
+          described_class.call(analysis)
+          expect(analysis.posts.where(post_type: :carousel, selected_for_analysis: true).count).to eq(8)
+        end
+      end
+
+      it "selects available count (4) when below cap (5) for images" do
+        ActsAsTenant.with_tenant(account) do
+          described_class.call(analysis)
+          expect(analysis.posts.where(post_type: :image, selected_for_analysis: true).count).to eq(4)
+        end
       end
     end
 

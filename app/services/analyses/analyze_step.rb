@@ -1,7 +1,7 @@
 module Analyses
   class AnalyzeStep
-    ANALYSIS_MODEL = "gpt-4o-mini"
-    PROVIDER = :openai
+    ANALYSIS_MODEL = "claude-opus-4-7"
+    PROVIDER = :anthropic
     MAX_TOKENS = 2000
 
     TYPE_CONFIG = {

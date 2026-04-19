@@ -44,12 +44,63 @@ RSpec.describe Analysis, type: :model do
     end
   end
 
+  describe 'validations' do
+    describe 'max_posts' do
+      it 'accepts 10 (minimum)' do
+        ActsAsTenant.with_tenant(account) do
+          a = build(:analysis, account: account, competitor: competitor, max_posts: 10)
+          expect(a).to be_valid
+        end
+      end
+
+      it 'accepts 100 (maximum)' do
+        ActsAsTenant.with_tenant(account) do
+          a = build(:analysis, account: account, competitor: competitor, max_posts: 100)
+          expect(a).to be_valid
+        end
+      end
+
+      it 'rejects 9 (below minimum)' do
+        ActsAsTenant.with_tenant(account) do
+          a = build(:analysis, account: account, competitor: competitor, max_posts: 9)
+          expect(a).not_to be_valid
+        end
+      end
+
+      it 'rejects 101 (above maximum)' do
+        ActsAsTenant.with_tenant(account) do
+          a = build(:analysis, account: account, competitor: competitor, max_posts: 101)
+          expect(a).not_to be_valid
+        end
+      end
+
+      it 'rejects non-integer' do
+        ActsAsTenant.with_tenant(account) do
+          a = build(:analysis, account: account, competitor: competitor, max_posts: 50.5)
+          expect(a).not_to be_valid
+        end
+      end
+    end
+  end
+
   describe 'enums' do
     describe '#status' do
-      it 'defines 8 states' do
+      it 'defines 9 states including refining' do
         expect(Analysis.statuses.keys).to match_array(
-          %w[pending scraping scoring transcribing analyzing generating_suggestions completed failed]
+          %w[pending scraping scoring transcribing analyzing generating_suggestions refining completed failed]
         )
+      end
+
+      it 'has refining at value 6' do
+        expect(Analysis.statuses['refining']).to eq(6)
+      end
+
+      it 'has completed at value 7' do
+        expect(Analysis.statuses['completed']).to eq(7)
+      end
+
+      it 'has failed at value 8' do
+        expect(Analysis.statuses['failed']).to eq(8)
       end
 
       it 'defaults to pending' do

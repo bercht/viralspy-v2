@@ -60,12 +60,12 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
         end
       end
 
-      it "calls LLM with anthropic provider and claude model" do
+      it "calls LLM with anthropic provider and claude-opus-4-7 model" do
         ActsAsTenant.with_tenant(account) do
           described_class.call(analysis)
 
           expect(LLM::Gateway).to have_received(:complete).with(
-            hash_including(provider: :anthropic, model: "claude-3-5-sonnet-20241022", json_mode: true)
+            hash_including(provider: :anthropic, model: "claude-opus-4-7", json_mode: true)
           )
         end
       end

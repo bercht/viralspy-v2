@@ -160,11 +160,11 @@ RSpec.describe Analyses::ScrapeStep do
         end
       end
 
-      it "calls scrape_profile with competitor handle" do
+      it "calls scrape_profile with competitor handle and analysis.max_posts" do
         ActsAsTenant.with_tenant(account) do
           expect(mock_provider).to receive(:scrape_profile).with(
             handle: "testhandle",
-            max_posts: kind_of(Integer)
+            max_posts: analysis.max_posts
           ).and_return(scraping_success)
 
           described_class.call(analysis)

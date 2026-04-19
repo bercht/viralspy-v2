@@ -15,12 +15,19 @@ class Analysis < ApplicationRecord
     transcribing: 3,
     analyzing: 4,
     generating_suggestions: 5,
-    completed: 6,
-    failed: 7
+    refining: 6,
+    completed: 7,
+    failed: 8
+  }
+
+  validates :max_posts, numericality: {
+    only_integer: true,
+    greater_than_or_equal_to: 10,
+    less_than_or_equal_to: 100
   }
 
   scope :recent, -> { order(created_at: :desc) }
-  scope :in_progress, -> { where(status: %i[pending scraping scoring transcribing analyzing generating_suggestions]) }
+  scope :in_progress, -> { where(status: %i[pending scraping scoring transcribing analyzing generating_suggestions refining]) }
 
   def duration_seconds
     return nil unless started_at && finished_at

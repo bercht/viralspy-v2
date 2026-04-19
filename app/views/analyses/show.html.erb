@@ -1,0 +1,19 @@
+<div class="mb-8">
+  <div class="flex items-center gap-2 text-sm text-gray-500">
+    <%= link_to "@#{@competitor.instagram_handle}", competitor_path(@competitor), class: "hover:underline" %>
+    <span>/</span>
+    <span><%= l(@analysis.created_at, format: :short) %></span>
+  </div>
+  <div class="mt-2 flex items-center gap-3">
+    <h1 class="text-2xl font-bold text-gray-900"><%= t("analyses.show.title") %></h1>
+    <%= render "shared/status_badge", status: @analysis.status %>
+  </div>
+</div>
+
+<% if @analysis.failed? %>
+  <%= render "failed" %>
+<% elsif @analysis.completed? %>
+  <%= render "completed" %>
+<% else %>
+  <%= render "in_progress" %>
+<% end %>

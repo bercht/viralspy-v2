@@ -1,0 +1,12 @@
+<div class="rounded-lg border border-blue-200 bg-blue-50 p-8 text-center">
+  <div class="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
+  <h2 class="text-lg font-semibold text-blue-900">
+    <%= t("analyses.show.in_progress.#{@analysis.status}") %>
+  </h2>
+  <p class="mt-2 text-sm text-blue-700">
+    <%= t("analyses.show.in_progress.description") %>
+  </p>
+  <p class="mt-4 text-xs text-blue-600">
+    <%= t("analyses.show.in_progress.refresh_hint") %>
+  </p>
+</div>

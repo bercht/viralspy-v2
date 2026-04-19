@@ -1,0 +1,56 @@
+<div class="rounded-lg border border-gray-200 bg-white p-6">
+  <div class="mb-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
+        <%= t("post_type.#{suggestion.content_type}") %>
+      </span>
+      <span class="text-xs text-gray-500">#<%= suggestion.position %></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <% if suggestion.draft? %>
+        <%= button_to t("analyses.show.suggestions.save"),
+            content_suggestion_path(suggestion, content_suggestion: { status: "saved" }),
+            method: :patch,
+            class: "rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-100",
+            form: { class: "inline" } %>
+        <%= button_to t("analyses.show.suggestions.discard"),
+            content_suggestion_path(suggestion, content_suggestion: { status: "discarded" }),
+            method: :patch,
+            class: "rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50",
+            form: { class: "inline" } %>
+      <% elsif suggestion.saved? %>
+        <span class="text-xs font-medium text-emerald-700">&#10003; <%= t("analyses.show.suggestions.saved") %></span>
+      <% elsif suggestion.discarded? %>
+        <span class="text-xs font-medium text-gray-500"><%= t("analyses.show.suggestions.discarded") %></span>
+      <% end %>
+    </div>
+  </div>
+
+  <h4 class="mb-2 text-base font-semibold text-gray-900"><%= suggestion.hook %></h4>
+
+  <div class="mb-4 whitespace-pre-line text-sm text-gray-700"><%= suggestion.caption_draft %></div>
+
+  <% if suggestion.suggested_hashtags.present? %>
+    <div class="mb-4 flex flex-wrap gap-2">
+      <% suggestion.suggested_hashtags.each do |tag| %>
+        <span class="text-xs text-blue-600">#<%= tag %></span>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if suggestion.format_details.present? %>
+    <details class="mb-3 text-sm">
+      <summary class="cursor-pointer text-gray-700 hover:text-gray-900"><%= t("analyses.show.suggestions.format_details") %></summary>
+      <div class="mt-2 rounded-lg bg-gray-50 p-3 text-xs text-gray-700">
+        <pre class="whitespace-pre-wrap font-mono"><%= JSON.pretty_generate(suggestion.format_details) %></pre>
+      </div>
+    </details>
+  <% end %>
+
+  <% if suggestion.rationale.present? %>
+    <details class="text-sm">
+      <summary class="cursor-pointer text-gray-700 hover:text-gray-900"><%= t("analyses.show.suggestions.rationale") %></summary>
+      <p class="mt-2 text-xs text-gray-600"><%= suggestion.rationale %></p>
+    </details>
+  <% end %>
+</div>

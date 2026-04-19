@@ -52,7 +52,7 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=web"
+      - "traefik.docker.network=traefik"
       - "traefik.http.routers.viralspy.rule=Host(`${VIRALSPY_HOST:-viralspy.curt.com.br}`)"
       - "traefik.http.routers.viralspy.entrypoints=websecure"
       - "traefik.http.routers.viralspy.tls=true"
@@ -90,4 +90,5 @@ networks:
   internal:
     driver: bridge
   web:
+    name: traefik
     external: true

@@ -1,6 +1,6 @@
 module Analyses
   class GenerateSuggestionsStep
-    GENERATION_MODEL = "claude-opus-4-7"
+    GENERATION_MODEL = "claude-sonnet-4-5"
     PROVIDER = :anthropic
     MAX_TOKENS = 4000
     TARGET_COUNT = 5

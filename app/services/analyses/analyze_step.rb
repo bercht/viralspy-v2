@@ -1,6 +1,6 @@
 module Analyses
   class AnalyzeStep
-    ANALYSIS_MODEL = "claude-opus-4-7"
+    ANALYSIS_MODEL = "claude-sonnet-4-5"
     PROVIDER = :anthropic
     MAX_TOKENS = 2000
 

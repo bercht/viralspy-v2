@@ -195,11 +195,11 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
 
     # Stub LLM::Gateway.build_provider so the real constructor (which requires API keys) is bypassed.
     # LLM::Gateway.complete still runs fully — including UsageLogger.log — just with mocked providers.
-    # AnalyzeStep (3 calls) + GenerateSuggestionsStep (1 call) all use :anthropic + claude-opus-4-7
-    reel_resp     = build_llm_response(reel_insights_json, model: "claude-opus-4-7", provider: :anthropic)
-    carousel_resp = build_llm_response(carousel_insights_json, model: "claude-opus-4-7", provider: :anthropic)
-    image_resp    = build_llm_response(image_insights_json, model: "claude-opus-4-7", provider: :anthropic)
-    gen_resp      = build_llm_response(suggestions_json, model: "claude-opus-4-7", provider: :anthropic)
+    # AnalyzeStep (3 calls) + GenerateSuggestionsStep (1 call) all use :anthropic + claude-sonnet-4-5
+    reel_resp     = build_llm_response(reel_insights_json, model: "claude-sonnet-4-5", provider: :anthropic)
+    carousel_resp = build_llm_response(carousel_insights_json, model: "claude-sonnet-4-5", provider: :anthropic)
+    image_resp    = build_llm_response(image_insights_json, model: "claude-sonnet-4-5", provider: :anthropic)
+    gen_resp      = build_llm_response(suggestions_json, model: "claude-sonnet-4-5", provider: :anthropic)
 
     anthropic_stub = instance_double(LLM::Providers::Anthropic)
     allow(anthropic_stub).to receive(:complete)

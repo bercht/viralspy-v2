@@ -76,12 +76,12 @@ RSpec.describe Analyses::AnalyzeStep do
         end
       end
 
-      it "calls LLM with anthropic provider and claude-opus-4-7 model" do
+      it "calls LLM with anthropic provider and claude-sonnet-4-5 model" do
         ActsAsTenant.with_tenant(account) do
           described_class.call(analysis)
 
           expect(LLM::Gateway).to have_received(:complete)
-            .with(hash_including(provider: :anthropic, model: "claude-opus-4-7", json_mode: true))
+            .with(hash_including(provider: :anthropic, model: "claude-sonnet-4-5", json_mode: true))
             .at_least(3).times
         end
       end

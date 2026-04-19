@@ -15,7 +15,7 @@ module Analyses
     ].freeze
 
     def perform(analysis_id)
-      analysis = Analysis.find(analysis_id)
+      analysis = ActsAsTenant.without_tenant { Analysis.find(analysis_id) }
 
       ActsAsTenant.with_tenant(analysis.account) do
         run_pipeline(analysis)

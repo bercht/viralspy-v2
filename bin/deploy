@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# bin/deploy — deploy manual de produção
+#
+# Uso: bin/deploy
+#
+# Requer:
+#   - Chave SSH configurada pra deployer@72.60.152.144
+#   - Branch `main` limpo e pushado ao GitHub
+#   - Arquivo .env.production existente no VPS em /home/deployer/viralspy-v2/.env.production
+#
+# O que faz:
+#   1. Verifica branch local = main e limpo
+#   2. SSH no VPS, git pull, docker compose build, up -d
+#   3. Roda healthcheck
+#   4. Em falha, aborta e imprime logs
+
+set -euo pipefail
+
+VPS_HOST="${VPS_HOST:-deployer@72.60.152.144}"
+APP_DIR="${APP_DIR:-/home/deployer/viralspy-v2}"
+APP_URL="${APP_URL:-https://viralspy.curt.com.br/up}"
+
+log() {
+  echo -e "\033[1;34m→\033[0m $*"
+}
+
+fail() {
+  echo -e "\033[1;31m✗\033[0m $*" >&2
+  exit 1
+}
+
+# --- Validações locais ---
+log "Validando estado local..."
+
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$current_branch" != "main" ]; then
+  fail "Você está na branch '$current_branch'. Deploy só roda de 'main'."
+fi
+
+if ! git diff --quiet || ! git diff --staged --quiet; then
+  fail "Branch main tem mudanças não commitadas. Commite ou stash antes."
+fi
+
+log "Pushing main pra origin (garantindo VPS vai baixar versão mais nova)..."
+git push origin main
+
+# --- Deploy no VPS ---
+log "Conectando no VPS $VPS_HOST..."
+
+ssh "$VPS_HOST" bash <<EOF
+  set -euo pipefail
+
+  cd $APP_DIR
+
+  echo "→ git fetch + reset pra origin/main"
+  git fetch origin main
+  git reset --hard origin/main
+
+  echo "→ docker compose build web sidekiq"
+  docker compose --env-file .env.production build web sidekiq
+
+  echo "→ docker compose up -d"
+  docker compose --env-file .env.production up -d
+
+  echo "→ aguardando healthcheck (até 120s)..."
+  for i in \$(seq 1 24); do
+    if docker compose --env-file .env.production ps web | grep -q "healthy"; then
+      echo "  web está healthy"
+      break
+    fi
+    if [ \$i -eq 24 ]; then
+      echo "  web nunca ficou healthy. Logs:"
+      docker compose --env-file .env.production logs --tail=50 web
+      exit 1
+    fi
+    sleep 5
+  done
+EOF
+
+# --- Smoke test externo ---
+log "Smoke test em $APP_URL..."
+sleep 3
+if curl -sfL "$APP_URL" > /dev/null; then
+  log "\033[1;32m✓\033[0m Deploy concluído. $APP_URL responde 200."
+else
+  fail "Healthcheck externo falhou. Verificar logs no VPS."
+fi

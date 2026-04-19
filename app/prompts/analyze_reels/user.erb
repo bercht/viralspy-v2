@@ -1,0 +1,22 @@
+Analise os seguintes <%= posts.size %> Reels do perfil @<%= handle %> (<%= followers %> seguidores).
+
+Métricas do perfil:
+- Posts por semana: <%= profile_metrics[:posts_per_week] || profile_metrics["posts_per_week"] %>
+- Engagement médio: <%= (profile_metrics[:avg_engagement_rate] || profile_metrics["avg_engagement_rate"] || 0) * 100 %>%
+- Mix de conteúdo: <%= profile_metrics[:content_mix] || profile_metrics["content_mix"] %>
+
+Reels (ordenados por quality_score):
+
+<% posts.each_with_index do |post, i| %>
+---
+REEL <%= i + 1 %>
+Caption: <%= post.caption.to_s[0, 800] %>
+Transcript: <%= post.transcript.to_s[0, 1500] %>
+Engajamento: <%= post.likes_count %> curtidas, <%= post.comments_count %> comentários
+Views: <%= post.video_view_count || "n/d" %>
+Hashtags: <%= (post.hashtags || []).first(10).join(", ") %>
+Postado há <%= ((Time.current - post.posted_at) / 1.day).to_i %> dias
+---
+<% end %>
+
+Retorne o JSON conforme especificado no system prompt.

@@ -1,0 +1,15 @@
+Analise as seguintes <%= posts.size %> imagens do perfil @<%= handle %> (<%= followers %> seguidores).
+
+Imagens (ordenadas por quality_score):
+
+<% posts.each_with_index do |post, i| %>
+---
+IMAGEM <%= i + 1 %>
+Caption: <%= post.caption.to_s[0, 1000] %>
+Engajamento: <%= post.likes_count %> curtidas, <%= post.comments_count %> comentários
+Hashtags: <%= (post.hashtags || []).first(8).join(", ") %>
+Postado há <%= ((Time.current - post.posted_at) / 1.day).to_i %> dias
+---
+<% end %>
+
+Retorne o JSON conforme especificado.

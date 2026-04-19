@@ -1,0 +1,19 @@
+Analise os seguintes <%= posts.size %> carrosséis do perfil @<%= handle %> (<%= followers %> seguidores).
+
+Métricas:
+- Posts por semana: <%= profile_metrics[:posts_per_week] || profile_metrics["posts_per_week"] %>
+- Engagement médio: <%= (profile_metrics[:avg_engagement_rate] || profile_metrics["avg_engagement_rate"] || 0) * 100 %>%
+
+Carrosséis (ordenados por quality_score):
+
+<% posts.each_with_index do |post, i| %>
+---
+CARROSSEL <%= i + 1 %>
+Caption: <%= post.caption.to_s[0, 1200] %>
+Engajamento: <%= post.likes_count %> curtidas, <%= post.comments_count %> comentários
+Hashtags: <%= (post.hashtags || []).first(10).join(", ") %>
+Postado há <%= ((Time.current - post.posted_at) / 1.day).to_i %> dias
+---
+<% end %>
+
+Retorne o JSON conforme especificado.

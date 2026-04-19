@@ -38,9 +38,16 @@ aws --version  # esperado: aws-cli/1.x ou 2.x
 
 ## Passo 2 — Clone e setup inicial
 
+Apps no VPS ficam em `/opt/apps/<nome>/`, seguindo o padrão já estabelecido pelo Fifty e outros apps.
+
 ```bash
-# no VPS
-cd ~
+# No VPS, garantir que /opt/apps é gravável pelo deployer
+# (rodar uma vez, se ainda não estiver configurado)
+sudo mkdir -p /opt/apps
+sudo chown deployer:deployer /opt/apps
+
+# Clone
+cd /opt/apps
 git clone git@github.com:curtbercht/viralspy-v2.git
 cd viralspy-v2
 
@@ -145,7 +152,7 @@ Deve retornar vazio (bucket vazio ainda) ou lista. Se der erro, revisar credenci
 ## Passo 4 — Primeira build
 
 ```bash
-cd /home/deployer/viralspy-v2
+cd /opt/apps/viralspy-v2
 docker compose --env-file .env.production build
 ```
 
@@ -201,23 +208,31 @@ docker compose --env-file .env.production exec web bin/rails runner "puts Accoun
 
 ## Passo 8 — Configurar cron de backup
 
+Criar diretório de backups locais e log com permissões corretas:
+
 ```bash
-# No VPS, como deployer
+# Diretório pra dumps locais (antes de upload S3)
+sudo mkdir -p /var/backups/viralspy-v2
+sudo chown deployer:deployer /var/backups/viralspy-v2
+
+# Log do cron
 sudo touch /var/log/viralspy-backup.log
 sudo chown deployer:deployer /var/log/viralspy-backup.log
+
+# Agora o cron
 crontab -e
 ```
 
 Adicionar:
 
 ```
-0 3 * * * /home/deployer/viralspy-v2/bin/backup >> /var/log/viralspy-backup.log 2>&1
+0 3 * * * /opt/apps/viralspy-v2/bin/backup >> /var/log/viralspy-backup.log 2>&1
 ```
 
 Testar manualmente:
 
 ```bash
-/home/deployer/viralspy-v2/bin/backup
+/opt/apps/viralspy-v2/bin/backup
 tail /var/log/viralspy-backup.log
 ```
 
@@ -264,7 +279,7 @@ Duração esperada: 2-4 min (depende de quanto mudou e se gem nova).
 
 ```bash
 ssh deployer@72.60.152.144
-cd /home/deployer/viralspy-v2
+cd /opt/apps/viralspy-v2
 git log --oneline -5                # ver commits recentes
 git reset --hard <commit-anterior>
 docker compose --env-file .env.production build web sidekiq
@@ -275,7 +290,7 @@ docker compose --env-file .env.production up -d
 
 ```bash
 ssh deployer@72.60.152.144
-cd /home/deployer/viralspy-v2
+cd /opt/apps/viralspy-v2
 
 # Listar backups disponíveis
 set -a; source .env.production; set +a

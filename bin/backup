@@ -2,7 +2,7 @@
 # bin/backup — backup diário do Postgres de produção
 #
 # Roda dentro do VPS, invocado por cron:
-#   0 3 * * * /home/deployer/viralspy-v2/bin/backup >> /var/log/viralspy-backup.log 2>&1
+#   0 3 * * * /opt/apps/viralspy-v2/bin/backup >> /var/log/viralspy-backup.log 2>&1
 #
 # O que faz:
 #   1. pg_dump do container db
@@ -13,8 +13,8 @@
 
 set -euo pipefail
 
-APP_DIR="/home/deployer/viralspy-v2"
-BACKUP_DIR="/home/deployer/backups/viralspy-v2"
+APP_DIR="/opt/apps/viralspy-v2"
+BACKUP_DIR="/var/backups/viralspy-v2"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="viralspy_${TIMESTAMP}.sql.gz"
 BACKUP_PATH="${BACKUP_DIR}/${BACKUP_FILE}"

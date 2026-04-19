@@ -6,7 +6,7 @@
 # Requer:
 #   - Chave SSH configurada pra deployer@72.60.152.144
 #   - Branch `main` limpo e pushado ao GitHub
-#   - Arquivo .env.production existente no VPS em /home/deployer/viralspy-v2/.env.production
+#   - Arquivo .env.production existente no VPS em /opt/apps/viralspy-v2/.env.production
 #
 # O que faz:
 #   1. Verifica branch local = main e limpo
@@ -17,7 +17,7 @@
 set -euo pipefail
 
 VPS_HOST="${VPS_HOST:-deployer@72.60.152.144}"
-APP_DIR="${APP_DIR:-/home/deployer/viralspy-v2}"
+APP_DIR="${APP_DIR:-/opt/apps/viralspy-v2}"
 APP_URL="${APP_URL:-https://viralspy.curt.com.br/up}"
 
 log() {

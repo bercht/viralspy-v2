@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-APP_DIR="/home/deployer/viralspy-v2"
+APP_DIR="/opt/apps/viralspy-v2"
 cd "$APP_DIR"
 
 set -a

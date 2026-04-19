@@ -25,6 +25,10 @@ class Post < ApplicationRecord
   scope :by_type, ->(type) { where(post_type: type) }
   scope :ranked, -> { order(quality_score: :desc) }
   scope :recent_first, -> { order(posted_at: :desc) }
+  scope :eligible_for_scoring, -> {
+    where("likes_count + comments_count >= ? AND posted_at IS NOT NULL AND posted_at <= ?",
+          10, 6.hours.ago)
+  }
 
   def has_video?
     video_url.present?

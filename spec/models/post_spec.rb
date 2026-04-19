@@ -128,6 +128,44 @@ RSpec.describe Post, type: :model do
         end
       end
     end
+
+    describe '.eligible_for_scoring' do
+      it 'includes posts with >= 10 interactions and posted_at > 6 hours ago' do
+        ActsAsTenant.with_tenant(account) do
+          eligible = create(:post, account: account, analysis: analysis, competitor: competitor,
+                            likes_count: 8, comments_count: 3, posted_at: 2.days.ago)
+
+          expect(Post.eligible_for_scoring).to include(eligible)
+        end
+      end
+
+      it 'excludes posts with fewer than 10 interactions' do
+        ActsAsTenant.with_tenant(account) do
+          low_engagement = create(:post, account: account, analysis: analysis, competitor: competitor,
+                                  likes_count: 5, comments_count: 4, posted_at: 2.days.ago)
+
+          expect(Post.eligible_for_scoring).not_to include(low_engagement)
+        end
+      end
+
+      it 'excludes posts newer than 6 hours' do
+        ActsAsTenant.with_tenant(account) do
+          too_recent = create(:post, account: account, analysis: analysis, competitor: competitor,
+                              likes_count: 100, comments_count: 20, posted_at: 1.hour.ago)
+
+          expect(Post.eligible_for_scoring).not_to include(too_recent)
+        end
+      end
+
+      it 'excludes posts with nil posted_at' do
+        ActsAsTenant.with_tenant(account) do
+          no_date = create(:post, account: account, analysis: analysis, competitor: competitor,
+                           likes_count: 100, comments_count: 20, posted_at: nil)
+
+          expect(Post.eligible_for_scoring).not_to include(no_date)
+        end
+      end
+    end
   end
 
   describe '#has_video?' do

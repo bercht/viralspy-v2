@@ -107,7 +107,7 @@ module Analyses
       LLM::Gateway.complete(
         provider: PROVIDER,
         model: GENERATION_MODEL,
-        messages: [{ role: "user", content: user_prompt }],
+        messages: [ { role: "user", content: user_prompt } ],
         system: system_prompt,
         json_mode: true,
         max_tokens: MAX_TOKENS,

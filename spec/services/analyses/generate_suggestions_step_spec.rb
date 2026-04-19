@@ -1,0 +1,256 @@
+require "rails_helper"
+
+RSpec.describe Analyses::GenerateSuggestionsStep do
+  let(:account) { create(:account) }
+  let(:competitor) { create(:competitor, account: account, instagram_handle: "testcorretor", followers_count: 5000) }
+
+  let(:full_insights) do
+    {
+      "reels" => { "hooks" => ["Gancho 1"], "structures" => ["S1"], "ctas" => ["CTA1"], "themes" => ["T1"], "observations" => "obs" },
+      "carousels" => { "structures" => ["S1"], "content_types" => ["educacional"], "themes" => ["T1"], "observations" => "obs" },
+      "images" => { "caption_styles" => ["informativo"], "visual_elements" => ["preço"], "themes" => ["T1"], "observations" => "obs" }
+    }
+  end
+
+  let(:analysis) do
+    create(:analysis, account: account, competitor: competitor,
+                      status: :generating_suggestions,
+                      profile_metrics: { "posts_per_week" => 4.2 },
+                      insights: full_insights)
+  end
+
+  def suggestion_payload(n)
+    {
+      "position" => n,
+      "content_type" => n <= 2 ? "reel" : (n <= 4 ? "carousel" : "image"),
+      "hook" => "Hook #{n}",
+      "caption_draft" => "Caption draft número #{n} com conteúdo relevante.",
+      "format_details" => n <= 2 ? { "duration_seconds" => 30, "structure" => ["hook", "cta"] } :
+                           (n <= 4 ? { "slides" => [{ "title" => "Slide 1", "body" => "Corpo do slide" }] } :
+                                     { "composition_tips" => "foto ampla", "text_overlay" => nil }),
+      "suggested_hashtags" => ["imoveis", "corretor"],
+      "rationale" => "Funciona porque segue padrão do concorrente."
+    }
+  end
+
+  let(:five_suggestions_json) do
+    JSON.generate("suggestions" => (1..5).map { |n| suggestion_payload(n) })
+  end
+
+  def mock_llm_response(json)
+    instance_double(LLM::Response, parsed_json: JSON.parse(json), content: json)
+  end
+
+  describe ".call" do
+    context "happy path — all 3 insight types available" do
+      before do
+        allow(LLM::Gateway).to receive(:complete).and_return(mock_llm_response(five_suggestions_json))
+      end
+
+      it "creates 5 ContentSuggestions and marks analysis completed" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_success
+          expect(result.data[:count]).to eq(5)
+          reloaded = analysis.reload
+          expect(reloaded.status).to eq("completed")
+          expect(reloaded.finished_at).to be_present
+          expect(reloaded.content_suggestions.count).to eq(5)
+        end
+      end
+
+      it "calls LLM with anthropic provider and claude model" do
+        ActsAsTenant.with_tenant(account) do
+          described_class.call(analysis)
+
+          expect(LLM::Gateway).to have_received(:complete).with(
+            hash_including(provider: :anthropic, model: "claude-3-5-sonnet-20241022", json_mode: true)
+          )
+        end
+      end
+
+      it "persists ContentSuggestions with correct attributes" do
+        ActsAsTenant.with_tenant(account) do
+          described_class.call(analysis)
+
+          suggestion = analysis.content_suggestions.find_by(position: 1)
+          expect(suggestion.content_reel?).to be true
+          expect(suggestion.hook).to eq("Hook 1")
+          expect(suggestion.caption_draft).to include("Caption draft")
+          expect(suggestion.suggested_hashtags).to include("imoveis")
+          expect(suggestion.rationale).to be_present
+          expect(suggestion.draft?).to be true
+        end
+      end
+    end
+
+    context "insights only from reels" do
+      let(:analysis) do
+        create(:analysis, account: account, competitor: competitor,
+                          status: :generating_suggestions,
+                          profile_metrics: {},
+                          insights: { "reels" => full_insights["reels"] })
+      end
+
+      before do
+        allow(LLM::Gateway).to receive(:complete).and_return(mock_llm_response(five_suggestions_json))
+      end
+
+      it "uses fallback mix of 5 reels and succeeds" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_success
+          expect(result.data[:mix]).to eq({ reel: 5, carousel: 0, image: 0 })
+        end
+      end
+    end
+
+    context "insights from reels and carousels only" do
+      let(:analysis) do
+        create(:analysis, account: account, competitor: competitor,
+                          status: :generating_suggestions,
+                          profile_metrics: {},
+                          insights: { "reels" => full_insights["reels"], "carousels" => full_insights["carousels"] })
+      end
+
+      before do
+        allow(LLM::Gateway).to receive(:complete).and_return(mock_llm_response(five_suggestions_json))
+      end
+
+      it "uses mix of 3 reels + 2 carousels (reel absorbs image slot)" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_success
+          expect(result.data[:mix]).to eq({ reel: 3, carousel: 2, image: 0 })
+        end
+      end
+    end
+
+    context "insights from carousels only" do
+      let(:analysis) do
+        create(:analysis, account: account, competitor: competitor,
+                          status: :generating_suggestions,
+                          profile_metrics: {},
+                          insights: { "carousels" => full_insights["carousels"] })
+      end
+
+      before do
+        allow(LLM::Gateway).to receive(:complete).and_return(mock_llm_response(five_suggestions_json))
+      end
+
+      it "uses fallback mix of 5 carousels" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_success
+          expect(result.data[:mix]).to eq({ reel: 0, carousel: 5, image: 0 })
+        end
+      end
+    end
+
+    context "no insights available" do
+      let(:analysis) do
+        create(:analysis, account: account, competitor: competitor,
+                          status: :generating_suggestions, insights: {})
+      end
+
+      it "returns :no_insights failure and marks analysis failed" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_failure
+          expect(result.error_code).to eq(:no_insights)
+          expect(analysis.reload.status).to eq("failed")
+          expect(analysis.reload.finished_at).to be_present
+        end
+      end
+    end
+
+    context "LLM returns invalid JSON" do
+      before do
+        bad_response = instance_double(LLM::Response)
+        allow(bad_response).to receive(:parsed_json).and_raise(LLM::ResponseParseError, "unexpected token")
+        allow(LLM::Gateway).to receive(:complete).and_return(bad_response)
+      end
+
+      it "returns :invalid_json failure and marks analysis failed" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_failure
+          expect(result.error_code).to eq(:invalid_json)
+          expect(analysis.reload.status).to eq("failed")
+        end
+      end
+    end
+
+    context "LLM returns valid JSON with empty suggestions array" do
+      before do
+        allow(LLM::Gateway).to receive(:complete)
+          .and_return(mock_llm_response(JSON.generate("suggestions" => [])))
+      end
+
+      it "returns :empty_suggestions failure" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_failure
+          expect(result.error_code).to eq(:empty_suggestions)
+          expect(analysis.reload.status).to eq("failed")
+        end
+      end
+    end
+
+    context "LLM returns only 3 suggestions (less than 5)" do
+      let(:three_suggestions_json) do
+        JSON.generate("suggestions" => (1..3).map { |n| suggestion_payload(n) })
+      end
+
+      before do
+        allow(LLM::Gateway).to receive(:complete).and_return(mock_llm_response(three_suggestions_json))
+      end
+
+      it "persists 3 suggestions and marks analysis completed" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_success
+          expect(result.data[:count]).to eq(3)
+          expect(analysis.reload.content_suggestions.count).to eq(3)
+          expect(analysis.reload.status).to eq("completed")
+        end
+      end
+    end
+  end
+
+  describe "resolve_mix (private)" do
+    let(:step) { described_class.new(analysis) }
+
+    def resolve(available)
+      step.send(:resolve_mix, available)
+    end
+
+    it "returns 2+2+1 when all 3 types available" do
+      expect(resolve(%i[reel carousel image])).to eq({ reel: 2, carousel: 2, image: 1 })
+    end
+
+    it "reel absorbs image slot when image unavailable" do
+      expect(resolve(%i[reel carousel])).to eq({ reel: 3, carousel: 2, image: 0 })
+    end
+
+    it "reel gets all 5 when only reel available" do
+      expect(resolve([:reel])).to eq({ reel: 5, carousel: 0, image: 0 })
+    end
+
+    it "carousel gets all 5 when only carousel available" do
+      expect(resolve([:carousel])).to eq({ reel: 0, carousel: 5, image: 0 })
+    end
+
+    it "image gets all 5 when only image available" do
+      expect(resolve([:image])).to eq({ reel: 0, carousel: 0, image: 5 })
+    end
+  end
+end

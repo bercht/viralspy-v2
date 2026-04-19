@@ -94,19 +94,38 @@ ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=<valor>
 ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=<valor>
 ```
 
-### Hostinger Object Storage
+### Cloudflare R2
 
-1. No painel Hostinger, criar bucket `viralspy-backups` no Object Storage
-2. Gerar access key + secret key
-3. Anotar endpoint exato (ex: `https://s3.eu-central-1.hostingercdn.com`)
+R2 é S3-compatible, free tier 10GB (folgado pra backup do MVP), egress grátis.
+
+1. **Acessar dashboard R2:** https://dash.cloudflare.com → conta → sidebar "R2"
+2. **Criar bucket:**
+   - Clicar "Create bucket"
+   - Nome: `viralspy-backups`
+   - Location: `Automatic` (default)
+   - Criar
+3. **Gerar API token:**
+   - Em R2, clicar "Manage R2 API Tokens" (topo da página) → "Create API Token"
+   - ⚠️ **Não confundir** com "My Profile → API Tokens" (tokens gerais do Cloudflare não funcionam em R2)
+   - Permissions: `Object Read & Write`
+   - Specify bucket(s): selecionar apenas `viralspy-backups` (não dar acesso a todos)
+   - TTL: leave forever (ou data fixa conforme política de rotação de credenciais)
+   - Criar → copiar **Access Key ID** e **Secret Access Key** (aparecem uma única vez)
+4. **Anotar o endpoint:** está na tela do bucket após criação, no formato:
+   `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`
+   onde `<ACCOUNT_ID>` é um hash hexadecimal de 32 caracteres.
+
+Preencher no `.env.production`:
 
 ```bash
-BACKUP_S3_ENDPOINT=<endpoint hostinger>
-BACKUP_S3_ACCESS_KEY=<access key>
-BACKUP_S3_SECRET_KEY=<secret key>
+BACKUP_S3_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+BACKUP_S3_ACCESS_KEY=<access key id>
+BACKUP_S3_SECRET_KEY=<secret access key>
 BACKUP_S3_BUCKET=viralspy-backups
-BACKUP_S3_REGION=us-east-1
+BACKUP_S3_REGION=auto
 ```
+
+> **Atenção:** `BACKUP_S3_REGION=auto` é a string literal `auto`, não é placeholder. R2 não usa regiões AWS-style.
 
 ### Testar conectividade S3
 
@@ -202,7 +221,7 @@ Testar manualmente:
 tail /var/log/viralspy-backup.log
 ```
 
-Verificar no Object Storage que apareceu `viralspy_<timestamp>.sql.gz`.
+Verificar no bucket R2 que apareceu `viralspy_<timestamp>.sql.gz`.
 
 ---
 

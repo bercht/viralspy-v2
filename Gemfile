@@ -46,6 +46,7 @@ gem "redis", "~> 5.0"
 # IA
 gem "ruby-openai"
 gem "anthropic"
+gem "assemblyai", "~> 1.0"
 
 # pgvector
 gem "pgvector"

@@ -8,6 +8,8 @@ module Transcription
       case provider_name.to_s.downcase
       when "openai"
         Providers::OpenAI.new
+      when "assemblyai"
+        Providers::AssemblyAI.new
       else
         raise ProviderNotFoundError, "Unsupported transcription provider: #{provider_name}"
       end

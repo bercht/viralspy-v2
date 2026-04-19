@@ -59,14 +59,71 @@ RSpec.describe LLM::Response do
   end
 
   describe "#parsed_json" do
-    it "parses content as JSON" do
-      r = described_class.new(content: '{"key":"value"}', raw: {}, usage: {}, model: "m", provider: :openai)
-      expect(r.parsed_json).to eq({ "key" => "value" })
+    def build_response(content)
+      described_class.new(
+        content: content,
+        raw: {},
+        usage: { prompt_tokens: 10, completion_tokens: 5 },
+        model: "claude-sonnet-4-5",
+        provider: :anthropic,
+        finish_reason: "end_turn"
+      )
     end
 
-    it "raises ResponseParseError on invalid JSON" do
-      r = described_class.new(content: "not json", raw: {}, usage: {}, model: "m", provider: :openai)
-      expect { r.parsed_json }.to raise_error(LLM::ResponseParseError, /Failed to parse/)
+    context "with pure JSON (no fences)" do
+      it "parses correctly" do
+        expect(build_response('{"hooks": ["abc"]}').parsed_json).to eq({ "hooks" => [ "abc" ] })
+      end
+
+      it "parses nested JSON" do
+        expect(build_response('{"a": {"b": [1, 2]}}').parsed_json).to eq({ "a" => { "b" => [ 1, 2 ] } })
+      end
+    end
+
+    context "with markdown fence (Sonnet 4.x behavior)" do
+      it "strips ```json fence" do
+        r = build_response("```json\n{\"hooks\": [\"abc\"]}\n```")
+        expect(r.parsed_json).to eq({ "hooks" => [ "abc" ] })
+      end
+
+      it "strips ``` fence without 'json' tag" do
+        r = build_response("```\n{\"hooks\": [\"abc\"]}\n```")
+        expect(r.parsed_json).to eq({ "hooks" => [ "abc" ] })
+      end
+
+      it "strips fences with trailing/leading whitespace" do
+        r = build_response("  ```json  \n{\"hooks\": [\"abc\"]}\n  ```  ")
+        expect(r.parsed_json).to eq({ "hooks" => [ "abc" ] })
+      end
+
+      it "is case-insensitive on the json tag" do
+        r = build_response("```JSON\n{\"ok\": true}\n```")
+        expect(r.parsed_json).to eq({ "ok" => true })
+      end
+
+      it "works with fence but no newline after ```json" do
+        r = build_response('```json{"ok": true}```')
+        expect(r.parsed_json).to eq({ "ok" => true })
+      end
+    end
+
+    context "with malformed JSON" do
+      it "raises ResponseParseError" do
+        r = described_class.new(content: "not json", raw: {}, usage: {}, model: "m", provider: :openai)
+        expect { r.parsed_json }.to raise_error(LLM::ResponseParseError, /Failed to parse/)
+      end
+
+      it "raises ResponseParseError when fence wraps non-JSON" do
+        r = build_response("```json\nthis is not valid json\n```")
+        expect { r.parsed_json }.to raise_error(LLM::ResponseParseError)
+      end
+    end
+
+    context "memoization" do
+      it "parses only once" do
+        r = build_response('{"n": 1}')
+        expect(r.parsed_json.object_id).to eq(r.parsed_json.object_id)
+      end
     end
   end
 

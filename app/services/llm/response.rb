@@ -26,13 +26,22 @@ module LLM
     end
 
     def parsed_json
-      @parsed_json ||= JSON.parse(content)
+      @parsed_json ||= JSON.parse(sanitized_json_content)
     rescue JSON::ParserError => e
       raise LLM::ResponseParseError, "Failed to parse response as JSON: #{e.message}"
     end
 
     def success?
       true
+    end
+
+    private
+
+    def sanitized_json_content
+      stripped = content.to_s.strip
+      stripped = stripped.sub(/\A```(?:json)?\s*\n?/i, "")
+      stripped = stripped.sub(/\n?\s*```\s*\z/, "")
+      stripped
     end
   end
 end

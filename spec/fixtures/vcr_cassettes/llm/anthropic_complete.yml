@@ -1,0 +1,28 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://api.anthropic.com/v1/messages
+    body:
+      encoding: UTF-8
+      string: '{"model":"claude-3-5-haiku-20241022","messages":[{"role":"user","content":"Reply
+        with the word OK only."}],"max_tokens":10,"temperature":0.7}'
+    headers:
+      Content-Type:
+      - application/json
+      X-Api-Key:
+      - <ANTHROPIC_KEY>
+      anthropic-version:
+      - '2023-06-01'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+    body:
+      encoding: UTF-8
+      string: '{"id":"msg_vcr-test","type":"message","role":"assistant","content":[{"type":"text","text":"OK"}],"model":"claude-3-5-haiku-20241022","stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"container":null,"usage":{"input_tokens":14,"output_tokens":1,"cache_creation_input_tokens":null,"cache_read_input_tokens":null}}'
+  recorded_at: Sat, 18 Apr 2026 21:00:00 GMT
+recorded_with: VCR 6.3.1

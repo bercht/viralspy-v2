@@ -17,6 +17,12 @@ VCR.configure do |config|
   config.filter_sensitive_data("<APIFY_TOKEN>") { ENV["APIFY_API_TOKEN"] }
   config.filter_sensitive_data("<OPENAI_KEY>") { ENV["OPENAI_API_KEY"] }
   config.filter_sensitive_data("<ANTHROPIC_KEY>") { ENV["ANTHROPIC_API_KEY"] }
+  config.filter_sensitive_data("<OPENAI_AUTH>") do |interaction|
+    interaction.request.headers["Authorization"]&.first
+  end
+  config.filter_sensitive_data("<ANTHROPIC_AUTH>") do |interaction|
+    interaction.request.headers["X-Api-Key"]&.first
+  end
 end
 
 Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }

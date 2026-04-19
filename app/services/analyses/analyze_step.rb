@@ -91,6 +91,7 @@ module Analyses
         system: system_prompt,
         json_mode: true,
         max_tokens: MAX_TOKENS,
+        temperature: nil,
         use_case: config[:use_case],
         account: account,
         analysis: analysis

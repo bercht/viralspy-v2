@@ -83,6 +83,41 @@ RSpec.describe LLM::Providers::Anthropic do
       end
     end
 
+    context "temperature handling" do
+      it "omits temperature from HTTP payload when nil" do
+        stub_request(:post, "https://api.anthropic.com/v1/messages")
+          .with { |req|
+            body = JSON.parse(req.body)
+            !body.key?("temperature")
+          }
+          .to_return(status: 200, body: success_body, headers: { "Content-Type" => "application/json" })
+
+        provider.complete(model: "claude-opus-4-7", messages: messages, temperature: nil)
+      end
+
+      it "includes temperature in HTTP payload when explicitly provided" do
+        stub_request(:post, "https://api.anthropic.com/v1/messages")
+          .with { |req|
+            body = JSON.parse(req.body)
+            body["temperature"] == 0.5
+          }
+          .to_return(status: 200, body: success_body, headers: { "Content-Type" => "application/json" })
+
+        provider.complete(model: "claude-3-5-sonnet-latest", messages: messages, temperature: 0.5)
+      end
+
+      it "includes temperature 0.7 in HTTP payload when using default" do
+        stub_request(:post, "https://api.anthropic.com/v1/messages")
+          .with { |req|
+            body = JSON.parse(req.body)
+            body["temperature"] == 0.7
+          }
+          .to_return(status: 200, body: success_body, headers: { "Content-Type" => "application/json" })
+
+        provider.complete(model: "claude-3-5-sonnet-latest", messages: messages)
+      end
+    end
+
     context "error responses" do
       it "raises RateLimitError on 429" do
         stub_request(:post, "https://api.anthropic.com/v1/messages")

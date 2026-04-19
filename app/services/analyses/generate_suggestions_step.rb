@@ -111,7 +111,7 @@ module Analyses
         system: system_prompt,
         json_mode: true,
         max_tokens: MAX_TOKENS,
-        temperature: 0.8,
+        temperature: nil,
         use_case: "content_suggestions",
         account: account,
         analysis: analysis

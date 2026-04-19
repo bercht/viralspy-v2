@@ -20,9 +20,10 @@ module LLM
         params = {
           model: model,
           messages: normalize_messages(messages),
-          max_tokens: max_tokens,
-          temperature: temperature
+          max_tokens: max_tokens
         }
+        # Claude 4.x rejects temperature with 400. Callers that pass nil opt out.
+        params[:temperature] = temperature unless temperature.nil?
 
         system_prompt = build_system(system, json_mode)
         params[:system] = system_prompt if system_prompt.present?

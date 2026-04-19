@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# bin/restore-backup — restaura backup do S3 ou local
+#
+# Uso:
+#   bin/restore-backup <backup-file.sql.gz>          # local
+#   bin/restore-backup s3 <backup-file.sql.gz>       # do S3
+#
+# CUIDADO: apaga todos os dados atuais do Postgres.
+
+set -euo pipefail
+
+APP_DIR="/home/deployer/viralspy-v2"
+cd "$APP_DIR"
+
+set -a
+# shellcheck source=/dev/null
+source .env.production
+set +a
+
+if [ "${1:-}" = "s3" ]; then
+  if [ -z "${2:-}" ]; then
+    echo "Uso: bin/restore-backup s3 <nome-do-arquivo.sql.gz>"
+    exit 1
+  fi
+  BACKUP_FILE="/tmp/$2"
+  echo "→ Downloading from S3..."
+  AWS_ACCESS_KEY_ID="$BACKUP_S3_ACCESS_KEY" \
+  AWS_SECRET_ACCESS_KEY="$BACKUP_S3_SECRET_KEY" \
+  aws --endpoint-url "$BACKUP_S3_ENDPOINT" \
+      --region "$BACKUP_S3_REGION" \
+      s3 cp "s3://$BACKUP_S3_BUCKET/$2" "$BACKUP_FILE"
+else
+  if [ -z "${1:-}" ]; then
+    echo "Uso: bin/restore-backup <caminho/backup.sql.gz>"
+    exit 1
+  fi
+  BACKUP_FILE="$1"
+fi
+
+echo "→ Restoring $BACKUP_FILE..."
+echo "  ⚠️  Esta operação APAGA os dados atuais. Pressione Ctrl+C em 5s pra abortar."
+sleep 5
+
+gunzip -c "$BACKUP_FILE" | docker compose --env-file .env.production exec -T db \
+  psql -U "${POSTGRES_USER:-viralspy}" -d "${POSTGRES_DB:-viralspy_production}"
+
+echo "✓ Restore done."

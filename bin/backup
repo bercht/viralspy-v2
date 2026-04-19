@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# bin/backup — backup diário do Postgres de produção
+#
+# Roda dentro do VPS, invocado por cron:
+#   0 3 * * * /home/deployer/viralspy-v2/bin/backup >> /var/log/viralspy-backup.log 2>&1
+#
+# O que faz:
+#   1. pg_dump do container db
+#   2. Comprime com gzip
+#   3. Upload pro Object Storage Hostinger (S3-compatible via aws-cli)
+#   4. Rotaciona backups locais — mantém últimos 3
+#   5. Apaga no S3 backups mais antigos que 3 dias
+
+set -euo pipefail
+
+APP_DIR="/home/deployer/viralspy-v2"
+BACKUP_DIR="/home/deployer/backups/viralspy-v2"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="viralspy_${TIMESTAMP}.sql.gz"
+BACKUP_PATH="${BACKUP_DIR}/${BACKUP_FILE}"
+
+cd "$APP_DIR"
+
+# Carrega .env.production pra pegar credenciais S3 + DB
+set -a
+# shellcheck source=/dev/null
+source .env.production
+set +a
+
+mkdir -p "$BACKUP_DIR"
+
+echo "[$(date -Iseconds)] → Starting backup..."
+
+# 1. pg_dump via docker compose exec
+docker compose --env-file .env.production exec -T db \
+  pg_dump -U "${POSTGRES_USER:-viralspy}" -d "${POSTGRES_DB:-viralspy_production}" \
+  | gzip > "$BACKUP_PATH"
+
+SIZE=$(du -h "$BACKUP_PATH" | cut -f1)
+echo "[$(date -Iseconds)] → Dump created: $BACKUP_FILE ($SIZE)"
+
+# 2. Upload pro Hostinger Object Storage (S3-compatible via aws-cli)
+echo "[$(date -Iseconds)] → Uploading to S3..."
+AWS_ACCESS_KEY_ID="$BACKUP_S3_ACCESS_KEY" \
+AWS_SECRET_ACCESS_KEY="$BACKUP_S3_SECRET_KEY" \
+aws --endpoint-url "$BACKUP_S3_ENDPOINT" \
+    --region "$BACKUP_S3_REGION" \
+    s3 cp "$BACKUP_PATH" "s3://$BACKUP_S3_BUCKET/$BACKUP_FILE"
+
+echo "[$(date -Iseconds)] → Upload done."
+
+# 3. Rotação local: mantém últimos 3
+cd "$BACKUP_DIR"
+ls -t viralspy_*.sql.gz | tail -n +4 | xargs -r rm -v
+
+# 4. Rotação S3: apaga arquivos com mais de 3 dias
+echo "[$(date -Iseconds)] → Cleaning old S3 backups (>3 days)..."
+CUTOFF_DATE=$(date -d '3 days ago' +%Y-%m-%d)
+
+AWS_ACCESS_KEY_ID="$BACKUP_S3_ACCESS_KEY" \
+AWS_SECRET_ACCESS_KEY="$BACKUP_S3_SECRET_KEY" \
+aws --endpoint-url "$BACKUP_S3_ENDPOINT" \
+    --region "$BACKUP_S3_REGION" \
+    s3 ls "s3://$BACKUP_S3_BUCKET/" | \
+while read -r line; do
+  file_date=$(echo "$line" | awk '{print $1}')
+  file_name=$(echo "$line" | awk '{print $4}')
+  if [[ "$file_name" == viralspy_*.sql.gz ]] && [[ "$file_date" < "$CUTOFF_DATE" ]]; then
+    echo "  deleting old: $file_name"
+    AWS_ACCESS_KEY_ID="$BACKUP_S3_ACCESS_KEY" \
+    AWS_SECRET_ACCESS_KEY="$BACKUP_S3_SECRET_KEY" \
+    aws --endpoint-url "$BACKUP_S3_ENDPOINT" \
+        --region "$BACKUP_S3_REGION" \
+        s3 rm "s3://$BACKUP_S3_BUCKET/$file_name"
+  fi
+done
+
+echo "[$(date -Iseconds)] ✓ Backup done."

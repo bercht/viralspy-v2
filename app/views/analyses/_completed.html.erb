@@ -47,9 +47,9 @@
   <% end %>
 </section>
 
-<% if posts_by_type.any? %>
-  <section class="mb-8">
-    <h2 class="mb-4 text-heading text-text-body"><%= t("analyses.show.top_posts.title") %></h2>
+<section class="mb-8">
+  <h2 class="mb-4 text-heading text-text-body"><%= t("analyses.show.top_posts.title") %></h2>
+  <% if posts_by_type.any? %>
     <div class="space-y-6">
       <% %w[reel carousel image].each do |type| %>
         <% posts = posts_by_type[type] %>
@@ -57,16 +57,24 @@
         <%= render "analyses/posts_by_type", type: type, posts: posts.sort_by { |p| -(p.quality_score || 0) } %>
       <% end %>
     </div>
-  </section>
-<% end %>
+  <% else %>
+    <div class="rounded-feature border border-border-subtle bg-surface-canvas p-6 text-center text-body-sm text-text-muted shadow-card">
+      <%= t("analyses.show.top_posts.empty") %>
+    </div>
+  <% end %>
+</section>
 
-<% if suggestions.any? %>
-  <section>
-    <h2 class="mb-4 text-heading text-text-body"><%= t("analyses.show.suggestions.title") %></h2>
+<section>
+  <h2 class="mb-4 text-heading text-text-body"><%= t("analyses.show.suggestions.title") %></h2>
+  <% if suggestions.any? %>
     <div class="space-y-4">
       <% suggestions.each do |suggestion| %>
         <%= render "analyses/suggestion_card", suggestion: suggestion %>
       <% end %>
     </div>
-  </section>
-<% end %>
+  <% else %>
+    <div class="rounded-feature border border-border-subtle bg-surface-canvas p-6 text-center text-body-sm text-text-muted shadow-card">
+      <%= t("analyses.show.suggestions.empty") %>
+    </div>
+  <% end %>
+</section>

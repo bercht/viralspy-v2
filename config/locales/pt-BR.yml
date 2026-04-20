@@ -241,8 +241,10 @@ pt-BR:
         likes: "curtidas"
         comments: "comentários"
         views: "views"
+        empty: "Nenhum post foi selecionado — o perfil pode ter conteúdo insuficiente ou engajamento muito baixo."
       suggestions:
         title: "Sugestões de conteúdo"
+        empty: "Nenhuma sugestão foi gerada nesta análise."
         save: "Salvar"
         discard: "Descartar"
         saved: "Salva"

@@ -30,7 +30,7 @@ RSpec.describe "ApiCredentials errors" do
     it "builds a message without use_case when omitted" do
       err = ApiCredentials::NotConfiguredError.new(provider: "anthropic")
       expect(err.message).to include("anthropic")
-      expect(err.message).not_to include("use case")
+      expect(err.message).not_to match(/use.?case/i)
     end
   end
 end

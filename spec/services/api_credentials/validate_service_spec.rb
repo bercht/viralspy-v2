@@ -213,7 +213,7 @@ RSpec.describe ApiCredentials::ValidateService do
         ActsAsTenant.with_tenant(account) do
           credential = build(:api_credential, account: account, provider: "openai", encrypted_api_key: "x")
           credential.save!(validate: false)
-          ApiCredential.connection.update("UPDATE api_credentials SET provider='gemini' WHERE id=#{credential.id}")
+          ApiCredential.where(id: credential.id).update_all(provider: "gemini")
           credential.reload
 
           result = described_class.call(credential)

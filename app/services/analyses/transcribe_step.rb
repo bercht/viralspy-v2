@@ -51,7 +51,7 @@ module Analyses
         return
       end
 
-      result = Transcription::Factory.build.transcribe(video_url: post.video_url)
+      result = Transcription::Factory.build(api_key: api_key_for_transcription).transcribe(video_url: post.video_url)
 
       if result.success?
         post.update!(transcript: result.transcript, transcript_status: :completed, transcribed_at: Time.current)
@@ -90,6 +90,15 @@ module Analyses
 
     def mark_failed(message)
       analysis.update!(status: :failed, error_message: message, finished_at: Time.current)
+    end
+
+    # =========================================================================
+    # Ponto de troca pra Fase 1.6a (BYOK — ADR-013).
+    # Transcrição usa OpenAI no MVP (fixo). Na 1.6a, lê account.api_credentials.
+    # =========================================================================
+
+    def api_key_for_transcription
+      ENV.fetch("OPENAI_API_KEY")
     end
   end
 end

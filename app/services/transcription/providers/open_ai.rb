@@ -6,7 +6,7 @@ module Transcription
       MODEL = "gpt-4o-mini-transcribe"
       API_URL = "https://api.openai.com/v1/audio/transcriptions"
 
-      def initialize(api_key: ENV["OPENAI_API_KEY"])
+      def initialize(api_key:)
         super(api_key: api_key)
       end
 

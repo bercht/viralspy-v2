@@ -6,7 +6,7 @@ module Transcription
       # Modelo "best" (Slam-1/Universal) é o default da gem assemblyai.
       # ~US$ 0.12/hora de áudio. Reel típico (~40s) custa ~US$ 0.0013.
 
-      def initialize(api_key: ENV["ASSEMBLYAI_API_KEY"])
+      def initialize(api_key:)
         super(api_key: api_key)
       end
 

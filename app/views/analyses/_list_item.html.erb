@@ -1,14 +1,12 @@
-<%= tag.div id: dom_id(analysis, :list_item) do %>
-  <li class="px-6 py-4">
-    <%= link_to competitor_analysis_path(competitor, analysis),
-        class: "flex items-center justify-between transition-colors hover:bg-surface-base -mx-2 px-2 rounded-sm" do %>
-      <div>
-        <p class="text-body-sm font-medium text-text-body"><%= l(analysis.created_at, format: :long) %></p>
-        <p class="text-caption text-text-muted">
-          <%= t("competitors.show.posts_scraped", count: analysis.posts_scraped_count || 0) %>
-        </p>
-      </div>
-      <%= render "shared/status_badge", status: analysis.status %>
-    <% end %>
-  </li>
+<%= tag.li id: dom_id(analysis, :list_item), class: "px-6 py-4" do %>
+  <%= link_to competitor_analysis_path(competitor, analysis),
+      class: "flex items-center justify-between transition-colors hover:bg-surface-base -mx-2 px-2 rounded-sm" do %>
+    <div>
+      <p class="text-body-sm font-medium text-text-body"><%= l(analysis.created_at, format: :long) %></p>
+      <p class="text-caption text-text-muted">
+        <%= t("competitors.show.posts_scraped", count: analysis.posts_scraped_count || 0) %>
+      </p>
+    </div>
+    <%= render "shared/status_badge", status: analysis.status %>
+  <% end %>
 <% end %>

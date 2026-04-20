@@ -1,11 +1,10 @@
 # Ignore bundler config.
 /.bundle
 
-# Environment files — nunca commitar, apenas o exemplo e o template de prod
+# Environment files — nunca commitar, apenas o exemplo
 .env
 .env.*
 !.env.example
-!.env.production
 
 # Logfiles e tempfiles
 /log/*

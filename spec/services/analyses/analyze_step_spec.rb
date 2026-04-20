@@ -85,6 +85,19 @@ RSpec.describe Analyses::AnalyzeStep do
             .at_least(3).times
         end
       end
+
+      it "passes api_key resolved from ENV to Gateway" do
+        allow(ENV).to receive(:fetch).and_call_original
+        allow(ENV).to receive(:fetch).with("ANTHROPIC_API_KEY").and_return("test-anthropic-key")
+
+        ActsAsTenant.with_tenant(account) do
+          described_class.call(analysis)
+
+          expect(LLM::Gateway).to have_received(:complete)
+            .with(hash_including(api_key: "test-anthropic-key"))
+            .at_least(3).times
+        end
+      end
     end
 
     context "profile with only reels" do
@@ -188,6 +201,24 @@ RSpec.describe Analyses::AnalyzeStep do
           expect(analysis.reload.finished_at).to be_present
         end
       end
+    end
+  end
+
+  describe "private resolution methods" do
+    let(:step) { described_class.new(analysis) }
+
+    it "provider_for returns :anthropic" do
+      expect(step.send(:provider_for, "reel_analysis")).to eq(:anthropic)
+    end
+
+    it "model_for returns claude-sonnet-4-5" do
+      expect(step.send(:model_for, "reel_analysis")).to eq("claude-sonnet-4-5")
+    end
+
+    it "api_key_for reads ENV for the given provider" do
+      allow(ENV).to receive(:fetch).and_call_original
+      allow(ENV).to receive(:fetch).with("ANTHROPIC_API_KEY").and_return("anthro-key")
+      expect(step.send(:api_key_for, :anthropic)).to eq("anthro-key")
     end
   end
 end

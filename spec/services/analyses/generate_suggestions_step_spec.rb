@@ -70,6 +70,18 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
         end
       end
 
+      it "passes api_key resolved from ENV to Gateway" do
+        allow(ENV).to receive(:fetch).and_call_original
+        allow(ENV).to receive(:fetch).with("ANTHROPIC_API_KEY").and_return("test-anthropic-key")
+
+        ActsAsTenant.with_tenant(account) do
+          described_class.call(analysis)
+
+          expect(LLM::Gateway).to have_received(:complete)
+            .with(hash_including(api_key: "test-anthropic-key"))
+        end
+      end
+
       it "persists ContentSuggestions with correct attributes" do
         ActsAsTenant.with_tenant(account) do
           described_class.call(analysis)
@@ -223,6 +235,24 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
           expect(analysis.reload.status).to eq("completed")
         end
       end
+    end
+  end
+
+  describe "private resolution methods" do
+    let(:step) { described_class.new(analysis) }
+
+    it "provider_for returns :anthropic" do
+      expect(step.send(:provider_for, "content_suggestions")).to eq(:anthropic)
+    end
+
+    it "model_for returns claude-sonnet-4-5" do
+      expect(step.send(:model_for, "content_suggestions")).to eq("claude-sonnet-4-5")
+    end
+
+    it "api_key_for reads ENV for the given provider" do
+      allow(ENV).to receive(:fetch).and_call_original
+      allow(ENV).to receive(:fetch).with("ANTHROPIC_API_KEY").and_return("anthro-key")
+      expect(step.send(:api_key_for, :anthropic)).to eq("anthro-key")
     end
   end
 

@@ -1,7 +1,5 @@
 module Analyses
   class AnalyzeStep
-    ANALYSIS_MODEL = "claude-sonnet-4-5"
-    PROVIDER = :anthropic
     MAX_TOKENS = 2000
 
     TYPE_CONFIG = {
@@ -84,9 +82,14 @@ module Analyses
       system_prompt = PromptRenderer.render(step: config[:dir], kind: :system, locals: locals)
       user_prompt = PromptRenderer.render(step: config[:dir], kind: :user, locals: locals)
 
+      provider = provider_for(config[:use_case])
+      model    = model_for(config[:use_case])
+      key      = api_key_for(provider)
+
       LLM::Gateway.complete(
-        provider: PROVIDER,
-        model: ANALYSIS_MODEL,
+        provider: provider,
+        model: model,
+        api_key: key,
         messages: [ { role: "user", content: user_prompt } ],
         system: system_prompt,
         json_mode: true,
@@ -96,6 +99,32 @@ module Analyses
         account: account,
         analysis: analysis
       )
+    end
+
+    # =========================================================================
+    # Ponto de troca pra Fase 1.6a (BYOK — ADR-013).
+    # Hoje: valores fixos. Na 1.6a, lê account.llm_preferences e
+    # account.api_credentials. NÃO extrair pra concern nessa fase.
+    # =========================================================================
+
+    def provider_for(_use_case)
+      :anthropic
+    end
+
+    def model_for(_use_case)
+      "claude-sonnet-4-5"
+    end
+
+    def api_key_for(provider)
+      ENV.fetch(api_key_env_var(provider))
+    end
+
+    def api_key_env_var(provider)
+      case provider
+      when :openai    then "OPENAI_API_KEY"
+      when :anthropic then "ANTHROPIC_API_KEY"
+      else raise ArgumentError, "Unknown provider: #{provider.inspect}"
+      end
     end
 
     def record_failure(type, message)

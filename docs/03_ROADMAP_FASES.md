@@ -6,9 +6,9 @@
 
 ## Status atual
 
-**Fase atual:** Fase 1.6 (Interface Web) — pronta pra iniciar
-**Última fase concluída:** Fase 1.6a (BYOK — Bring Your Own Keys) — mergeada em main
-**Próxima fase esperada:** Fase 1.6 → Fase 1.7
+**Fase atual:** Fase 2 (próxima)
+**Última fase concluída:** Fase 1.6 (Interface Web) — concluída e mergeada em main
+**Próxima fase esperada:** Fase 2
 
 ---
 
@@ -176,42 +176,24 @@ Criar esqueleto Rails, Docker, gems base, banco inicializado.
 
 ---
 
-## Fase 1.6 — Interface Web
+## Fase 1.6 — Interface Web ✅ CONCLUÍDA
 
-**Duração estimada:** 5-7 dias
-**Commits:** 2-3
+**Commits:** ~20
 
-### Objetivo
+### Entregas (T1–T5)
 
-UI completa para criar competitor, disparar análise, ver progresso e resultado.
+- **T1** ✅ Controllers + Views: CompetitorsController, AnalysesController, ContentSuggestionsController
+- **T2** ✅ Design system: tokens Tailwind, layout com navbar, flash responsivo
+- **T3** ✅ Turbo Stream em tempo real: análise show com progresso via ActionCable
+- **T4** ✅ Visualização rica do resultado: profile metrics, top posts, sugestões com save/discard/copy
+- **T5** ✅ Polimento: 7 empty states, responsividade mobile, system spec end-to-end
 
-### Escopo
+### Resultado
 
-**Controllers:**
-- `CompetitorsController` (index, new, create, show, destroy)
-- `AnalysesController` (create, show) — seleção de Playbooks ao criar
-- `ContentSuggestionsController` (update — save/discard)
-
-**Views principais:**
-- Competitors index + competitor show
-- Analysis new: input de handle + seleção de playbooks que receberão a análise
-- Analysis show: status em tempo real, profile metrics, top posts rankeados, 5 sugestões
-
-**Components:**
-- `StatusBadgeComponent`, `SuggestionCardComponent`
-- `ProfileMetricsComponent`, `PostRankingComponent`, `ProgressStepsComponent`
-
-**Stimulus controllers:**
-- `analysis_status_controller`, `copy_to_clipboard_controller`
-- `confirm_controller`, `tab_controller`
-
-### Critério de aceite
-
-- Fluxo end-to-end: cadastro → configurar chaves → criar competitor → rodar análise → ver resultado
-- Seleção de playbooks ao disparar análise funcional
-- Sugestões com save/discard funcionais
-- Zero CSS custom, zero classes criadas, zero CSS inline
-- System spec crítico verde
+- Fluxo end-to-end funcional: signup → configurar chaves → criar competitor → rodar análise → ver resultado → salvar sugestão
+- System spec verde (5 examples, 0 failures)
+- Suite completa: 658 examples, 0 failures
+- Zero CSS custom, zero `@apply`, zero `style=""`
 
 ---
 

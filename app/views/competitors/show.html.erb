@@ -44,8 +44,12 @@
         <% end %>
       </ul>
     <% else %>
-      <div class="p-12 text-center">
-        <p class="text-body-sm text-text-muted"><%= t("competitors.show.no_analyses") %></p>
+      <div class="p-8 text-center md:p-12">
+        <h3 class="text-heading text-text-body"><%= t("competitors.show.no_analyses.title") %></h3>
+        <p class="mt-2 text-body-sm text-text-muted"><%= t("competitors.show.no_analyses.description") %></p>
+        <%= link_to t("competitors.show.no_analyses.cta"),
+            new_competitor_analysis_path(@competitor),
+            class: "mt-6 inline-block rounded-pill bg-brand-primary px-6 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
       </div>
     <% end %>
   </section>

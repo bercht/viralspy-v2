@@ -173,7 +173,10 @@ pt-BR:
       delete: "Excluir"
       delete_confirm: "Tem certeza? Todas as análises e sugestões serão removidas."
       analyses_history: "Histórico de análises"
-      no_analyses: "Nenhuma análise rodada ainda. Clique em 'Nova análise' para começar."
+      no_analyses:
+        title: "Nenhuma análise ainda"
+        description: "Rode a primeira análise pra ver posts, métricas e sugestões de conteúdo."
+        cta: "Iniciar análise"
       posts_scraped:
         zero: "Sem posts capturados"
         one: "1 post capturado"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_19_161251) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_20_040818) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -20,6 +20,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_19_161251) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "llm_preferences", default: {}, null: false
   end
 
   create_table "analyses", force: :cascade do |t|
@@ -43,6 +44,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_19_161251) do
     t.index ["account_id"], name: "index_analyses_on_account_id"
     t.index ["competitor_id"], name: "index_analyses_on_competitor_id"
     t.index ["status"], name: "index_analyses_on_status"
+  end
+
+  create_table "api_credentials", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "provider", null: false
+    t.string "encrypted_api_key", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "last_validated_at"
+    t.integer "last_validation_status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "provider"], name: "index_api_credentials_on_account_id_and_provider", unique: true
+    t.index ["account_id"], name: "index_api_credentials_on_account_id"
   end
 
   create_table "competitors", force: :cascade do |t|
@@ -163,6 +177,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_19_161251) do
 
   add_foreign_key "analyses", "accounts"
   add_foreign_key "analyses", "competitors"
+  add_foreign_key "api_credentials", "accounts"
   add_foreign_key "competitors", "accounts"
   add_foreign_key "content_suggestions", "accounts"
   add_foreign_key "content_suggestions", "analyses"

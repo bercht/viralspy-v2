@@ -1,0 +1,74 @@
+<article class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+  <header class="flex items-start justify-between gap-4">
+    <div>
+      <h2 class="text-heading text-text-body">
+        <%= t("settings.api_keys.providers.#{provider}.name") %>
+      </h2>
+      <p class="mt-1 text-body-sm text-text-muted">
+        <%= t("settings.api_keys.providers.#{provider}.description") %>
+      </p>
+    </div>
+
+    <%= render "status_pill", credential: credential %>
+  </header>
+
+  <% form_url = credential.present? ? update_for_settings_api_keys_path(provider) : create_for_settings_api_keys_path(provider) %>
+  <% form_method = credential.present? ? :patch : :post %>
+
+  <%= form_with(
+        url: form_url,
+        method: form_method,
+        scope: :api_credential,
+        html: { class: "mt-6 space-y-4", data: { controller: "api-key-form" } }
+      ) do |f| %>
+
+    <div>
+      <%= f.label :api_key, t("settings.api_keys.form.api_key_label"),
+          class: "block text-body-sm font-medium text-text-body" %>
+
+      <%= f.password_field :api_key,
+          autocomplete: "off",
+          placeholder: credential.present? \
+            ? t("settings.api_keys.form.api_key_placeholder_existing") \
+            : t("settings.api_keys.form.api_key_placeholder_empty"),
+          data: { api_key_form_target: "input" },
+          class: "mt-1 block w-full rounded-input border border-border-default bg-surface-canvas px-3 py-2 text-body text-text-body placeholder:text-text-subtle focus:border-brand-primary focus:outline-none focus:shadow-focus" %>
+
+      <p class="mt-2 text-body-sm">
+        <%= link_to t("settings.api_keys.form.docs_link"),
+            t("settings.api_keys.providers.#{provider}.docs_url"),
+            target: "_blank", rel: "noopener",
+            class: "text-brand-primary hover:text-brand-primary-hover underline-offset-2 hover:underline" %>
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+      <div class="text-caption text-text-muted">
+        <% if credential&.last_validated_at %>
+          <%= t("settings.api_keys.last_validated_at",
+                time: l(credential.last_validated_at, format: :short)) %>
+        <% else %>
+          <%= t("settings.api_keys.never_validated") %>
+        <% end %>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <% if credential.present? %>
+          <%= button_to t("settings.api_keys.form.remove"),
+              destroy_for_settings_api_keys_path(provider),
+              method: :delete,
+              form: { data: { turbo_confirm: t("settings.api_keys.form.confirm_destroy", provider: t("settings.api_keys.providers.#{provider}.name")) } },
+              class: "rounded-pill px-4 py-2 text-button text-semantic-danger transition-colors hover:bg-semantic-danger-bg focus:outline-none focus:shadow-focus" %>
+        <% end %>
+
+        <%= f.submit(
+              credential.present? \
+                ? t("settings.api_keys.form.update_and_validate") \
+                : t("settings.api_keys.form.save_and_validate"),
+              data: { api_key_form_target: "submit" },
+              class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong disabled:cursor-not-allowed disabled:opacity-60"
+            ) %>
+      </div>
+    </div>
+  <% end %>
+</article>

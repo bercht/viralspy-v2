@@ -1,0 +1,12 @@
+<div class="mx-auto max-w-4xl">
+  <header class="mb-8">
+    <h1 class="text-display text-text-display"><%= t("settings.api_keys.title") %></h1>
+    <p class="mt-2 text-body text-text-muted"><%= t("settings.api_keys.subtitle") %></p>
+  </header>
+
+  <div class="space-y-4">
+    <% @credentials_by_provider.each do |provider, credential| %>
+      <%= render "provider_card", provider: provider, credential: credential %>
+    <% end %>
+  </div>
+</div>

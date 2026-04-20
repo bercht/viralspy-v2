@@ -1,0 +1,17 @@
+<% if credential.nil? %>
+  <% label = t("settings.api_keys.status.not_configured") %>
+  <% classes = "bg-semantic-neutral-bg text-semantic-neutral" %>
+<% else %>
+  <% status = credential.last_validation_status.to_sym %>
+  <% label = t("settings.api_keys.status.#{status}") %>
+  <% classes = case status
+     when :verified       then "bg-semantic-success-bg text-semantic-success"
+     when :failed         then "bg-semantic-danger-bg text-semantic-danger"
+     when :quota_exceeded then "bg-semantic-warning-bg text-semantic-warning"
+     else                      "bg-semantic-neutral-bg text-semantic-neutral"
+     end %>
+<% end %>
+
+<span class="inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-caption <%= classes %>">
+  <%= label %>
+</span>

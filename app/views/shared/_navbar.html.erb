@@ -9,6 +9,8 @@
           class: "text-button text-text-on-dark-muted transition-colors hover:text-text-on-dark" %>
       <%= link_to t("nav.competitors"), competitors_path,
           class: "text-button text-text-on-dark-muted transition-colors hover:text-text-on-dark" %>
+      <%= link_to t("nav.settings"), settings_api_keys_path,
+          class: "text-button text-text-on-dark-muted transition-colors hover:text-text-on-dark" %>
 
       <div class="flex items-center gap-3 border-l border-white/20 pl-6">
         <span class="text-body-sm text-text-on-dark-muted"><%= current_user.first_name %></span>

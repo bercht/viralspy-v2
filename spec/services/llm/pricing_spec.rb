@@ -63,6 +63,57 @@ RSpec.describe LLM::Pricing do
     end
   end
 
+  describe "Claude 4.x models" do
+    it "prices claude-sonnet-4-6 at 3/15 USD per 1M tokens" do
+      # 1M input @ $3 + 1M output @ $15 = $18 USD * 5.50 = $99 BRL = 9900 cents
+      expect(described_class.cost_cents(
+        provider: :anthropic, model: "claude-sonnet-4-6",
+        prompt_tokens: 1_000_000, completion_tokens: 1_000_000
+      )).to eq(9900)
+    end
+
+    it "prices claude-opus-4-6 at 5/25 USD per 1M tokens" do
+      # 1M input @ $5 + 1M output @ $25 = $30 USD * 5.50 = $165 BRL = 16500 cents
+      expect(described_class.cost_cents(
+        provider: :anthropic, model: "claude-opus-4-6",
+        prompt_tokens: 1_000_000, completion_tokens: 1_000_000
+      )).to eq(16500)
+    end
+
+    it "prices claude-opus-4-7 at 5/25 USD per 1M tokens" do
+      expect(described_class.cost_cents(
+        provider: :anthropic, model: "claude-opus-4-7",
+        prompt_tokens: 1_000_000, completion_tokens: 1_000_000
+      )).to eq(16500)
+    end
+
+    it "prices claude-haiku-4-5-20251001 at 1/5 USD per 1M tokens" do
+      # 1M input @ $1 + 1M output @ $5 = $6 USD * 5.50 = $33 BRL = 3300 cents
+      expect(described_class.cost_cents(
+        provider: :anthropic, model: "claude-haiku-4-5-20251001",
+        prompt_tokens: 1_000_000, completion_tokens: 1_000_000
+      )).to eq(3300)
+    end
+  end
+
+  describe "unknown model warning" do
+    it "logs a warning and returns 0 for unknown model" do
+      expect(Rails.logger).to receive(:warn).with(/Unknown model.*claude-sonnet-9000/)
+      expect(described_class.cost_cents(
+        provider: :anthropic, model: "claude-sonnet-9000",
+        prompt_tokens: 1000, completion_tokens: 500
+      )).to eq(0)
+    end
+
+    it "does not log a warning for known models" do
+      expect(Rails.logger).not_to receive(:warn)
+      described_class.cost_cents(
+        provider: :anthropic, model: "claude-sonnet-4-5",
+        prompt_tokens: 1000, completion_tokens: 500
+      )
+    end
+  end
+
   describe ".known_model?" do
     it "returns true for known models" do
       expect(described_class.known_model?(provider: :openai, model: "gpt-4o-mini")).to be true

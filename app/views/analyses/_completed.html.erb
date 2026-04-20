@@ -54,7 +54,7 @@
       <% %w[reel carousel image].each do |type| %>
         <% posts = posts_by_type[type] %>
         <% next if posts.blank? %>
-        <%= render "posts_by_type", type: type, posts: posts.sort_by { |p| -(p.quality_score || 0) } %>
+        <%= render "analyses/posts_by_type", type: type, posts: posts.sort_by { |p| -(p.quality_score || 0) } %>
       <% end %>
     </div>
   </section>
@@ -65,7 +65,7 @@
     <h2 class="mb-4 text-heading text-text-body"><%= t("analyses.show.suggestions.title") %></h2>
     <div class="space-y-4">
       <% suggestions.each do |suggestion| %>
-        <%= render "suggestion_card", suggestion: suggestion %>
+        <%= render "analyses/suggestion_card", suggestion: suggestion %>
       <% end %>
     </div>
   </section>

@@ -25,6 +25,6 @@ class ApiCredential < ApplicationRecord
   end
 
   def api_key=(value)
-    self.encrypted_api_key = value
+    self.encrypted_api_key = value if value.present?
   end
 end

@@ -1,4 +1,19 @@
 pt-BR:
+  activerecord:
+    errors:
+      messages:
+        blank: "não pode ficar em branco"
+        taken: "já está em uso"
+        invalid: "é inválido"
+      models:
+        api_credential:
+          attributes:
+            encrypted_api_key:
+              blank: "não pode ficar em branco"
+    attributes:
+      api_credential:
+        encrypted_api_key: "Chave de API"
+        provider: "Provedor"
   errors:
     not_authorized: "Você não tem permissão para essa ação."
     signup:

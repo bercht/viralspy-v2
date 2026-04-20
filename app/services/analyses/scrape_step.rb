@@ -40,7 +40,6 @@ module Analyses
     def mark_started
       analysis.update!(
         status: :scraping,
-        started_at: analysis.started_at || Time.current,
         scraping_provider: ENV.fetch("SCRAPING_PROVIDER", "apify")
       )
       Rails.logger.info("[Analysis##{analysis.id}] Starting ScrapeStep for @#{competitor.instagram_handle}")

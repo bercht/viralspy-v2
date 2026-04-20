@@ -124,6 +124,35 @@ RSpec.describe Analyses::RunAnalysisWorker do
       it "does not re-raise the exception" do
         expect { described_class.new.perform(analysis.id) }.not_to raise_error
       end
+
+      it "still sets started_at before the crash" do
+        described_class.new.perform(analysis.id)
+        expect(analysis.reload.started_at).to be_present
+      end
+    end
+
+    context "started_at lifecycle" do
+      before { stub_all_steps_success }
+
+      it "sets started_at before any step runs" do
+        started_at_during_step = nil
+
+        allow(Analyses::ScrapeStep).to receive(:call) do |_analysis|
+          started_at_during_step = analysis.reload.started_at
+          Analyses::Result.success
+        end
+
+        described_class.new.perform(analysis.id)
+        expect(started_at_during_step).to be_present
+      end
+
+      it "does not reset started_at if already set (idempotence)" do
+        original = 5.minutes.ago
+        analysis.update!(started_at: original)
+
+        described_class.new.perform(analysis.id)
+        expect(analysis.reload.started_at).to be_within(1.second).of(original)
+      end
     end
 
     context "tenant isolation" do

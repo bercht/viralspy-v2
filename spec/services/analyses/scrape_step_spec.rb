@@ -113,25 +113,6 @@ RSpec.describe Analyses::ScrapeStep do
         end
       end
 
-      it "sets started_at" do
-        ActsAsTenant.with_tenant(account) do
-          described_class.call(analysis)
-
-          expect(analysis.reload.started_at).to be_present
-        end
-      end
-
-      it "does not overwrite started_at if already set" do
-        original_time = 5.minutes.ago
-        analysis.update!(started_at: original_time)
-
-        ActsAsTenant.with_tenant(account) do
-          described_class.call(analysis)
-
-          expect(analysis.reload.started_at).to be_within(1.second).of(original_time)
-        end
-      end
-
       it "sets scraping_provider from ENV" do
         ActsAsTenant.with_tenant(account) do
           described_class.call(analysis)

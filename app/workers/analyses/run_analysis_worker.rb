@@ -28,6 +28,7 @@ module Analyses
 
     def run_pipeline(analysis)
       Rails.logger.info("[Analysis##{analysis.id}] Pipeline starting")
+      analysis.update!(started_at: Time.current) if analysis.started_at.nil?
 
       STEPS.each do |step_class|
         step_name = step_class.name.demodulize

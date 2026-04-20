@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_20_021817) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_19_161251) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -127,19 +127,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_021817) do
     t.index ["analysis_id"], name: "index_posts_on_analysis_id"
     t.index ["competitor_id"], name: "index_posts_on_competitor_id"
     t.index ["instagram_post_id"], name: "index_posts_on_instagram_post_id"
-  end
-
-  create_table "prompt_templates", force: :cascade do |t|
-    t.string "use_case", null: false
-    t.integer "version", null: false
-    t.text "system_content", null: false
-    t.text "user_content_erb", null: false
-    t.boolean "active", default: false, null: false
-    t.text "change_notes"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["use_case", "active"], name: "index_prompt_templates_on_use_case_and_active"
-    t.index ["use_case", "version"], name: "index_prompt_templates_on_use_case_and_version", unique: true
   end
 
   create_table "transcription_usage_logs", force: :cascade do |t|

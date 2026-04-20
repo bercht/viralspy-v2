@@ -1,5 +1,6 @@
 class AnalysesController < ApplicationController
   include RequiresApiCredentials
+  include AnalysesHelper
 
   before_action :set_competitor
   before_action :require_api_credentials_configured!, only: [ :new, :create ]

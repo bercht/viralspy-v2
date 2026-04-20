@@ -3,11 +3,25 @@ require "rails_helper"
 # Integration spec: runs the full pipeline with real service objects.
 # Only external boundaries are mocked: Scraping::Factory, Transcription::Factory, LLM::Gateway.
 RSpec.describe "Analyses::RunAnalysisWorker integration" do
-  let(:account) { create(:account) }
+  let(:account) { create(:account, :with_credentials) }
   let(:competitor) do
     create(:competitor, account: account, instagram_handle: "testcorretor", followers_count: 5_000)
   end
   let(:analysis) { create(:analysis, account: account, competitor: competitor, status: :pending, max_posts: 30) }
+
+  # Credentials are created by :with_credentials trait with random keys.
+  # Fetch them so we can assert in stubs.
+  def openai_key
+    ActsAsTenant.with_tenant(account) { account.api_credential_for("openai").encrypted_api_key }
+  end
+
+  def anthropic_key
+    ActsAsTenant.with_tenant(account) { account.api_credential_for("anthropic").encrypted_api_key }
+  end
+
+  def assemblyai_key
+    ActsAsTenant.with_tenant(account) { account.api_credential_for("assemblyai").encrypted_api_key }
+  end
 
   # --- Scraping mock ---
 
@@ -179,20 +193,16 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
   end
 
   before do
-    # Ensure API key ENV vars are present so api_key_for/api_key_for_transcription don't raise KeyError.
-    # The actual values are irrelevant because build_provider is stubbed below.
-    allow(ENV).to receive(:fetch).and_call_original
-    allow(ENV).to receive(:fetch).with("ANTHROPIC_API_KEY").and_return("test-anthropic-key")
-    allow(ENV).to receive(:fetch).with("OPENAI_API_KEY").and_return("test-openai-key")
-
     # Mock scraper
     mock_scraper = instance_double(Scraping::ApifyProvider)
     allow(Scraping::Factory).to receive(:build).and_return(mock_scraper)
     allow(mock_scraper).to receive(:scrape_profile).and_return(scraping_result)
 
-    # Mock transcription
-    mock_transcriber = instance_double(Transcription::Providers::OpenAI)
-    allow(Transcription::Factory).to receive(:build).and_return(mock_transcriber)
+    # Mock transcription — defaults to assemblyai (transcription_provider default)
+    mock_transcriber = instance_double(Transcription::Providers::AssemblyAI)
+    allow(Transcription::Factory).to receive(:build)
+      .with(provider: :assemblyai, api_key: instance_of(String))
+      .and_return(mock_transcriber)
     allow(mock_transcriber).to receive(:transcribe)
       .and_return(Transcription::Result.success(
         transcript: "Bom dia pessoal, hoje vou falar sobre três erros comuns na hora de avaliar um imóvel...",
@@ -200,16 +210,20 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
       ))
 
     # Stub LLM::Gateway.build_provider so the real constructor (which requires API keys) is bypassed.
-    # LLM::Gateway.complete still runs fully — including UsageLogger.log — just with mocked providers.
-    # AnalyzeStep (3 calls) + GenerateSuggestionsStep (1 call) all use :anthropic + claude-sonnet-4-5
-    reel_resp     = build_llm_response(reel_insights_json, model: "claude-sonnet-4-5", provider: :anthropic)
-    carousel_resp = build_llm_response(carousel_insights_json, model: "claude-sonnet-4-5", provider: :anthropic)
-    image_resp    = build_llm_response(image_insights_json, model: "claude-sonnet-4-5", provider: :anthropic)
-    gen_resp      = build_llm_response(suggestions_json, model: "claude-sonnet-4-5", provider: :anthropic)
+    # AnalyzeStep (3 calls) uses :openai (analysis_provider default)
+    # GenerateSuggestionsStep (1 call) uses :anthropic (generation_provider default)
+    reel_resp     = build_llm_response(reel_insights_json, model: "gpt-4o-mini", provider: :openai)
+    carousel_resp = build_llm_response(carousel_insights_json, model: "gpt-4o-mini", provider: :openai)
+    image_resp    = build_llm_response(image_insights_json, model: "gpt-4o-mini", provider: :openai)
+    gen_resp      = build_llm_response(suggestions_json, model: "claude-sonnet-4-6", provider: :anthropic)
+
+    openai_stub = instance_double(LLM::Providers::OpenAI)
+    allow(openai_stub).to receive(:complete)
+      .and_return(reel_resp, carousel_resp, image_resp)
+    allow(LLM::Gateway).to receive(:build_provider).with(:openai, api_key: instance_of(String)).and_return(openai_stub)
 
     anthropic_stub = instance_double(LLM::Providers::Anthropic)
-    allow(anthropic_stub).to receive(:complete)
-      .and_return(reel_resp, carousel_resp, image_resp, gen_resp)
+    allow(anthropic_stub).to receive(:complete).and_return(gen_resp)
     allow(LLM::Gateway).to receive(:build_provider).with(:anthropic, api_key: instance_of(String)).and_return(anthropic_stub)
   end
 
@@ -256,10 +270,13 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
     end
   end
 
-  it "transcribes the 12 selected reels" do
+  it "transcribes the 12 selected reels via assemblyai (default transcription provider)" do
     ActsAsTenant.with_tenant(account) do
       Analyses::RunAnalysisWorker.new.perform(analysis.id)
       expect(analysis.posts.where(transcript_status: "completed").count).to eq(12)
+      expect(Transcription::Factory).to have_received(:build)
+        .with(provider: :assemblyai, api_key: instance_of(String))
+        .at_least(12).times
     end
   end
 
@@ -280,7 +297,7 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
   it "creates LLMUsageLog for each LLM call" do
     ActsAsTenant.with_tenant(account) do
       Analyses::RunAnalysisWorker.new.perform(analysis.id)
-      # 3 analyze calls + 1 generate_suggestions = 4 logs
+      # 3 analyze calls (openai) + 1 generate_suggestions (anthropic) = 4 logs
       expect(LLMUsageLog.where(analysis: analysis).count).to eq(4)
     end
   end

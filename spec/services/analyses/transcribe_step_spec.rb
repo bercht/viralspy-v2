@@ -4,10 +4,13 @@ RSpec.describe Analyses::TranscribeStep do
   let(:account) { create(:account) }
   let(:competitor) { create(:competitor, account: account) }
   let(:analysis) { create(:analysis, account: account, competitor: competitor, status: :transcribing) }
-  let(:mock_provider) { instance_double(Transcription::Providers::OpenAI) }
+  let(:mock_provider) { instance_double(Transcription::Providers::AssemblyAI) }
+  let!(:assemblyai_cred) { create(:api_credential, :assemblyai, account: account, encrypted_api_key: "aai-test-key") }
 
   before do
-    allow(Transcription::Factory).to receive(:build).and_return(mock_provider)
+    allow(Transcription::Factory).to receive(:build)
+      .with(provider: :assemblyai, api_key: "aai-test-key")
+      .and_return(mock_provider)
   end
 
   def create_reel(video_url: "https://cdn.example.com/video.mp4", **opts)
@@ -65,11 +68,30 @@ RSpec.describe Analyses::TranscribeStep do
         end
       end
 
+      it "calls Transcription::Factory.build with assemblyai provider and credential key" do
+        ActsAsTenant.with_tenant(account) do
+          described_class.call(analysis)
+
+          expect(Transcription::Factory).to have_received(:build)
+            .with(provider: :assemblyai, api_key: "aai-test-key")
+            .at_least(:once)
+        end
+      end
+
       it "creates TranscriptionUsageLog for each successful reel" do
         ActsAsTenant.with_tenant(account) do
           expect {
             described_class.call(analysis)
           }.to change(TranscriptionUsageLog, :count).by(2)
+        end
+      end
+
+      it "logs with dynamic provider from preferences (assemblyai by default)" do
+        ActsAsTenant.with_tenant(account) do
+          described_class.call(analysis)
+
+          log = TranscriptionUsageLog.last
+          expect(log.provider).to eq("assemblyai")
         end
       end
     end
@@ -212,6 +234,74 @@ RSpec.describe Analyses::TranscribeStep do
           expect(result.error_code).to eq(:transcribe_exception)
           expect(analysis.reload.status).to eq("failed")
           expect(analysis.reload.finished_at).to be_present
+        end
+      end
+    end
+
+    context "when assemblyai credential is missing" do
+      let!(:reel) { create_reel }
+
+      before do
+        assemblyai_cred.destroy!
+        allow(Transcription::Factory).to receive(:build)
+      end
+
+      it "marks analysis as failed with transcribe_exception and does not call Factory.build" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_failure
+          expect(result.error_code).to eq(:transcribe_exception)
+          expect(analysis.reload.status).to eq("failed")
+          expect(analysis.reload.finished_at).to be_present
+          expect(Transcription::Factory).not_to have_received(:build)
+        end
+      end
+    end
+
+    context "when assemblyai credential is inactive" do
+      let!(:reel) { create_reel }
+
+      before do
+        assemblyai_cred.update!(active: false)
+        allow(Transcription::Factory).to receive(:build)
+      end
+
+      it "marks analysis as failed (inactive treated as missing)" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_failure
+          expect(result.error_code).to eq(:transcribe_exception)
+          expect(analysis.reload.status).to eq("failed")
+          expect(Transcription::Factory).not_to have_received(:build)
+        end
+      end
+    end
+
+    context "when transcription_provider preference is overridden to openai" do
+      let!(:openai_cred) { create(:api_credential, :openai, account: account, encrypted_api_key: "sk-openai-key") }
+      let!(:reel) { create_reel }
+      let(:openai_provider) { instance_double(Transcription::Providers::OpenAI) }
+
+      before do
+        account.update!(llm_preferences: {
+          "transcription_provider" => "openai",
+          "transcription_model" => "gpt-4o-mini-transcribe"
+        })
+        allow(Transcription::Factory).to receive(:build)
+          .with(provider: :openai, api_key: "sk-openai-key")
+          .and_return(openai_provider)
+        allow(openai_provider).to receive(:transcribe).and_return(success_result)
+      end
+
+      it "uses openai transcription provider from preferences" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_success
+          expect(Transcription::Factory).to have_received(:build)
+            .with(provider: :openai, api_key: "sk-openai-key")
         end
       end
     end

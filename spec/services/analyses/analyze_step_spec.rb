@@ -48,6 +48,8 @@ RSpec.describe Analyses::AnalyzeStep do
 
   describe ".call" do
     context "sets :analyzing status on entry" do
+      let!(:openai_cred) { create(:api_credential, :openai, account: account, encrypted_api_key: "sk-test-openai") }
+
       it "sets analysis status to :analyzing before calling LLM" do
         analysis.update!(status: :transcribing)
         captured_status = nil
@@ -67,6 +69,7 @@ RSpec.describe Analyses::AnalyzeStep do
     end
 
     context "happy path — posts of all 3 types selected" do
+      let!(:openai_cred) { create(:api_credential, :openai, account: account, encrypted_api_key: "sk-test-openai") }
       let!(:reel) { create_selected_post(:reel) }
       let!(:carousel) { create_selected_post(:carousel) }
       let!(:image) { create_selected_post(:image) }
@@ -95,31 +98,29 @@ RSpec.describe Analyses::AnalyzeStep do
         end
       end
 
-      it "calls LLM with anthropic provider and claude-sonnet-4-5 model" do
+      it "calls LLM with openai provider and gpt-4o-mini model" do
         ActsAsTenant.with_tenant(account) do
           described_class.call(analysis)
 
           expect(LLM::Gateway).to have_received(:complete)
-            .with(hash_including(provider: :anthropic, model: "claude-sonnet-4-5", json_mode: true))
+            .with(hash_including(provider: :openai, model: "gpt-4o-mini", json_mode: true))
             .at_least(3).times
         end
       end
 
-      it "passes api_key resolved from ENV to Gateway" do
-        allow(ENV).to receive(:fetch).and_call_original
-        allow(ENV).to receive(:fetch).with("ANTHROPIC_API_KEY").and_return("test-anthropic-key")
-
+      it "passes api_key from credential to Gateway" do
         ActsAsTenant.with_tenant(account) do
           described_class.call(analysis)
 
           expect(LLM::Gateway).to have_received(:complete)
-            .with(hash_including(api_key: "test-anthropic-key"))
+            .with(hash_including(api_key: "sk-test-openai"))
             .at_least(3).times
         end
       end
     end
 
     context "profile with only reels" do
+      let!(:openai_cred) { create(:api_credential, :openai, account: account, encrypted_api_key: "sk-test-openai") }
       let!(:reel) { create_selected_post(:reel) }
 
       before do
@@ -141,6 +142,7 @@ RSpec.describe Analyses::AnalyzeStep do
     end
 
     context "one type fails with invalid JSON" do
+      let!(:openai_cred) { create(:api_credential, :openai, account: account, encrypted_api_key: "sk-test-openai") }
       let!(:reel) { create_selected_post(:reel) }
       let!(:carousel) { create_selected_post(:carousel) }
 
@@ -168,7 +170,8 @@ RSpec.describe Analyses::AnalyzeStep do
       end
     end
 
-    context "all types fail" do
+    context "all types fail with LLM error" do
+      let!(:openai_cred) { create(:api_credential, :openai, account: account, encrypted_api_key: "sk-test-openai") }
       let!(:reel) { create_selected_post(:reel) }
       let!(:carousel) { create_selected_post(:carousel) }
 
@@ -221,23 +224,106 @@ RSpec.describe Analyses::AnalyzeStep do
         end
       end
     end
+
+    context "when credential for analysis_provider (openai) is missing" do
+      let!(:reel) { create_selected_post(:reel) }
+
+      before { allow(LLM::Gateway).to receive(:complete) }
+
+      it "records failure for all types, marks analysis failed, does not call LLM" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_failure
+          expect(result.error_code).to eq(:analyze_all_failed)
+          expect(analysis.reload.status).to eq("failed")
+          expect(LLM::Gateway).not_to have_received(:complete)
+        end
+      end
+    end
+
+    context "when credential for analysis_provider is inactive" do
+      let!(:reel) { create_selected_post(:reel) }
+
+      before do
+        create(:api_credential, :openai, :inactive, account: account)
+        allow(LLM::Gateway).to receive(:complete)
+      end
+
+      it "treats inactive credential as missing, marks analysis failed" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_failure
+          expect(result.error_code).to eq(:analyze_all_failed)
+          expect(analysis.reload.status).to eq("failed")
+          expect(LLM::Gateway).not_to have_received(:complete)
+        end
+      end
+    end
+
+    context "when analysis_provider preference is overridden to anthropic" do
+      let!(:anthropic_cred) do
+        create(:api_credential, :anthropic, account: account, encrypted_api_key: "sk-ant-test")
+      end
+      let!(:reel) { create_selected_post(:reel) }
+
+      before do
+        account.update!(llm_preferences: { "analysis_provider" => "anthropic", "analysis_model" => "claude-sonnet-4-6" })
+        allow(LLM::Gateway).to receive(:complete)
+          .with(hash_including(use_case: "reel_analysis"))
+          .and_return(mock_llm_response(reel_insights_json))
+      end
+
+      it "uses anthropic provider and claude-sonnet-4-6 model from preferences" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_success
+          expect(LLM::Gateway).to have_received(:complete)
+            .with(hash_including(provider: :anthropic, model: "claude-sonnet-4-6", api_key: "sk-ant-test"))
+        end
+      end
+    end
   end
 
   describe "private resolution methods" do
     let(:step) { described_class.new(analysis) }
 
-    it "provider_for returns :anthropic" do
-      expect(step.send(:provider_for, "reel_analysis")).to eq(:anthropic)
+    it "provider_for reads analysis_provider from account preferences (default: openai)" do
+      expect(step.send(:provider_for, "reel_analysis")).to eq(:openai)
     end
 
-    it "model_for returns claude-sonnet-4-5" do
-      expect(step.send(:model_for, "reel_analysis")).to eq("claude-sonnet-4-5")
+    it "model_for reads analysis_model from account preferences (default: gpt-4o-mini)" do
+      expect(step.send(:model_for, "reel_analysis")).to eq("gpt-4o-mini")
     end
 
-    it "api_key_for reads ENV for the given provider" do
-      allow(ENV).to receive(:fetch).and_call_original
-      allow(ENV).to receive(:fetch).with("ANTHROPIC_API_KEY").and_return("anthro-key")
-      expect(step.send(:api_key_for, :anthropic)).to eq("anthro-key")
+    it "api_key_for returns encrypted_api_key from active credential" do
+      create(:api_credential, :openai, account: account, encrypted_api_key: "sk-from-credential")
+      expect(step.send(:api_key_for, :openai)).to eq("sk-from-credential")
+    end
+
+    it "api_key_for raises NotConfiguredError when credential is missing" do
+      expect { step.send(:api_key_for, :openai) }
+        .to raise_error(ApiCredentials::NotConfiguredError, /No active API credential/)
+    end
+
+    it "api_key_for raises NotConfiguredError when credential is inactive" do
+      create(:api_credential, :openai, :inactive, account: account)
+      expect { step.send(:api_key_for, :openai) }
+        .to raise_error(ApiCredentials::NotConfiguredError)
+    end
+
+    context "when account has custom preferences" do
+      before { account.update!(llm_preferences: { "analysis_provider" => "anthropic", "analysis_model" => "claude-opus-4-7" }) }
+
+      it "provider_for returns the custom provider as symbol" do
+        expect(step.send(:provider_for, "reel_analysis")).to eq(:anthropic)
+      end
+
+      it "model_for returns the custom model" do
+        expect(step.send(:model_for, "reel_analysis")).to eq("claude-opus-4-7")
+      end
     end
   end
 end

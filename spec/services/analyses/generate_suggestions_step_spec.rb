@@ -43,6 +43,10 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
 
   describe ".call" do
     context "happy path — all 3 insight types available" do
+      let!(:anthropic_cred) do
+        create(:api_credential, :anthropic, account: account, encrypted_api_key: "sk-ant-test")
+      end
+
       before do
         allow(LLM::Gateway).to receive(:complete).and_return(mock_llm_response(five_suggestions_json))
       end
@@ -60,25 +64,22 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
         end
       end
 
-      it "calls LLM with anthropic provider and claude-sonnet-4-5 model" do
+      it "calls LLM with anthropic provider and claude-sonnet-4-6 model" do
         ActsAsTenant.with_tenant(account) do
           described_class.call(analysis)
 
           expect(LLM::Gateway).to have_received(:complete).with(
-            hash_including(provider: :anthropic, model: "claude-sonnet-4-5", json_mode: true)
+            hash_including(provider: :anthropic, model: "claude-sonnet-4-6", json_mode: true)
           )
         end
       end
 
-      it "passes api_key resolved from ENV to Gateway" do
-        allow(ENV).to receive(:fetch).and_call_original
-        allow(ENV).to receive(:fetch).with("ANTHROPIC_API_KEY").and_return("test-anthropic-key")
-
+      it "passes api_key from credential to Gateway" do
         ActsAsTenant.with_tenant(account) do
           described_class.call(analysis)
 
           expect(LLM::Gateway).to have_received(:complete)
-            .with(hash_including(api_key: "test-anthropic-key"))
+            .with(hash_including(api_key: "sk-ant-test"))
         end
       end
 
@@ -98,6 +99,7 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
     end
 
     context "insights only from reels" do
+      let!(:anthropic_cred) { create(:api_credential, :anthropic, account: account) }
       let(:analysis) do
         create(:analysis, account: account, competitor: competitor,
                           status: :generating_suggestions,
@@ -120,6 +122,7 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
     end
 
     context "insights from reels and carousels only" do
+      let!(:anthropic_cred) { create(:api_credential, :anthropic, account: account) }
       let(:analysis) do
         create(:analysis, account: account, competitor: competitor,
                           status: :generating_suggestions,
@@ -142,6 +145,7 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
     end
 
     context "insights from carousels only" do
+      let!(:anthropic_cred) { create(:api_credential, :anthropic, account: account) }
       let(:analysis) do
         create(:analysis, account: account, competitor: competitor,
                           status: :generating_suggestions,
@@ -182,6 +186,8 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
     end
 
     context "LLM returns invalid JSON" do
+      let!(:anthropic_cred) { create(:api_credential, :anthropic, account: account) }
+
       before do
         bad_response = instance_double(LLM::Response)
         allow(bad_response).to receive(:parsed_json).and_raise(LLM::ResponseParseError, "unexpected token")
@@ -200,6 +206,8 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
     end
 
     context "LLM returns valid JSON with empty suggestions array" do
+      let!(:anthropic_cred) { create(:api_credential, :anthropic, account: account) }
+
       before do
         allow(LLM::Gateway).to receive(:complete)
           .and_return(mock_llm_response(JSON.generate("suggestions" => [])))
@@ -217,6 +225,8 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
     end
 
     context "LLM returns only 3 suggestions (less than 5)" do
+      let!(:anthropic_cred) { create(:api_credential, :anthropic, account: account) }
+
       let(:three_suggestions_json) do
         JSON.generate("suggestions" => (1..3).map { |n| suggestion_payload(n) })
       end
@@ -236,23 +246,85 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
         end
       end
     end
+
+    context "when credential for generation_provider (anthropic) is missing" do
+      before { allow(LLM::Gateway).to receive(:complete) }
+
+      it "marks analysis failed without calling LLM" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_failure
+          expect(analysis.reload.status).to eq("failed")
+          expect(LLM::Gateway).not_to have_received(:complete)
+        end
+      end
+    end
+
+    context "when credential for generation_provider is inactive" do
+      before do
+        create(:api_credential, :anthropic, :inactive, account: account)
+        allow(LLM::Gateway).to receive(:complete)
+      end
+
+      it "treats inactive credential as missing, marks analysis failed" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_failure
+          expect(analysis.reload.status).to eq("failed")
+          expect(LLM::Gateway).not_to have_received(:complete)
+        end
+      end
+    end
+
+    context "when generation_provider preference is overridden to openai" do
+      let!(:openai_cred) do
+        create(:api_credential, :openai, account: account, encrypted_api_key: "sk-test-openai")
+      end
+
+      before do
+        account.update!(llm_preferences: { "generation_provider" => "openai", "generation_model" => "gpt-4o" })
+        allow(LLM::Gateway).to receive(:complete).and_return(mock_llm_response(five_suggestions_json))
+      end
+
+      it "uses openai provider and gpt-4o model from custom preferences" do
+        ActsAsTenant.with_tenant(account) do
+          result = described_class.call(analysis)
+
+          expect(result).to be_success
+          expect(LLM::Gateway).to have_received(:complete)
+            .with(hash_including(provider: :openai, model: "gpt-4o", api_key: "sk-test-openai"))
+        end
+      end
+    end
   end
 
   describe "private resolution methods" do
     let(:step) { described_class.new(analysis) }
 
-    it "provider_for returns :anthropic" do
+    it "provider_for reads generation_provider from account preferences (default: anthropic)" do
       expect(step.send(:provider_for, "content_suggestions")).to eq(:anthropic)
     end
 
-    it "model_for returns claude-sonnet-4-5" do
-      expect(step.send(:model_for, "content_suggestions")).to eq("claude-sonnet-4-5")
+    it "model_for reads generation_model from account preferences (default: claude-sonnet-4-6)" do
+      expect(step.send(:model_for, "content_suggestions")).to eq("claude-sonnet-4-6")
     end
 
-    it "api_key_for reads ENV for the given provider" do
-      allow(ENV).to receive(:fetch).and_call_original
-      allow(ENV).to receive(:fetch).with("ANTHROPIC_API_KEY").and_return("anthro-key")
-      expect(step.send(:api_key_for, :anthropic)).to eq("anthro-key")
+    it "api_key_for returns encrypted_api_key from active credential" do
+      create(:api_credential, :anthropic, account: account, encrypted_api_key: "sk-ant-from-credential")
+      expect(step.send(:api_key_for, :anthropic)).to eq("sk-ant-from-credential")
+    end
+
+    it "api_key_for raises NotConfiguredError when credential is missing" do
+      expect { step.send(:api_key_for, :anthropic) }
+        .to raise_error(ApiCredentials::NotConfiguredError, /No active API credential/)
+    end
+
+    it "api_key_for raises NotConfiguredError when credential is inactive" do
+      create(:api_credential, :anthropic, :inactive, account: account)
+      expect { step.send(:api_key_for, :anthropic) }
+        .to raise_error(ApiCredentials::NotConfiguredError)
     end
   end
 

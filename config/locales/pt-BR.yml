@@ -56,6 +56,10 @@ pt-BR:
     api_keys:
       title: "Chaves de API"
       subtitle: "Configure suas chaves de API dos provedores que o ViralSpy utiliza. Suas chaves ficam encriptadas e são usadas apenas nas suas próprias análises."
+      empty:
+        title: "Configure suas chaves de API"
+        description: "O ViralSpy usa suas próprias chaves pra scraping e IA, assim você paga direto aos providers (modelo BYOK — Bring Your Own Key)."
+        providers_needed: "Você precisa de: Apify (scraping), OpenAI ou AssemblyAI (transcrição), Anthropic (análise e geração)."
       providers:
         openai:
           name: "OpenAI"

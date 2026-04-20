@@ -52,7 +52,7 @@
         <% end %>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <% if credential.present? %>
           <%= button_to t("settings.api_keys.form.remove"),
               destroy_for_settings_api_keys_path(provider),

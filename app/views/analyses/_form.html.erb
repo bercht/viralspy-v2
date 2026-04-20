@@ -28,9 +28,9 @@
     </p>
   </article>
 
-  <div class="flex items-center justify-end gap-3">
+  <div class="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
     <%= link_to t("analyses.form.cancel"), competitor_path(competitor),
-        class: "rounded-pill px-4 py-2 text-button text-text-muted transition-colors hover:text-text-body" %>
+        class: "rounded-pill px-4 py-2 text-center text-button text-text-muted transition-colors hover:text-text-body" %>
     <%= f.submit t("analyses.form.submit"),
         class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
   </div>

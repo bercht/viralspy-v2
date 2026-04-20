@@ -4,14 +4,14 @@
             copy_to_clipboard_hook_value: suggestion.hook.to_s,
             copy_to_clipboard_caption_value: suggestion.caption_draft.to_s,
             copy_to_clipboard_hashtags_value: (suggestion.suggested_hashtags || []).join(" ") } do %>
-  <div class="mb-4 flex items-center justify-between">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
     <div class="flex items-center gap-3">
       <span class="rounded-pill bg-surface-base px-2.5 py-0.5 text-xs font-medium text-text-body">
         <%= t("post_type.#{suggestion.content_type}") %>
       </span>
       <span class="text-xs text-text-muted">#<%= suggestion.position %></span>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <button type="button"
               data-action="click->copy-to-clipboard#copy"
               data-copy-to-clipboard-target="button"

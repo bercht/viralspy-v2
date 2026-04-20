@@ -3,9 +3,9 @@ class ApiCredential < ApplicationRecord
 
   encrypts :encrypted_api_key
 
-  PROVIDERS = %w[openai anthropic assemblyai].freeze
+  PROVIDERS = %w[openai anthropic assemblyai heygen].freeze
 
-  enum :provider, { openai: "openai", anthropic: "anthropic", assemblyai: "assemblyai" }, prefix: :provider
+  enum :provider, { openai: "openai", anthropic: "anthropic", assemblyai: "assemblyai", heygen: "heygen" }, prefix: :provider
 
   enum :last_validation_status, {
     unknown: 0,

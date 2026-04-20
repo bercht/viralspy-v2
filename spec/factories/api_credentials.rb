@@ -38,5 +38,10 @@ FactoryBot.define do
       provider { "assemblyai" }
       encrypted_api_key { SecureRandom.hex(16) }
     end
+
+    trait :heygen do
+      provider { "heygen" }
+      encrypted_api_key { "hg-test-#{SecureRandom.hex(16)}" }
+    end
   end
 end

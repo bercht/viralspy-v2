@@ -27,11 +27,13 @@ class Account < ApplicationRecord
   has_many :api_credentials, dependent: :destroy
   has_many :playbooks, dependent: :destroy
   has_many :playbook_feedbacks, dependent: :destroy
+  has_many :generated_medias, dependent: :destroy
+  has_many :media_generation_usage_logs, dependent: :destroy
 
   validates :name, presence: true
 
   def llm_preferences_with_defaults
-    DEFAULT_LLM_PREFERENCES.merge(llm_preferences || {})
+    DEFAULT_LLM_PREFERENCES.merge((llm_preferences || {}).to_h.stringify_keys)
   end
 
   def api_credential_for(provider)
@@ -44,7 +46,7 @@ class Account < ApplicationRecord
 
   def missing_credentials_for_analysis
     prefs = llm_preferences_with_defaults
-    providers_needed = ANALYSIS_PROVIDER_PREFERENCE_KEYS.map { |key| prefs[key] }.compact.uniq
+    providers_needed = ANALYSIS_PROVIDER_PREFERENCE_KEYS.filter_map { |key| prefs[key].presence }.uniq
     providers_needed.reject { |provider| api_credential_for(provider).present? }.map(&:to_sym)
   end
 end

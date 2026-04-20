@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_20_230135) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_20_232958) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -21,6 +21,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_230135) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "llm_preferences", default: {}, null: false
+    t.jsonb "media_generation_preferences", default: {}, null: false
   end
 
   create_table "analyses", force: :cascade do |t|
@@ -55,7 +56,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_230135) do
     t.index ["analysis_id", "playbook_id"], name: "index_analysis_playbooks_on_analysis_id_and_playbook_id", unique: true
     t.index ["analysis_id"], name: "index_analysis_playbooks_on_analysis_id"
     t.index ["playbook_id"], name: "index_analysis_playbooks_on_playbook_id"
-    t.index ["update_status"], name: "index_analysis_playbooks_on_update_status"
   end
 
   create_table "api_credentials", force: :cascade do |t|
@@ -107,6 +107,30 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_230135) do
     t.index ["analysis_id"], name: "index_content_suggestions_on_analysis_id"
   end
 
+  create_table "generated_medias", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "content_suggestion_id", null: false
+    t.string "provider", default: "heygen", null: false
+    t.integer "media_type", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.text "prompt_sent"
+    t.jsonb "provider_params", default: {}
+    t.string "provider_job_id"
+    t.string "output_url"
+    t.integer "duration_seconds"
+    t.integer "cost_cents"
+    t.text "error_message"
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "created_at"], name: "index_generated_medias_on_account_id_and_created_at"
+    t.index ["account_id"], name: "index_generated_medias_on_account_id"
+    t.index ["content_suggestion_id"], name: "index_generated_medias_on_content_suggestion_id"
+    t.index ["provider_job_id"], name: "index_generated_medias_on_provider_job_id"
+    t.index ["status"], name: "index_generated_medias_on_status"
+  end
+
   create_table "llm_usage_logs", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "analysis_id"
@@ -123,30 +147,50 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_230135) do
     t.index ["analysis_id"], name: "index_llm_usage_logs_on_analysis_id"
   end
 
+  create_table "media_generation_usage_logs", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "generated_media_id", null: false
+    t.string "provider", null: false
+    t.integer "duration_seconds"
+    t.integer "cost_cents"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "created_at"], name: "index_media_generation_usage_logs_on_account_id_and_created_at"
+    t.index ["account_id"], name: "index_media_generation_usage_logs_on_account_id"
+    t.index ["generated_media_id"], name: "index_media_generation_usage_logs_on_generated_media_id"
+  end
+
   create_table "playbook_feedbacks", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "playbook_id", null: false
     t.text "content", null: false
+    t.string "source", null: false
     t.integer "status", default: 0, null: false
-    t.integer "source", default: 0, null: false
-    t.bigint "incorporated_in_version"
+    t.bigint "incorporated_in_version_id"
+    t.bigint "related_analysis_id"
+    t.integer "related_own_post_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_playbook_feedbacks_on_account_id"
-    t.index ["incorporated_in_version"], name: "index_playbook_feedbacks_on_incorporated_in_version"
+    t.index ["incorporated_in_version_id"], name: "index_playbook_feedbacks_on_incorporated_in_version_id"
+    t.index ["playbook_id", "status"], name: "index_playbook_feedbacks_on_playbook_id_and_status"
     t.index ["playbook_id"], name: "index_playbook_feedbacks_on_playbook_id"
-    t.index ["status"], name: "index_playbook_feedbacks_on_status"
+    t.index ["related_analysis_id"], name: "index_playbook_feedbacks_on_related_analysis_id"
   end
 
   create_table "playbook_versions", force: :cascade do |t|
+    t.bigint "account_id", null: false
     t.bigint "playbook_id", null: false
     t.integer "version_number", null: false
     t.text "content", null: false
     t.text "diff_summary"
-    t.integer "feedbacks_incorporated_count", default: 0, null: false
     t.bigint "triggered_by_analysis_id"
+    t.bigint "incorporated_in_version_id"
+    t.integer "feedbacks_incorporated_count", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_playbook_versions_on_account_id"
+    t.index ["incorporated_in_version_id"], name: "index_playbook_versions_on_incorporated_in_version_id"
     t.index ["playbook_id", "version_number"], name: "index_playbook_versions_on_playbook_id_and_version_number", unique: true
     t.index ["playbook_id"], name: "index_playbook_versions_on_playbook_id"
     t.index ["triggered_by_analysis_id"], name: "index_playbook_versions_on_triggered_by_analysis_id"
@@ -236,10 +280,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_230135) do
   add_foreign_key "competitors", "accounts"
   add_foreign_key "content_suggestions", "accounts"
   add_foreign_key "content_suggestions", "analyses"
+  add_foreign_key "generated_medias", "accounts"
+  add_foreign_key "generated_medias", "content_suggestions"
   add_foreign_key "llm_usage_logs", "accounts"
   add_foreign_key "llm_usage_logs", "analyses"
+  add_foreign_key "media_generation_usage_logs", "accounts"
+  add_foreign_key "media_generation_usage_logs", "generated_medias"
   add_foreign_key "playbook_feedbacks", "accounts"
+  add_foreign_key "playbook_feedbacks", "analyses", column: "related_analysis_id"
+  add_foreign_key "playbook_feedbacks", "playbook_versions", column: "incorporated_in_version_id"
   add_foreign_key "playbook_feedbacks", "playbooks"
+  add_foreign_key "playbook_versions", "accounts"
+  add_foreign_key "playbook_versions", "analyses", column: "triggered_by_analysis_id"
+  add_foreign_key "playbook_versions", "playbook_versions", column: "incorporated_in_version_id"
   add_foreign_key "playbook_versions", "playbooks"
   add_foreign_key "playbooks", "accounts"
   add_foreign_key "posts", "accounts"

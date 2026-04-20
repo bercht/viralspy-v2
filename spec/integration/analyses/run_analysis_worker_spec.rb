@@ -179,6 +179,12 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
   end
 
   before do
+    # Ensure API key ENV vars are present so api_key_for/api_key_for_transcription don't raise KeyError.
+    # The actual values are irrelevant because build_provider is stubbed below.
+    allow(ENV).to receive(:fetch).and_call_original
+    allow(ENV).to receive(:fetch).with("ANTHROPIC_API_KEY").and_return("test-anthropic-key")
+    allow(ENV).to receive(:fetch).with("OPENAI_API_KEY").and_return("test-openai-key")
+
     # Mock scraper
     mock_scraper = instance_double(Scraping::ApifyProvider)
     allow(Scraping::Factory).to receive(:build).and_return(mock_scraper)
@@ -204,7 +210,7 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
     anthropic_stub = instance_double(LLM::Providers::Anthropic)
     allow(anthropic_stub).to receive(:complete)
       .and_return(reel_resp, carousel_resp, image_resp, gen_resp)
-    allow(LLM::Gateway).to receive(:build_provider).with(:anthropic).and_return(anthropic_stub)
+    allow(LLM::Gateway).to receive(:build_provider).with(:anthropic, api_key: instance_of(String)).and_return(anthropic_stub)
   end
 
   # Helper: run pipeline and assertions inside tenant context

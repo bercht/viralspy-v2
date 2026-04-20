@@ -1,51 +1,61 @@
-<div class="mb-8 flex items-center justify-between">
-  <div>
-    <h1 class="text-2xl font-bold text-gray-900">@<%= @competitor.instagram_handle %></h1>
-    <p class="mt-1 text-sm text-gray-600">
-      <% if @competitor.followers_count.present? %>
-        <%= number_with_delimiter(@competitor.followers_count) %> <%= t("competitors.show.followers") %>
-      <% else %>
-        <%= t("competitors.show.no_data_yet") %>
-      <% end %>
-    </p>
-  </div>
-  <div class="flex items-center gap-3">
-    <%= button_to t("competitors.show.new_analysis"),
-        competitor_analyses_path(@competitor), method: :post,
-        class: "rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800",
-        form: { class: "inline" } %>
-    <%= button_to t("competitors.show.delete"),
-        competitor_path(@competitor), method: :delete,
-        data: { turbo_confirm: t("competitors.show.delete_confirm") },
-        class: "rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50",
-        form: { class: "inline" } %>
-  </div>
-</div>
+<div class="mx-auto max-w-4xl">
+  <header class="mb-8">
+    <%= link_to t("competitors.index.title"), competitors_path,
+        class: "text-body-sm text-brand-primary hover:text-brand-primary-hover" %>
 
-<section class="rounded-lg border border-gray-200 bg-white">
-  <div class="border-b border-gray-200 px-6 py-4">
-    <h2 class="text-lg font-semibold text-gray-900"><%= t("competitors.show.analyses_history") %></h2>
-  </div>
-
-  <% if @analyses.any? %>
-    <ul class="divide-y divide-gray-200">
-      <% @analyses.each do |analysis| %>
-        <li class="px-6 py-4">
-          <%= link_to competitor_analysis_path(@competitor, analysis), class: "flex items-center justify-between hover:bg-gray-50" do %>
-            <div>
-              <p class="text-sm font-medium text-gray-900"><%= l(analysis.created_at, format: :long) %></p>
-              <p class="text-xs text-gray-500">
-                <%= t("competitors.show.posts_scraped", count: analysis.posts_scraped_count || 0) %>
-              </p>
-            </div>
-            <%= render "shared/status_badge", status: analysis.status %>
+    <div class="mt-2 flex items-start justify-between gap-4">
+      <div class="min-w-0">
+        <h1 class="text-display text-text-display">@<%= @competitor.instagram_handle %></h1>
+        <p class="mt-2 text-body-sm text-text-muted">
+          <% if @competitor.followers_count.present? %>
+            <%= number_with_delimiter(@competitor.followers_count) %> <%= t("competitors.show.followers") %>
+          <% else %>
+            <%= t("competitors.show.no_data_yet") %>
           <% end %>
-        </li>
-      <% end %>
-    </ul>
-  <% else %>
-    <div class="p-12 text-center">
-      <p class="text-sm text-gray-500"><%= t("competitors.show.no_analyses") %></p>
+        </p>
+      </div>
+
+      <div class="flex shrink-0 items-center gap-2">
+        <%= button_to t("competitors.show.new_analysis"),
+            competitor_analyses_path(@competitor), method: :post,
+            class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong",
+            form: { class: "inline" } %>
+
+        <%= button_to t("competitors.show.delete"),
+            competitor_path(@competitor), method: :delete,
+            data: { turbo_confirm: t("competitors.show.delete_confirm") },
+            class: "rounded-pill px-4 py-2 text-button text-semantic-danger transition-colors hover:bg-semantic-danger-bg",
+            form: { class: "inline" } %>
+      </div>
     </div>
-  <% end %>
-</section>
+  </header>
+
+  <section class="rounded-card border border-border-subtle bg-surface-canvas shadow-card">
+    <div class="border-b border-border-subtle px-6 py-4">
+      <h2 class="text-heading text-text-body"><%= t("competitors.show.analyses_history") %></h2>
+    </div>
+
+    <% if @analyses.any? %>
+      <ul class="divide-y divide-border-subtle">
+        <% @analyses.each do |analysis| %>
+          <li class="px-6 py-4">
+            <%= link_to competitor_analysis_path(@competitor, analysis),
+                class: "flex items-center justify-between transition-colors hover:bg-surface-base -mx-2 px-2 rounded-sm" do %>
+              <div>
+                <p class="text-body-sm font-medium text-text-body"><%= l(analysis.created_at, format: :long) %></p>
+                <p class="text-caption text-text-muted">
+                  <%= t("competitors.show.posts_scraped", count: analysis.posts_scraped_count || 0) %>
+                </p>
+              </div>
+              <%= render "shared/status_badge", status: analysis.status %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <div class="p-12 text-center">
+        <p class="text-body-sm text-text-muted"><%= t("competitors.show.no_analyses") %></p>
+      </div>
+    <% end %>
+  </section>
+</div>

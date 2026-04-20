@@ -19,7 +19,11 @@ module ApiCredentials
     rescue StandardError => e
       Rails.logger.error("[ApiCredentials::ValidateService] Unexpected error for credential ##{credential.id}: #{e.class} - #{e.message}")
       result = Result.failure(status: :unknown, message: "Unexpected error: #{e.message}")
-      persist_status(result)
+      begin
+        persist_status(result)
+      rescue StandardError => persist_error
+        Rails.logger.error("[ApiCredentials::ValidateService] Could not persist status for credential ##{credential.id}: #{persist_error.message}")
+      end
       result
     end
 
@@ -39,7 +43,7 @@ module ApiCredentials
 
     def persist_status(result)
       credential.update!(
-        last_validation_status: result.status.to_s,
+        last_validation_status: result.status,
         last_validated_at: Time.current
       )
     end

@@ -47,6 +47,25 @@ RSpec.describe Analyses::AnalyzeStep do
   end
 
   describe ".call" do
+    context "sets :analyzing status on entry" do
+      it "sets analysis status to :analyzing before calling LLM" do
+        analysis.update!(status: :transcribing)
+        captured_status = nil
+
+        allow(LLM::Gateway).to receive(:complete) do |**_kwargs|
+          captured_status ||= analysis.reload.status
+          mock_llm_response(reel_insights_json)
+        end
+
+        ActsAsTenant.with_tenant(account) do
+          create_selected_post(:reel)
+          described_class.call(analysis)
+        end
+
+        expect(captured_status).to eq("analyzing")
+      end
+    end
+
     context "happy path — posts of all 3 types selected" do
       let!(:reel) { create_selected_post(:reel) }
       let!(:carousel) { create_selected_post(:carousel) }

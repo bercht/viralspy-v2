@@ -21,6 +21,8 @@ module Analyses
     end
 
     def call
+      analysis.update!(status: :analyzing)
+
       %i[reel carousel image].each { |type| analyze_type(type) }
 
       if all_failed?

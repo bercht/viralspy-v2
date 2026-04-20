@@ -43,13 +43,13 @@ class Analysis < ApplicationRecord
   def broadcast_status_change
     broadcast_replace_to(
       "analysis_#{id}",
-      target: dom_id(self),
+      target: ActionView::RecordIdentifier.dom_id(self),
       partial: "analyses/analysis_body",
       locals: { analysis: self }
     )
     broadcast_replace_to(
       "competitor_#{competitor_id}_analyses",
-      target: dom_id(self, :list_item),
+      target: ActionView::RecordIdentifier.dom_id(self, :list_item),
       partial: "analyses/list_item",
       locals: { analysis: self, competitor: competitor }
     )

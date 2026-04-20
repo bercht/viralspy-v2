@@ -4,17 +4,14 @@ module LLM
   class Gateway
     SUPPORTED_PROVIDERS = %i[openai anthropic].freeze
 
-    def self.complete(provider:, model:, messages:, use_case:, account:,
-                      api_key: nil,
+    def self.complete(provider:, model:, messages:, use_case:, account:, api_key:,
                       system: nil, json_mode: false, temperature: 0.7,
                       max_tokens: Providers::Base::DEFAULT_MAX_TOKENS,
                       analysis: nil)
       validate_args!(provider: provider, use_case: use_case, account: account)
+      raise LLM::MissingApiKeyError, "API key is required for provider #{provider}" if api_key.blank?
 
-      resolved_key = api_key || legacy_env_api_key_for(provider)
-      raise LLM::MissingApiKeyError, "API key missing for provider #{provider}" if resolved_key.blank?
-
-      provider_instance = build_provider(provider, api_key: resolved_key)
+      provider_instance = build_provider(provider, api_key: api_key)
       response = provider_instance.complete(
         model: model,
         messages: messages,
@@ -45,16 +42,5 @@ module LLM
       else raise ProviderNotFoundError, "Unsupported provider: #{provider.inspect}"
       end
     end
-
-    # TRANSITORY — removed in Tarefa 2.4 of Fase 1.5b.
-    # Only used while callers are being migrated to pass api_key explicitly.
-    def self.legacy_env_api_key_for(provider)
-      case provider
-      when :openai    then ENV["OPENAI_API_KEY"]
-      when :anthropic then ENV["ANTHROPIC_API_KEY"]
-      end
-    end
-
-    private_class_method :legacy_env_api_key_for
   end
 end

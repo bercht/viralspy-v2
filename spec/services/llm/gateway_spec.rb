@@ -137,29 +137,23 @@ RSpec.describe LLM::Gateway do
         end
       end
 
-      it "falls back to ENV when api_key not provided (legacy migration path)" do
-        allow(ENV).to receive(:[]).and_call_original
-        allow(ENV).to receive(:[]).with("OPENAI_API_KEY").and_return("env-key")
-        expect(described_class).to receive(:build_provider).with(:openai, api_key: "env-key").and_return(mock_provider)
-
-        ActsAsTenant.with_tenant(account) do
-          described_class.complete(
-            provider: :openai, model: "gpt-4o-mini",
-            messages: [ { role: "user", content: "hi" } ],
-            use_case: "test", account: account
-          )
-        end
-      end
-
-      it "raises MissingApiKeyError when no api_key and no ENV" do
-        allow(ENV).to receive(:[]).and_call_original
-        allow(ENV).to receive(:[]).with("OPENAI_API_KEY").and_return(nil)
-
+      it "raises ArgumentError when api_key keyword is not provided" do
         expect {
           described_class.complete(
             provider: :openai, model: "gpt-4o-mini",
             messages: [ { role: "user", content: "hi" } ],
             use_case: "test", account: account
+          )
+        }.to raise_error(ArgumentError, /api_key/)
+      end
+
+      it "raises MissingApiKeyError when api_key is explicitly nil" do
+        expect {
+          described_class.complete(
+            provider: :openai, model: "gpt-4o-mini",
+            messages: [ { role: "user", content: "hi" } ],
+            use_case: "test", account: account,
+            api_key: nil
           )
         }.to raise_error(LLM::MissingApiKeyError)
       end

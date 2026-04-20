@@ -25,7 +25,8 @@ RSpec.describe "LLM integration", :vcr do
           messages: [ { role: "user", content: "Reply with the word OK only." } ],
           max_tokens: 10,
           use_case: "integration_test",
-          account: account
+          account: account,
+          api_key: ENV.fetch("OPENAI_API_KEY", "test-key-vcr")
         )
 
         expect(response).to be_a(LLM::Response)
@@ -51,7 +52,8 @@ RSpec.describe "LLM integration", :vcr do
           messages: [ { role: "user", content: "Reply with the word OK only." } ],
           max_tokens: 10,
           use_case: "integration_test",
-          account: account
+          account: account,
+          api_key: ENV.fetch("ANTHROPIC_API_KEY", "test-key-vcr")
         )
 
         expect(response).to be_a(LLM::Response)

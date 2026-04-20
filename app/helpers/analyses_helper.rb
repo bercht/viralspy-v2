@@ -8,4 +8,13 @@ module AnalysesHelper
       suggestions: analysis.content_suggestions.ordered
     }
   end
+
+  def known_format_keys(content_type)
+    case content_type
+    when "reel"     then %w[duration_seconds structure]
+    when "carousel" then %w[slides]
+    when "image"    then %w[composition_tips text_overlay]
+    else []
+    end
+  end
 end

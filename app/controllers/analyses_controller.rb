@@ -31,10 +31,6 @@ class AnalysesController < ApplicationController
 
   def show
     authorize @analysis
-
-    if @analysis.completed?
-      load_completed_analysis_data
-    end
   end
 
   private
@@ -49,9 +45,5 @@ class AnalysesController < ApplicationController
 
   def analysis_params
     params.fetch(:analysis, {}).permit(:max_posts)
-  end
-
-  def load_completed_analysis_data
-    @completed_locals = completed_locals(@analysis)
   end
 end

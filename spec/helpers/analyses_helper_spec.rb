@@ -23,6 +23,24 @@ RSpec.describe AnalysesHelper, type: :helper do
       end
     end
 
+  describe '#known_format_keys' do
+    it "returns reel keys" do
+      expect(known_format_keys("reel")).to match_array(%w[duration_seconds structure])
+    end
+
+    it "returns carousel keys" do
+      expect(known_format_keys("carousel")).to eq(%w[slides])
+    end
+
+    it "returns image keys" do
+      expect(known_format_keys("image")).to match_array(%w[composition_tips text_overlay])
+    end
+
+    it "returns empty array for unknown type" do
+      expect(known_format_keys("unknown")).to eq([])
+    end
+  end
+
     context 'when analysis is completed' do
       it 'returns hash with correct keys' do
         ActsAsTenant.with_tenant(account) do

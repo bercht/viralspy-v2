@@ -212,14 +212,27 @@ pt-BR:
         title: "Top posts analisados"
         score: "Score"
         no_caption: "(sem caption)"
+        likes: "curtidas"
+        comments: "comentários"
+        views: "views"
       suggestions:
         title: "Sugestões de conteúdo"
         save: "Salvar"
         discard: "Descartar"
         saved: "Salva"
         discarded: "Descartada"
+        copy: "Copiar"
+        copied: "Copiado!"
         format_details: "Detalhes do formato"
         rationale: "Por quê?"
+        format:
+          duration: "Duração"
+          structure: "Estrutura sugerida"
+          slides: "Slides"
+          slide_n: "Slide %{n}"
+          composition_tips: "Dicas de composição"
+          text_overlay: "Texto sobreposto"
+          additional_fields: "Campos adicionais"
 
   api_credentials:
     missing:

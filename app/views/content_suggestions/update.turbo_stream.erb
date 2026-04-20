@@ -1,0 +1,3 @@
+<%= turbo_stream.replace dom_id(@suggestion) do %>
+  <%= render "analyses/suggestion_card", suggestion: @suggestion %>
+<% end %>

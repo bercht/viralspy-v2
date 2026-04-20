@@ -48,6 +48,38 @@ RSpec.describe "ContentSuggestions", type: :request, skip_tenant: true do
       expect(response).to have_http_status(:not_found)
     end
 
+    context "formato turbo_stream" do
+      it "retorna turbo-stream substituindo o card" do
+        patch content_suggestion_path(suggestion),
+              params: { content_suggestion: { status: "saved" } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+        expect(response.body).to include("turbo-stream")
+        expect(response.body).to include("replace")
+        expect(response.body).to include(ActionView::RecordIdentifier.dom_id(suggestion))
+        expect(suggestion.reload.status).to eq("saved")
+      end
+
+      it "retorna 422 para status inválido via turbo_stream" do
+        patch content_suggestion_path(suggestion),
+              params: { content_suggestion: { status: "bogus" } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "atualiza status para discarded via turbo_stream" do
+        patch content_suggestion_path(suggestion),
+              params: { content_suggestion: { status: "discarded" } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response).to have_http_status(:ok)
+        expect(suggestion.reload.status).to eq("discarded")
+      end
+    end
+
     context "sem login" do
       before { sign_out user }
 

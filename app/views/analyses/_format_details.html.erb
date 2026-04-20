@@ -1,0 +1,65 @@
+<div class="mt-2 rounded-card border border-border-subtle bg-surface-base p-4">
+  <% case suggestion.content_type %>
+  <% when "reel" %>
+    <% if suggestion.format_details["duration_seconds"].present? %>
+      <p class="mb-3 text-xs text-text-muted">
+        <span class="font-medium text-text-body"><%= t("analyses.show.suggestions.format.duration") %>:</span>
+        <%= suggestion.format_details["duration_seconds"] %>s
+      </p>
+    <% end %>
+    <% if suggestion.format_details["structure"].present? %>
+      <p class="mb-2 text-xs font-medium text-text-body"><%= t("analyses.show.suggestions.format.structure") %></p>
+      <ol class="space-y-1 text-xs text-text-muted">
+        <% suggestion.format_details["structure"].each_with_index do |step, idx| %>
+          <li class="flex gap-2">
+            <span class="font-medium text-text-body"><%= idx + 1 %>.</span>
+            <span><%= step %></span>
+          </li>
+        <% end %>
+      </ol>
+    <% end %>
+
+  <% when "carousel" %>
+    <% if suggestion.format_details["slides"].present? %>
+      <p class="mb-2 text-xs font-medium text-text-body">
+        <%= t("analyses.show.suggestions.format.slides") %>
+        (<%= suggestion.format_details["slides"].size %>)
+      </p>
+      <div class="space-y-3">
+        <% suggestion.format_details["slides"].each_with_index do |slide, idx| %>
+          <div class="rounded border border-border-subtle bg-surface-canvas p-3">
+            <p class="text-xs font-medium text-text-body">
+              <%= t("analyses.show.suggestions.format.slide_n", n: idx + 1) %><% if slide["title"].present? %>: <%= slide["title"] %><% end %>
+            </p>
+            <% if slide["body"].present? %>
+              <p class="mt-1 text-xs text-text-muted"><%= slide["body"] %></p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+  <% when "image" %>
+    <% if suggestion.format_details["composition_tips"].present? %>
+      <p class="mb-1 text-xs font-medium text-text-body"><%= t("analyses.show.suggestions.format.composition_tips") %></p>
+      <p class="mb-3 text-xs text-text-muted"><%= suggestion.format_details["composition_tips"] %></p>
+    <% end %>
+    <% if suggestion.format_details["text_overlay"].present? %>
+      <p class="mb-1 text-xs font-medium text-text-body"><%= t("analyses.show.suggestions.format.text_overlay") %></p>
+      <p class="text-xs text-text-muted"><%= suggestion.format_details["text_overlay"] %></p>
+    <% end %>
+  <% end %>
+
+  <% unknown_keys = suggestion.format_details.keys - known_format_keys(suggestion.content_type) %>
+  <% if unknown_keys.any? %>
+    <div class="mt-3 border-t border-border-subtle pt-3">
+      <p class="mb-1 text-xs font-medium text-text-muted"><%= t("analyses.show.suggestions.format.additional_fields") %></p>
+      <% unknown_keys.each do |key| %>
+        <p class="text-xs text-text-muted">
+          <span class="font-medium"><%= key.humanize %>:</span>
+          <%= suggestion.format_details[key].to_s.truncate(120) %>
+        </p>
+      <% end %>
+    </div>
+  <% end %>
+</div>

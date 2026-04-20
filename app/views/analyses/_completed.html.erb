@@ -1,34 +1,34 @@
-<section class="mb-8 rounded-lg border border-gray-200 bg-white p-6">
-  <h2 class="mb-4 text-lg font-semibold text-gray-900"><%= t("analyses.show.profile_metrics.title") %></h2>
+<section class="mb-8 rounded-feature border border-border-subtle bg-surface-canvas p-6 shadow-card">
+  <h2 class="mb-4 text-heading text-text-body"><%= t("analyses.show.profile_metrics.title") %></h2>
   <div class="grid grid-cols-2 gap-6 md:grid-cols-4">
     <div>
-      <p class="text-xs uppercase tracking-wider text-gray-500"><%= t("analyses.show.profile_metrics.posts_per_week") %></p>
-      <p class="mt-1 text-2xl font-semibold text-gray-900"><%= profile_metrics["posts_per_week"] || "—" %></p>
+      <p class="text-caption uppercase tracking-wider text-text-muted"><%= t("analyses.show.profile_metrics.posts_per_week") %></p>
+      <p class="mt-1 text-2xl font-semibold text-text-body"><%= profile_metrics["posts_per_week"] || "—" %></p>
     </div>
     <div>
-      <p class="text-xs uppercase tracking-wider text-gray-500"><%= t("analyses.show.profile_metrics.avg_likes") %></p>
-      <p class="mt-1 text-2xl font-semibold text-gray-900"><%= number_with_delimiter(profile_metrics["avg_likes_per_post"] || 0) %></p>
+      <p class="text-caption uppercase tracking-wider text-text-muted"><%= t("analyses.show.profile_metrics.avg_likes") %></p>
+      <p class="mt-1 text-2xl font-semibold text-text-body"><%= number_with_delimiter(profile_metrics["avg_likes_per_post"] || 0) %></p>
     </div>
     <div>
-      <p class="text-xs uppercase tracking-wider text-gray-500"><%= t("analyses.show.profile_metrics.avg_comments") %></p>
-      <p class="mt-1 text-2xl font-semibold text-gray-900"><%= number_with_delimiter(profile_metrics["avg_comments_per_post"] || 0) %></p>
+      <p class="text-caption uppercase tracking-wider text-text-muted"><%= t("analyses.show.profile_metrics.avg_comments") %></p>
+      <p class="mt-1 text-2xl font-semibold text-text-body"><%= number_with_delimiter(profile_metrics["avg_comments_per_post"] || 0) %></p>
     </div>
     <div>
-      <p class="text-xs uppercase tracking-wider text-gray-500"><%= t("analyses.show.profile_metrics.engagement_rate") %></p>
-      <p class="mt-1 text-2xl font-semibold text-gray-900">
+      <p class="text-caption uppercase tracking-wider text-text-muted"><%= t("analyses.show.profile_metrics.engagement_rate") %></p>
+      <p class="mt-1 text-2xl font-semibold text-text-body">
         <%= number_to_percentage((profile_metrics["avg_engagement_rate"] || 0) * 100, precision: 2) %>
       </p>
     </div>
   </div>
 
   <% if profile_metrics["content_mix"].present? %>
-    <div class="mt-6 border-t border-gray-200 pt-6">
-      <p class="mb-2 text-xs uppercase tracking-wider text-gray-500"><%= t("analyses.show.profile_metrics.content_mix") %></p>
+    <div class="mt-6 border-t border-border-subtle pt-6">
+      <p class="mb-2 text-caption uppercase tracking-wider text-text-muted"><%= t("analyses.show.profile_metrics.content_mix") %></p>
       <div class="flex flex-wrap gap-4">
         <% profile_metrics["content_mix"].each do |type, pct| %>
           <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-gray-900"><%= t("post_type.#{type}") %>:</span>
-            <span class="text-sm text-gray-600"><%= number_to_percentage(pct * 100, precision: 0) %></span>
+            <span class="text-body-sm font-medium text-text-body"><%= t("post_type.#{type}") %>:</span>
+            <span class="text-body-sm text-text-muted"><%= number_to_percentage(pct * 100, precision: 0) %></span>
           </div>
         <% end %>
       </div>
@@ -36,11 +36,11 @@
   <% end %>
 
   <% if profile_metrics["top_hashtags"].present? %>
-    <div class="mt-6 border-t border-gray-200 pt-6">
-      <p class="mb-2 text-xs uppercase tracking-wider text-gray-500"><%= t("analyses.show.profile_metrics.top_hashtags") %></p>
+    <div class="mt-6 border-t border-border-subtle pt-6">
+      <p class="mb-2 text-caption uppercase tracking-wider text-text-muted"><%= t("analyses.show.profile_metrics.top_hashtags") %></p>
       <div class="flex flex-wrap gap-2">
         <% profile_metrics["top_hashtags"].each do |tag| %>
-          <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">#<%= tag %></span>
+          <span class="rounded-pill bg-surface-base px-3 py-1 text-xs font-medium text-text-body">#<%= tag %></span>
         <% end %>
       </div>
     </div>
@@ -49,7 +49,7 @@
 
 <% if posts_by_type.any? %>
   <section class="mb-8">
-    <h2 class="mb-4 text-lg font-semibold text-gray-900"><%= t("analyses.show.top_posts.title") %></h2>
+    <h2 class="mb-4 text-heading text-text-body"><%= t("analyses.show.top_posts.title") %></h2>
     <div class="space-y-6">
       <% %w[reel carousel image].each do |type| %>
         <% posts = posts_by_type[type] %>
@@ -62,7 +62,7 @@
 
 <% if suggestions.any? %>
   <section>
-    <h2 class="mb-4 text-lg font-semibold text-gray-900"><%= t("analyses.show.suggestions.title") %></h2>
+    <h2 class="mb-4 text-heading text-text-body"><%= t("analyses.show.suggestions.title") %></h2>
     <div class="space-y-4">
       <% suggestions.each do |suggestion| %>
         <%= render "suggestion_card", suggestion: suggestion %>

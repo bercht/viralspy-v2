@@ -1,3 +1,5 @@
+<%= turbo_stream_from "analysis_#{@analysis.id}" %>
+
 <div class="mx-auto max-w-5xl">
   <header class="mb-8">
     <%= link_to "@#{@competitor.instagram_handle}", competitor_path(@competitor),
@@ -18,15 +20,8 @@
           <% end %>
         </p>
       </div>
-      <%= render "shared/status_badge", status: @analysis.status %>
     </div>
   </header>
 
-  <% if @analysis.completed? %>
-    <%= render "completed", **(@completed_locals || {}) %>
-  <% elsif @analysis.failed? %>
-    <%= render "failed", analysis: @analysis, competitor: @competitor %>
-  <% else %>
-    <%= render "in_progress", analysis: @analysis %>
-  <% end %>
+  <%= render "analyses/analysis_body", analysis: @analysis %>
 </div>

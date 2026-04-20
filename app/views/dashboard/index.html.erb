@@ -1,18 +1,30 @@
 <div class="mx-auto max-w-6xl">
-  <header class="mb-8 flex items-center justify-between">
-    <div>
-      <h1 class="text-display text-text-display"><%= t("dashboard.title") %></h1>
-      <p class="mt-2 text-body text-text-muted"><%= t("dashboard.subtitle") %></p>
-    </div>
-    <%= link_to t("dashboard.new_competitor"), new_competitor_path,
-        class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
-  </header>
+  <% if @competitors.none? %>
+    <section class="rounded-feature border border-border-subtle bg-surface-canvas p-8 text-center shadow-card md:p-12">
+      <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-base">
+        <svg class="h-6 w-6 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+      </div>
+      <h2 class="text-heading text-text-body"><%= t("dashboard.empty.title") %></h2>
+      <p class="mx-auto mt-2 max-w-md text-body text-text-muted"><%= t("dashboard.empty.description") %></p>
+      <%= link_to t("dashboard.empty.cta"), new_competitor_path,
+          class: "mt-6 inline-block rounded-pill bg-brand-primary px-6 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
+    </section>
+  <% else %>
+    <header class="mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-display text-text-display"><%= t("dashboard.title") %></h1>
+        <p class="mt-2 text-body text-text-muted"><%= t("dashboard.subtitle") %></p>
+      </div>
+      <%= link_to t("dashboard.new_competitor"), new_competitor_path,
+          class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
+    </header>
 
-  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-    <section class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
-      <h2 class="mb-4 text-heading text-text-body"><%= t("dashboard.recent_competitors") %></h2>
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <section class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+        <h2 class="mb-4 text-heading text-text-body"><%= t("dashboard.recent_competitors") %></h2>
 
-      <% if @competitors.any? %>
         <ul class="divide-y divide-border-subtle">
           <% @competitors.each do |competitor| %>
             <li class="py-3">
@@ -28,34 +40,32 @@
             </li>
           <% end %>
         </ul>
-      <% else %>
-        <p class="text-body-sm text-text-muted"><%= t("dashboard.no_competitors") %></p>
-      <% end %>
-    </section>
+      </section>
 
-    <section class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
-      <h2 class="mb-4 text-heading text-text-body"><%= t("dashboard.recent_analyses") %></h2>
+      <section class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+        <h2 class="mb-4 text-heading text-text-body"><%= t("dashboard.recent_analyses") %></h2>
 
-      <% if @recent_analyses.any? %>
-        <ul class="divide-y divide-border-subtle">
-          <% @recent_analyses.each do |analysis| %>
-            <li class="py-3">
-              <%= link_to competitor_analysis_path(analysis.competitor, analysis),
-                  class: "flex items-center justify-between -mx-2 px-2 transition-colors hover:bg-surface-base rounded-sm" do %>
-                <div>
-                  <p class="text-body-sm font-medium text-text-body">@<%= analysis.competitor.instagram_handle %></p>
-                  <p class="text-caption text-text-muted">
-                    <%= l(analysis.created_at, format: :short) %>
-                  </p>
-                </div>
-                <%= render "shared/status_badge", status: analysis.status %>
-              <% end %>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="text-body-sm text-text-muted"><%= t("dashboard.no_analyses") %></p>
-      <% end %>
-    </section>
-  </div>
+        <% if @recent_analyses.any? %>
+          <ul class="divide-y divide-border-subtle">
+            <% @recent_analyses.each do |analysis| %>
+              <li class="py-3">
+                <%= link_to competitor_analysis_path(analysis.competitor, analysis),
+                    class: "flex items-center justify-between -mx-2 px-2 transition-colors hover:bg-surface-base rounded-sm" do %>
+                  <div>
+                    <p class="text-body-sm font-medium text-text-body">@<%= analysis.competitor.instagram_handle %></p>
+                    <p class="text-caption text-text-muted">
+                      <%= l(analysis.created_at, format: :short) %>
+                    </p>
+                  </div>
+                  <%= render "shared/status_badge", status: analysis.status %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-body-sm text-text-muted"><%= t("dashboard.no_analyses") %></p>
+        <% end %>
+      </section>
+    </div>
+  <% end %>
 </div>

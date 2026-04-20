@@ -114,6 +114,10 @@ pt-BR:
     recent_analyses: "Análises recentes"
     no_competitors: "Nenhum concorrente adicionado ainda."
     no_analyses: "Nenhuma análise rodada ainda."
+    empty:
+      title: "Comece adicionando um concorrente"
+      description: "Rastreie o Instagram dos seus concorrentes pra descobrir o que funciona e gerar ideias de conteúdo."
+      cta: "Adicionar concorrente"
     analyses_count:
       zero: "sem análises"
       one: "1 análise"

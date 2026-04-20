@@ -52,15 +52,21 @@ module Analyses
         return
       end
 
-      result = Transcription::Factory.build(api_key: api_key_for_transcription).transcribe(video_url: post.video_url)
+      provider = provider_for(:transcription)
+      model    = model_for(:transcription)
+      key      = api_key_for(provider)
+
+      result = Transcription::Factory
+                 .build(provider: provider, api_key: key)
+                 .transcribe(video_url: post.video_url)
 
       if result.success?
         post.update!(transcript: result.transcript, transcript_status: :completed, transcribed_at: Time.current)
         Transcription::UsageLogger.log(
           result: result,
           account: account,
-          provider: :openai,
-          model: ENV.fetch("TRANSCRIPTION_MODEL", "gpt-4o-mini-transcribe"),
+          provider: provider,
+          model: model,
           post: post,
           analysis: analysis
         )
@@ -69,6 +75,8 @@ module Analyses
         Rails.logger.warn("[Analysis##{analysis.id}] Transcription failed for post #{post.id}: #{result.error_code}")
         post.update!(transcript_status: new_status)
       end
+    rescue ApiCredentials::NotConfiguredError
+      raise
     rescue => e
       Rails.logger.error("[Analysis##{analysis.id}] Unexpected error transcribing post #{post.id}: #{e.class} - #{e.message}")
       post.update!(transcript_status: :failed)
@@ -89,12 +97,23 @@ module Analyses
     end
 
     # =========================================================================
-    # Ponto de troca pra Fase 1.6a (BYOK — ADR-013).
-    # Transcrição usa OpenAI no MVP (fixo). Na 1.6a, lê account.api_credentials.
+    # Resolução de provider/model/key via account (BYOK — ADR-013).
+    # use_case "transcription" tem seu próprio grupo de preferências.
     # =========================================================================
 
-    def api_key_for_transcription
-      ENV.fetch("OPENAI_API_KEY")
+    def provider_for(_use_case)
+      account.llm_preferences_with_defaults["transcription_provider"].to_sym
+    end
+
+    def model_for(_use_case)
+      account.llm_preferences_with_defaults["transcription_model"]
+    end
+
+    def api_key_for(provider)
+      credential = account.api_credential_for(provider.to_s)
+      raise ApiCredentials::NotConfiguredError.new(provider: provider.to_s, use_case: "transcription") unless credential
+
+      credential.encrypted_api_key
     end
   end
 end

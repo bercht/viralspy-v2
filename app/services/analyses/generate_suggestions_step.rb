@@ -122,29 +122,23 @@ module Analyses
     end
 
     # =========================================================================
-    # Ponto de troca pra Fase 1.6a (BYOK — ADR-013).
-    # Hoje: valores fixos. Na 1.6a, lê account.llm_preferences e
-    # account.api_credentials. NÃO extrair pra concern nessa fase.
+    # Resolução de provider/model/key via account (BYOK — ADR-013).
+    # use_case "content_suggestions" cai no grupo "generation".
     # =========================================================================
 
     def provider_for(_use_case)
-      :anthropic
+      account.llm_preferences_with_defaults["generation_provider"].to_sym
     end
 
     def model_for(_use_case)
-      "claude-sonnet-4-5"
+      account.llm_preferences_with_defaults["generation_model"]
     end
 
     def api_key_for(provider)
-      ENV.fetch(api_key_env_var(provider))
-    end
+      credential = account.api_credential_for(provider.to_s)
+      raise ApiCredentials::NotConfiguredError.new(provider: provider.to_s, use_case: "generation") unless credential
 
-    def api_key_env_var(provider)
-      case provider
-      when :openai    then "OPENAI_API_KEY"
-      when :anthropic then "ANTHROPIC_API_KEY"
-      else raise ArgumentError, "Unknown provider: #{provider.inspect}"
-      end
+      credential.encrypted_api_key
     end
 
     def persist_suggestions(suggestions_data)

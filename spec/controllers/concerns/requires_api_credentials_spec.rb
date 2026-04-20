@@ -43,9 +43,9 @@ RSpec.describe RequiresApiCredentials, type: :controller do
         .and_return([:openai, :assemblyai])
     end
 
-    it "redirects to fallback when settings route isn't defined yet" do
+    it "redirects to settings api keys page" do
       get :index
-      expect(response).to redirect_to(root_path)
+      expect(response).to redirect_to(settings_api_keys_path)
     end
 
     it "sets an alert flash listing missing providers with use cases" do

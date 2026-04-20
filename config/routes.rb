@@ -16,6 +16,14 @@ Rails.application.routes.draw do
 
   resources :content_suggestions, only: [ :update ]
 
+  namespace :settings do
+    resource :api_keys, only: [ :show ], controller: "api_keys" do
+      post   "providers/:provider", to: "api_keys#create",  as: :create_for
+      patch  "providers/:provider", to: "api_keys#update",  as: :update_for
+      delete "providers/:provider", to: "api_keys#destroy", as: :destroy_for
+    end
+  end
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   unless Rails.env.production?

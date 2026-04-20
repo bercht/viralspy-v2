@@ -34,7 +34,54 @@ pt-BR:
   nav:
     dashboard: "Dashboard"
     competitors: "Concorrentes"
+    settings: "Configurações"
     logout: "Sair"
+
+  settings:
+    api_keys:
+      title: "Chaves de API"
+      subtitle: "Configure suas chaves de API dos provedores que o ViralSpy utiliza. Suas chaves ficam encriptadas e são usadas apenas nas suas próprias análises."
+      providers:
+        openai:
+          name: "OpenAI"
+          description: "Usada para transcrição de reels (opcional) e análise estruturada (padrão)."
+          placeholder: "sk-..."
+          docs_url: "https://platform.openai.com/api-keys"
+        anthropic:
+          name: "Anthropic"
+          description: "Usada para análise estruturada (opcional) e geração de conteúdo (padrão)."
+          placeholder: "sk-ant-..."
+          docs_url: "https://console.anthropic.com/settings/keys"
+        assemblyai:
+          name: "AssemblyAI"
+          description: "Usada para transcrição de reels. Tem free tier generoso (~US$ 50 no signup)."
+          placeholder: "sua-chave-assemblyai"
+          docs_url: "https://www.assemblyai.com/app/api-keys"
+      status:
+        unknown: "Ainda não validada"
+        verified: "Chave válida"
+        failed: "Chave inválida"
+        quota_exceeded: "Cota esgotada"
+        not_configured: "Não configurada"
+      last_validated_at: "Última validação: %{time}"
+      never_validated: "Ainda não validada"
+      form:
+        save_and_validate: "Salvar e validar"
+        update_and_validate: "Atualizar e validar"
+        remove: "Remover"
+        api_key_label: "Chave de API"
+        api_key_placeholder_empty: "Cole sua chave aqui"
+        api_key_placeholder_existing: "••••••••••••••••  (deixe vazio para manter a atual)"
+        docs_link: "Como obter a chave"
+        confirm_destroy: "Tem certeza que quer remover a chave de %{provider}? Você precisará reconfigurá-la para rodar análises."
+      flash:
+        saved_verified: "%{provider}: chave salva e validada com sucesso."
+        saved_failed: "%{provider}: chave salva, mas o provedor rejeitou a validação. Verifique se a chave está correta."
+        saved_quota: "%{provider}: chave salva, mas o provedor reportou cota esgotada. Você pode salvar e tentar validar novamente mais tarde."
+        saved_unknown: "%{provider}: chave salva, mas não foi possível validar no momento (timeout ou erro de conexão). Tente novamente em alguns minutos."
+        destroyed: "%{provider}: chave removida."
+        invalid_provider: "Provedor inválido."
+        not_found: "%{provider}: nenhuma chave configurada para remover."
 
   time:
     formats:

@@ -74,4 +74,111 @@ RSpec.describe Account, type: :model do
       end
     end
   end
+
+  describe "#ready_for_analysis?" do
+    let(:account) { create(:account) }
+
+    context "when all 3 credentials are active" do
+      it "returns true" do
+        ActsAsTenant.with_tenant(account) do
+          create(:api_credential, account: account, provider: "openai")
+          create(:api_credential, account: account, provider: "anthropic")
+          create(:api_credential, account: account, provider: "assemblyai")
+
+          expect(account.ready_for_analysis?).to be true
+        end
+      end
+    end
+
+    context "when assemblyai credential is missing" do
+      it "returns false" do
+        ActsAsTenant.with_tenant(account) do
+          create(:api_credential, account: account, provider: "openai")
+          create(:api_credential, account: account, provider: "anthropic")
+
+          expect(account.ready_for_analysis?).to be false
+        end
+      end
+    end
+
+    context "when credential exists but is inactive" do
+      it "returns false" do
+        ActsAsTenant.with_tenant(account) do
+          create(:api_credential, account: account, provider: "openai")
+          create(:api_credential, account: account, provider: "anthropic")
+          create(:api_credential, :inactive, account: account, provider: "assemblyai")
+
+          expect(account.ready_for_analysis?).to be false
+        end
+      end
+    end
+
+    context "when llm_preferences overrides analysis_provider to anthropic" do
+      it "checks anthropic credential (not openai) for analysis use case" do
+        ActsAsTenant.with_tenant(account) do
+          account.update!(llm_preferences: { "analysis_provider" => "anthropic" })
+          create(:api_credential, account: account, provider: "anthropic")
+          create(:api_credential, account: account, provider: "assemblyai")
+
+          expect(account.ready_for_analysis?).to be true
+        end
+      end
+    end
+
+    context "when same provider serves multiple use cases" do
+      it "deduplicates and requires credential only once" do
+        ActsAsTenant.with_tenant(account) do
+          account.update!(llm_preferences: {
+            "analysis_provider" => "anthropic",
+            "generation_provider" => "anthropic"
+          })
+          create(:api_credential, account: account, provider: "anthropic")
+          create(:api_credential, account: account, provider: "assemblyai")
+
+          expect(account.ready_for_analysis?).to be true
+        end
+      end
+    end
+  end
+
+  describe "#missing_credentials_for_analysis" do
+    let(:account) { create(:account) }
+
+    it "returns empty array when all credentials are present" do
+      ActsAsTenant.with_tenant(account) do
+        create(:api_credential, account: account, provider: "openai")
+        create(:api_credential, account: account, provider: "anthropic")
+        create(:api_credential, account: account, provider: "assemblyai")
+
+        expect(account.missing_credentials_for_analysis).to eq([])
+      end
+    end
+
+    it "returns only missing providers" do
+      ActsAsTenant.with_tenant(account) do
+        create(:api_credential, account: account, provider: "openai")
+        create(:api_credential, account: account, provider: "anthropic")
+
+        expect(account.missing_credentials_for_analysis).to eq([:assemblyai])
+      end
+    end
+
+    it "returns all 3 providers when no credentials exist" do
+      ActsAsTenant.with_tenant(account) do
+        expect(account.missing_credentials_for_analysis).to contain_exactly(:assemblyai, :openai, :anthropic)
+      end
+    end
+
+    it "does not duplicate when same provider is required by multiple use cases" do
+      ActsAsTenant.with_tenant(account) do
+        account.update!(llm_preferences: {
+          "analysis_provider" => "anthropic",
+          "generation_provider" => "anthropic"
+        })
+
+        expect(account.missing_credentials_for_analysis).to contain_exactly(:assemblyai, :anthropic)
+        expect(account.missing_credentials_for_analysis.length).to eq(2)
+      end
+    end
+  end
 end

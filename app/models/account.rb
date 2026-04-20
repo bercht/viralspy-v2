@@ -8,6 +8,15 @@ class Account < ApplicationRecord
     "generation_model" => "claude-sonnet-4-6"
   }.freeze
 
+  # Preference keys that map to a required credential for running analyses.
+  # Each resolves to a provider string (e.g. "openai") that must have an
+  # active ApiCredential before ready_for_analysis? returns true.
+  ANALYSIS_PROVIDER_PREFERENCE_KEYS = %w[
+    transcription_provider
+    analysis_provider
+    generation_provider
+  ].freeze
+
   has_many :users, dependent: :destroy
   has_many :competitors, dependent: :destroy
   has_many :analyses, dependent: :destroy
@@ -25,5 +34,15 @@ class Account < ApplicationRecord
 
   def api_credential_for(provider)
     api_credentials.active.find_by(provider: provider.to_s)
+  end
+
+  def ready_for_analysis?
+    missing_credentials_for_analysis.empty?
+  end
+
+  def missing_credentials_for_analysis
+    prefs = llm_preferences_with_defaults
+    providers_needed = ANALYSIS_PROVIDER_PREFERENCE_KEYS.map { |key| prefs[key] }.compact.uniq
+    providers_needed.reject { |provider| api_credential_for(provider).present? }.map(&:to_sym)
   end
 end

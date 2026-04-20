@@ -148,6 +148,20 @@ pt-BR:
         format_details: "Detalhes do formato"
         rationale: "Por quê?"
 
+  api_credentials:
+    missing:
+      title: "Configure suas chaves de API antes de rodar uma análise"
+      intro: "Você precisa configurar as seguintes chaves:"
+      providers:
+        openai: "OpenAI"
+        anthropic: "Anthropic"
+        assemblyai: "AssemblyAI"
+      use_cases:
+        openai: "análise estruturada e/ou transcrição"
+        anthropic: "análise estruturada e/ou geração de conteúdo"
+        assemblyai: "transcrição de reels"
+      cta: "Acesse Configurações → API Keys para configurar."
+
   content_suggestions:
     updated:
       saved: "Sugestão salva."

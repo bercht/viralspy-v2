@@ -6,17 +6,21 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
+  <body class="min-h-screen bg-surface-base font-sans text-body text-text-body antialiased">
     <% if user_signed_in? %>
       <%= render "shared/navbar" %>
     <% end %>
 
-    <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <main class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <%= render "shared/flash" %>
       <%= yield %>
     </main>

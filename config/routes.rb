@@ -17,4 +17,8 @@ Rails.application.routes.draw do
   resources :content_suggestions, only: [ :update ]
 
   get "up" => "rails/health#show", as: :rails_health_check
+
+  unless Rails.env.production?
+    get "design-system", to: "design_system#index"
+  end
 end

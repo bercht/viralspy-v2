@@ -1,10 +1,13 @@
 <% flash.each do |type, message| %>
   <% classes = case type.to_sym
-     when :notice then "border-emerald-200 bg-emerald-50 text-emerald-900"
-     when :alert, :error then "border-red-200 bg-red-50 text-red-900"
-     else "border-gray-200 bg-gray-50 text-gray-900"
+     when :notice
+       "border-semantic-success/30 bg-semantic-success-bg text-semantic-success"
+     when :alert, :error
+       "border-semantic-danger/30 bg-semantic-danger-bg text-semantic-danger"
+     else
+       "border-semantic-neutral/30 bg-semantic-neutral-bg text-semantic-neutral"
      end %>
-  <div class="mb-6 rounded-lg border px-4 py-3 text-sm <%= classes %>">
+  <div class="mb-6 rounded-card border px-4 py-3 text-body-sm <%= classes %>">
     <%= message %>
   </div>
 <% end %>

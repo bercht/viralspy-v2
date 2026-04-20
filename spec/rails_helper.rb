@@ -4,6 +4,7 @@ require_relative "../config/environment"
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require "rspec/rails"
 require "shoulda/matchers"
+require "capybara/rspec"
 
 require "webmock/rspec"
 WebMock.disable_net_connect!(allow_localhost: true)
@@ -43,6 +44,16 @@ RSpec.configure do |config|
   config.include Devise::Test::IntegrationHelpers, type: :request
   config.include Devise::Test::ControllerHelpers, type: :controller
   config.include ActiveSupport::Testing::TimeHelpers
+  config.include Warden::Test::Helpers, type: :system
+
+  config.before(:each, type: :system) do
+    Warden.test_mode!
+    driven_by(:rack_test)
+  end
+
+  config.after(:each, type: :system) do
+    Warden.test_reset!
+  end
 
   config.before(:each, type: :request) do
     host! "localhost"

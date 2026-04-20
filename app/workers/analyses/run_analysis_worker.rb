@@ -47,11 +47,23 @@ module Analyses
       end
 
       Rails.logger.info("[Analysis##{analysis.id}] Pipeline completed successfully")
+      run_playbook_updates(analysis)
     rescue => e
       Rails.logger.error(
         "[Analysis##{analysis.id}] Pipeline unexpected exception: #{e.class} - #{e.message}\n#{e.backtrace.first(5).join("\n")}"
       )
       analysis.update!(status: :failed, error_message: "Worker crashed: #{e.message}", finished_at: Time.current)
+    end
+
+    def run_playbook_updates(analysis)
+      analysis.analysis_playbooks.playbook_update_pending.each do |ap|
+        Analyses::UpdatePlaybookStep.call(ap)
+      rescue => e
+        # rubocop:disable Lint/SuppressedException -- failure in one playbook must not affect others
+        Rails.logger.error("[Analysis##{analysis.id}] UpdatePlaybookStep rescue: #{e.message} analysis_playbook_id=#{ap.id}")
+        ap.playbook_update_failed! rescue nil
+        # rubocop:enable Lint/SuppressedException
+      end
     end
   end
 end

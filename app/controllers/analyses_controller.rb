@@ -21,6 +21,7 @@ class AnalysesController < ApplicationController
     authorize @analysis
 
     if @analysis.save
+      attach_playbooks(@analysis)
       Analyses::RunAnalysisWorker.perform_async(@analysis.id)
       redirect_to competitor_analysis_path(@competitor, @analysis),
                   notice: t("analyses.flash.started")
@@ -45,5 +46,15 @@ class AnalysesController < ApplicationController
 
   def analysis_params
     params.fetch(:analysis, {}).permit(:max_posts)
+  end
+
+  def attach_playbooks(analysis)
+    playbook_ids = params.dig(:analysis, :playbook_ids)
+    return unless playbook_ids.present?
+
+    ids = playbook_ids.reject(&:blank?).map(&:to_i)
+    current_tenant.playbooks.where(id: ids).each do |playbook|
+      analysis.analysis_playbooks.create!(playbook: playbook)
+    end
   end
 end

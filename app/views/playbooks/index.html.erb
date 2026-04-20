@@ -1,0 +1,42 @@
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Playbooks</h1>
+    <%= link_to "Novo Playbook", new_playbook_path,
+        class: "inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700" %>
+  </div>
+
+  <% if @playbooks.empty? %>
+    <div class="text-center py-16 text-gray-500">
+      <p class="text-lg">Nenhum playbook ainda.</p>
+      <p class="text-sm mt-2">Crie um playbook para começar a acumular conhecimento sobre seu nicho.</p>
+    </div>
+  <% else %>
+    <div class="space-y-4">
+      <% @playbooks.each do |playbook| %>
+        <div class="bg-white border border-gray-200 rounded-lg p-5 hover:border-indigo-300 transition-colors">
+          <div class="flex items-start justify-between">
+            <div>
+              <%= link_to playbook.name, playbook,
+                  class: "text-lg font-semibold text-gray-900 hover:text-indigo-600" %>
+              <% if playbook.niche.present? %>
+                <p class="text-sm text-gray-500 mt-1"><%= playbook.niche %></p>
+              <% end %>
+            </div>
+            <div class="text-right text-sm text-gray-400">
+              <% if playbook.current_version_number > 0 %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                  v<%= playbook.current_version_number %>
+                </span>
+              <% else %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                  Sem versão
+                </span>
+              <% end %>
+              <p class="mt-1">Atualizado <%= time_ago_in_words(playbook.updated_at) %> atrás</p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

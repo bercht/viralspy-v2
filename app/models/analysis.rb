@@ -5,6 +5,8 @@ class Analysis < ApplicationRecord
   belongs_to :competitor
   has_many :posts, dependent: :destroy
   has_many :content_suggestions, dependent: :destroy
+  has_many :analysis_playbooks, dependent: :destroy
+  has_many :playbooks, through: :analysis_playbooks
   has_many :llm_usage_logs, dependent: :nullify
   has_many :transcription_usage_logs, dependent: :nullify
 

@@ -16,6 +16,19 @@ Rails.application.routes.draw do
 
   resources :content_suggestions, only: [ :update ]
 
+  resources :playbooks do
+    resources :playbook_versions, only: [ :index, :show ], shallow: true
+    resources :playbook_feedbacks, only: [ :create, :update ], shallow: true do
+      member do
+        patch :incorporate
+        patch :dismiss
+      end
+    end
+    member do
+      get :export
+    end
+  end
+
   namespace :settings do
     resource :api_keys, only: [ :show ], controller: "api_keys" do
       post   "providers/:provider", to: "api_keys#create",  as: :create_for

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_20_040818) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_20_230135) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -44,6 +44,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_040818) do
     t.index ["account_id"], name: "index_analyses_on_account_id"
     t.index ["competitor_id"], name: "index_analyses_on_competitor_id"
     t.index ["status"], name: "index_analyses_on_status"
+  end
+
+  create_table "analysis_playbooks", force: :cascade do |t|
+    t.bigint "analysis_id", null: false
+    t.bigint "playbook_id", null: false
+    t.integer "update_status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["analysis_id", "playbook_id"], name: "index_analysis_playbooks_on_analysis_id_and_playbook_id", unique: true
+    t.index ["analysis_id"], name: "index_analysis_playbooks_on_analysis_id"
+    t.index ["playbook_id"], name: "index_analysis_playbooks_on_playbook_id"
+    t.index ["update_status"], name: "index_analysis_playbooks_on_update_status"
   end
 
   create_table "api_credentials", force: :cascade do |t|
@@ -109,6 +121,47 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_040818) do
     t.index ["account_id", "created_at"], name: "index_llm_usage_logs_on_account_id_and_created_at"
     t.index ["account_id"], name: "index_llm_usage_logs_on_account_id"
     t.index ["analysis_id"], name: "index_llm_usage_logs_on_analysis_id"
+  end
+
+  create_table "playbook_feedbacks", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "playbook_id", null: false
+    t.text "content", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "source", default: 0, null: false
+    t.bigint "incorporated_in_version"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_playbook_feedbacks_on_account_id"
+    t.index ["incorporated_in_version"], name: "index_playbook_feedbacks_on_incorporated_in_version"
+    t.index ["playbook_id"], name: "index_playbook_feedbacks_on_playbook_id"
+    t.index ["status"], name: "index_playbook_feedbacks_on_status"
+  end
+
+  create_table "playbook_versions", force: :cascade do |t|
+    t.bigint "playbook_id", null: false
+    t.integer "version_number", null: false
+    t.text "content", null: false
+    t.text "diff_summary"
+    t.integer "feedbacks_incorporated_count", default: 0, null: false
+    t.bigint "triggered_by_analysis_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["playbook_id", "version_number"], name: "index_playbook_versions_on_playbook_id_and_version_number", unique: true
+    t.index ["playbook_id"], name: "index_playbook_versions_on_playbook_id"
+    t.index ["triggered_by_analysis_id"], name: "index_playbook_versions_on_triggered_by_analysis_id"
+  end
+
+  create_table "playbooks", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "name", null: false
+    t.string "niche"
+    t.text "purpose"
+    t.integer "current_version_number", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "name"], name: "index_playbooks_on_account_id_and_name", unique: true
+    t.index ["account_id"], name: "index_playbooks_on_account_id"
   end
 
   create_table "posts", force: :cascade do |t|
@@ -177,12 +230,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_040818) do
 
   add_foreign_key "analyses", "accounts"
   add_foreign_key "analyses", "competitors"
+  add_foreign_key "analysis_playbooks", "analyses"
+  add_foreign_key "analysis_playbooks", "playbooks"
   add_foreign_key "api_credentials", "accounts"
   add_foreign_key "competitors", "accounts"
   add_foreign_key "content_suggestions", "accounts"
   add_foreign_key "content_suggestions", "analyses"
   add_foreign_key "llm_usage_logs", "accounts"
   add_foreign_key "llm_usage_logs", "analyses"
+  add_foreign_key "playbook_feedbacks", "accounts"
+  add_foreign_key "playbook_feedbacks", "playbooks"
+  add_foreign_key "playbook_versions", "playbooks"
+  add_foreign_key "playbooks", "accounts"
   add_foreign_key "posts", "accounts"
   add_foreign_key "posts", "analyses"
   add_foreign_key "posts", "competitors"

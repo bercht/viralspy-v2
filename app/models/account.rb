@@ -25,6 +25,8 @@ class Account < ApplicationRecord
   has_many :llm_usage_logs, dependent: :nullify
   has_many :transcription_usage_logs, dependent: :nullify
   has_many :api_credentials, dependent: :destroy
+  has_many :playbooks, dependent: :destroy
+  has_many :playbook_feedbacks, dependent: :destroy
 
   validates :name, presence: true
 

@@ -28,6 +28,32 @@
     </p>
   </article>
 
+  <% if current_tenant.playbooks.any? %>
+    <article class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+      <p class="block text-body-sm font-medium text-text-body mb-1">
+        Alimentar playbooks <span class="font-normal text-text-muted">(opcional)</span>
+      </p>
+      <p class="text-caption text-text-muted mb-3">Selecione quais playbooks devem ser atualizados com os insights desta análise.</p>
+      <div class="space-y-2">
+        <% current_tenant.playbooks.recent.each do |playbook| %>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <%= check_box_tag "analysis[playbook_ids][]", playbook.id, false,
+                class: "h-4 w-4 text-brand-primary border-border-default rounded" %>
+            <span class="text-body-sm text-text-body">
+              <%= playbook.name %>
+              <% if playbook.niche.present? %>
+                <span class="text-text-muted">· <%= playbook.niche.truncate(50) %></span>
+              <% end %>
+              <% if playbook.current_version_number > 0 %>
+                <span class="text-caption text-text-muted ml-1">v<%= playbook.current_version_number %></span>
+              <% end %>
+            </span>
+          </label>
+        <% end %>
+      </div>
+    </article>
+  <% end %>
+
   <div class="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
     <%= link_to t("analyses.form.cancel"), competitor_path(competitor),
         class: "rounded-pill px-4 py-2 text-center text-button text-text-muted transition-colors hover:text-text-body" %>

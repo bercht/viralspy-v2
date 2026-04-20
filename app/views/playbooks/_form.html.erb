@@ -1,0 +1,40 @@
+<%= form_with(model: playbook, local: true, class: "space-y-5") do |f| %>
+  <% if playbook.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <ul class="text-sm text-red-700 space-y-1">
+        <% playbook.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, "Nome", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= f.text_field :name,
+        placeholder: "ex: Marketing Imobiliário com IA",
+        class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500" %>
+  </div>
+
+  <div>
+    <%= f.label :niche, "Nicho", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= f.text_field :niche,
+        placeholder: "ex: corretores de imóveis no Brasil, foco em alto padrão",
+        class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500" %>
+  </div>
+
+  <div>
+    <%= f.label :purpose, "Propósito", class: "block text-sm font-medium text-gray-700 mb-1" %>
+    <%= f.text_area :purpose,
+        placeholder: "ex: Acumular conhecimento sobre o que funciona em conteúdo de marketing imobiliário com IA",
+        rows: 3,
+        class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500 resize-none" %>
+  </div>
+
+  <div class="flex items-center gap-3 pt-2">
+    <%= f.submit playbook.new_record? ? "Criar Playbook" : "Salvar alterações",
+        class: "inline-flex items-center px-5 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 cursor-pointer" %>
+    <%= link_to "Cancelar", playbooks_path,
+        class: "text-sm text-gray-500 hover:text-gray-700" %>
+  </div>
+<% end %>

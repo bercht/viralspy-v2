@@ -3,7 +3,7 @@
   <head>
     <title>ViralSpy</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
@@ -21,8 +21,10 @@
       <%= render "shared/navbar" %>
     <% end %>
 
-    <main class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <%= render "shared/flash" %>
+    <main class="mx-auto w-full max-w-6xl px-4 py-6 md:px-6 lg:px-8 lg:py-8">
+      <div id="flash">
+        <%= render "shared/flash" %>
+      </div>
       <%= yield %>
     </main>
   </body>

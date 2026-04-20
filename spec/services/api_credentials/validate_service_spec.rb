@@ -70,6 +70,7 @@ RSpec.describe ApiCredentials::ValidateService do
         result = described_class.call(credential)
 
         expect(result.status).to eq(:unknown)
+        expect(credential.reload.last_validation_status).to eq("unknown")
       end
     end
 
@@ -213,6 +214,7 @@ RSpec.describe ApiCredentials::ValidateService do
         ActsAsTenant.with_tenant(account) do
           credential = build(:api_credential, account: account, provider: "openai", encrypted_api_key: "x")
           credential.save!(validate: false)
+          # bypass model validation to simulate DB state with an unlisted provider
           ApiCredential.where(id: credential.id).update_all(provider: "gemini")
           credential.reload
 

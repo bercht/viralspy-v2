@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe "ApiCredentials errors" do
+RSpec.describe ApiCredentials do
   it "defines Error as base StandardError" do
     expect(ApiCredentials::Error.ancestors).to include(StandardError)
   end

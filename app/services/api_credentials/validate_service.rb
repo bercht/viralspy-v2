@@ -108,22 +108,16 @@ module ApiCredentials
       client = ::AssemblyAI::Client.new(api_key: credential.encrypted_api_key)
       client.transcripts.list(limit: 1)
       Result.success
+    rescue Faraday::UnauthorizedError
+      Result.failure(status: :failed, message: "AssemblyAI rejected the API key (invalid or revoked)")
+    rescue Faraday::TooManyRequestsError
+      Result.failure(status: :quota_exceeded, message: "AssemblyAI rate limit or quota exceeded")
+    rescue Faraday::TimeoutError, Faraday::ConnectionFailed
+      Result.failure(status: :unknown, message: "AssemblyAI connection timed out")
+    rescue Faraday::Error => e
+      Result.failure(status: :unknown, message: "AssemblyAI error: #{e.message}")
     rescue StandardError => e
-      interpret_assemblyai_error(e)
-    end
-
-    def interpret_assemblyai_error(error)
-      message = error.message.to_s.downcase
-
-      if message.include?("401") || message.include?("unauthorized") || message.include?("invalid api key")
-        Result.failure(status: :failed, message: "AssemblyAI rejected the API key: #{error.message}")
-      elsif message.include?("429") || message.include?("rate limit") || message.include?("quota")
-        Result.failure(status: :quota_exceeded, message: "AssemblyAI rate limit or quota exceeded")
-      elsif message.include?("timeout") || message.include?("timed out")
-        Result.failure(status: :unknown, message: "AssemblyAI timed out: #{error.message}")
-      else
-        Result.failure(status: :unknown, message: "AssemblyAI error: #{error.message}")
-      end
+      Result.failure(status: :unknown, message: "AssemblyAI unexpected error: #{e.message}")
     end
   end
 end

@@ -3,7 +3,7 @@
 module LLM
   module Providers
     class OpenAI < Base
-      def initialize(api_key: ENV["OPENAI_API_KEY"], timeout: DEFAULT_TIMEOUT)
+      def initialize(api_key:, timeout: DEFAULT_TIMEOUT)
         super(api_key: api_key, timeout: timeout)
       end
 

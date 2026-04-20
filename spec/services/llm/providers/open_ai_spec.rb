@@ -25,6 +25,10 @@ RSpec.describe LLM::Providers::OpenAI do
     it "raises MissingApiKeyError without api_key" do
       expect { described_class.new(api_key: nil) }.to raise_error(LLM::MissingApiKeyError)
     end
+
+    it "raises ArgumentError when called without api_key keyword" do
+      expect { described_class.new }.to raise_error(ArgumentError, /api_key/)
+    end
   end
 
   describe "#complete" do

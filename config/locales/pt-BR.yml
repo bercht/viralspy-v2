@@ -159,6 +159,32 @@ pt-BR:
   analyses:
     started: "Análise iniciada. Isso pode levar alguns minutos."
     create_failed: "Não foi possível iniciar a análise."
+    flash:
+      started: "Análise iniciada. Você será notificado quando estiver pronta."
+      create_failed: "Não foi possível iniciar a análise. Tente novamente."
+    new:
+      title: "Nova análise"
+      subtitle: "Rode uma análise do perfil @%{handle} pra gerar insights e sugestões de conteúdo."
+      back_to_competitor: "← Voltar para o concorrente"
+    form:
+      max_posts_label: "Quantidade de posts analisados"
+      max_posts_hint: "Quanto mais posts, mais rica a análise — e mais tempo e custo."
+      max_posts_options:
+        thirty: "Rápido (30 posts)"
+        fifty: "Padrão (50 posts)"
+        eighty: "Completo (80 posts)"
+        hundred: "Máximo (100 posts)"
+      submit: "Rodar análise"
+      cancel: "Cancelar"
+    status:
+      pending: "Aguardando início"
+      scraping: "Buscando posts no Instagram..."
+      scoring: "Analisando métricas..."
+      transcribing: "Transcrevendo reels..."
+      analyzing: "Gerando insights com IA..."
+      generating_suggestions: "Criando sugestões de conteúdo..."
+      completed: "Concluída"
+      failed: "Falhou"
     show:
       title: "Análise"
       in_progress:

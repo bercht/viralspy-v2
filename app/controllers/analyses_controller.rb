@@ -1,30 +1,39 @@
 class AnalysesController < ApplicationController
+  include RequiresApiCredentials
+
   before_action :set_competitor
+  before_action :require_api_credentials_configured!, only: [ :new, :create ]
   before_action :set_analysis, only: [ :show ]
 
+  def new
+    @analysis = @competitor.analyses.build(
+      account: current_account,
+      max_posts: Analysis.columns_hash["max_posts"].default.to_i
+    )
+    authorize @analysis
+  end
+
   def create
-    @analysis = @competitor.analyses.build(account: current_account, status: :pending)
+    @analysis = @competitor.analyses.build(
+      analysis_params.merge(account: current_account, status: :pending)
+    )
     authorize @analysis
 
     if @analysis.save
       Analyses::RunAnalysisWorker.perform_async(@analysis.id)
       redirect_to competitor_analysis_path(@competitor, @analysis),
-                  notice: t("analyses.started")
+                  notice: t("analyses.flash.started")
     else
-      redirect_to @competitor, alert: t("analyses.create_failed")
+      render :new, status: :unprocessable_entity
     end
   end
 
   def show
     authorize @analysis
-    return unless @analysis.completed?
 
-    @profile_metrics = @analysis.profile_metrics || {}
-    @insights = @analysis.insights || {}
-    @posts_by_type = @analysis.posts
-                              .where(selected_for_analysis: true)
-                              .group_by(&:post_type)
-    @suggestions = @analysis.content_suggestions.ordered
+    if @analysis.completed?
+      load_completed_analysis_data
+    end
   end
 
   private
@@ -35,5 +44,18 @@ class AnalysesController < ApplicationController
 
   def set_analysis
     @analysis = @competitor.analyses.find(params[:id])
+  end
+
+  def analysis_params
+    params.fetch(:analysis, {}).permit(:max_posts)
+  end
+
+  def load_completed_analysis_data
+    @profile_metrics = @analysis.profile_metrics || {}
+    @insights = @analysis.insights || {}
+    @posts_by_type = @analysis.posts
+                              .where(selected_for_analysis: true)
+                              .group_by(&:post_type)
+    @suggestions = @analysis.content_suggestions.ordered
   end
 end

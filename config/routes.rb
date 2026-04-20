@@ -11,7 +11,7 @@ Rails.application.routes.draw do
   get "dashboard", to: "dashboard#index", as: :dashboard
 
   resources :competitors, only: [ :index, :new, :create, :show, :destroy ] do
-    resources :analyses, only: [ :create, :show ]
+    resources :analyses, only: [ :new, :create, :show ]
   end
 
   resources :content_suggestions, only: [ :update ]

@@ -51,11 +51,6 @@ class AnalysesController < ApplicationController
   end
 
   def load_completed_analysis_data
-    @profile_metrics = @analysis.profile_metrics || {}
-    @insights = @analysis.insights || {}
-    @posts_by_type = @analysis.posts
-                              .where(selected_for_analysis: true)
-                              .group_by(&:post_type)
-    @suggestions = @analysis.content_suggestions.ordered
+    @completed_locals = completed_locals(@analysis)
   end
 end

@@ -23,7 +23,7 @@
   </header>
 
   <% if @analysis.completed? %>
-    <%= render "completed" %>
+    <%= render "completed", **(@completed_locals || {}) %>
   <% elsif @analysis.failed? %>
     <%= render "failed", analysis: @analysis, competitor: @competitor %>
   <% else %>

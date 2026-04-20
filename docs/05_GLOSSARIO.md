@@ -10,21 +10,20 @@
 |-------|-----------|
 | **Account** | Conta de um usuário na plataforma. Unidade de tenant. No MVP, 1 usuário por account. |
 | **Competitor** | Perfil Instagram que o usuário quer analisar. |
-| **Analysis** | Execução completa (scrape + metrics + score + transcribe + analyze + generate + refine). |
+| **Analysis** | Execução completa (scrape + metrics + score + transcribe + analyze + generate). |
 | **Post** | Post individual capturado no scraping. Pertence a uma Analysis. `reel`, `carousel` ou `image`. |
-| **ContentSuggestion** | Sugestão gerada pela IA. 5 por Analysis (2 reels + 2 carrosséis + 1 imagem, com fallback). Pode ser refinada pelo CritiqueAndRefineStep. |
+| **ContentSuggestion** | Sugestão gerada pela IA. 5 por Analysis (2 reels + 2 carrosséis + 1 imagem, com fallback). |
 | **Handle** | Username Instagram sem `@`, lowercase. |
 | **Quality Score** | Score numérico Ruby (sem IA) pra rankear posts dentro de cada tipo. |
 | **Selected for Analysis** | Flag no Post marcando se foi escolhido pro LLM. Top N proporcional por tipo. |
 | **Profile Metrics** | Métricas agregadas do perfil em Ruby: frequência, mix, horários, hashtags. Em `analyses.profile_metrics` (JSONB). |
 | **Transcript** | Transcrição do áudio de um reel. Em `posts.transcript`. |
 | **Insights** | Hash JSON da IA com análise segmentada por tipo (reel, carousel, image). |
-| **Refinement Notes** | Array de strings descrevendo mudanças feitas pelo CritiqueAndRefineStep. Em `content_suggestions.refinement_notes` (JSONB). |
 | **Hook (Gancho)** | Primeira linha impactante de um post. |
 | **Scraping Provider** | Abstração do scraping. MVP: Apify. |
 | **Transcription Provider** | Abstração de transcrição. Providers: OpenAI ou AssemblyAI. Default: AssemblyAI. |
 | **LLM Gateway** | Classe que unifica chamadas a OpenAI/Anthropic. |
-| **Use Case** | Contexto de chamada LLM para logging. Valores: `"reel_analysis"`, `"carousel_analysis"`, `"image_analysis"`, `"content_suggestions"`, `"critique_and_refine"`. |
+| **Use Case** | Contexto de chamada LLM para logging. Valores: `"reel_analysis"`, `"carousel_analysis"`, `"image_analysis"`, `"content_suggestions"`. |
 | **max_posts** | Input do usuário por análise: quantos posts o scraper captura (range 10-100, default 50). |
 
 ---
@@ -144,7 +143,7 @@ create_table :posts do |t|
   t.references :account, null: false, foreign_key: true
   t.string :instagram_post_id, null: false
   t.string :shortcode
-  t.string :post_type, null: false  # 'reel', 'carousel', 'image'
+  t.integer :post_type, null: false  # reel:0, carousel:1, image:2
   t.text :caption
   t.string :display_url
   t.string :video_url              # só reels
@@ -176,13 +175,12 @@ create_table :content_suggestions do |t|
   t.references :analysis, null: false, foreign_key: true
   t.references :account, null: false, foreign_key: true
   t.integer :position, null: false                  # 1..5
-  t.string :content_type, null: false               # 'reel', 'carousel', 'image'
+  t.integer :content_type, null: false              # reel:0, carousel:1, image:2
   t.string :hook
   t.text :caption_draft
   t.jsonb :format_details, default: {}              # estrutura por tipo
   t.string :suggested_hashtags, array: true, default: []
   t.text :rationale
-  t.jsonb :refinement_notes                         # nullable — array de strings
   t.integer :status, default: 0
   t.timestamps
   t.index [:account_id, :created_at]
@@ -194,8 +192,6 @@ end
 > - `reel`: `{ duration_seconds: 30, structure: ["hook", "problem", "solution", "cta"] }`
 > - `carousel`: `{ slides: [{ title: "...", body: "..." }, ...] }`
 > - `image`: `{ composition_tips: "...", text_overlay: "..." }`
-
-> **`refinement_notes`:** populado pelo `CritiqueAndRefineStep`. Array de strings descrevendo o que mudou na sugestão. `nil` até o step rodar. `[]` (array vazio) se o step rodou mas decidiu preservar a sugestão sem alterações.
 
 ### LLMUsageLog
 
@@ -263,27 +259,15 @@ enum :status, {
   scraping: 1,                 # Apify rodando
   scoring: 2,                  # Ruby puro, muito rápido
   transcribing: 3,             # áudio dos reels selecionados
-  analyzing: 4,                # 3 chamadas LLM (Opus 4.7)
-  generating_suggestions: 5,   # 1 chamada LLM (Opus 4.7)
-  refining: 6,                 # CritiqueAndRefineStep (Opus 4.7)
+  analyzing: 4,                # 3 chamadas LLM
+  generating_suggestions: 5,   # 1 chamada LLM
+  # índice 6 reservado (status `refining` removido do enum na Fase 1.5b)
   completed: 7,                # sucesso
   failed: 8                    # falhou em alguma etapa
 }
 ```
 
-> ⚠️ **Amendment pós-Fase 1.5a:** `refining` (valor 6) foi inserido entre `generating_suggestions` (5) e `completed`. Isso empurrou `completed` de 6 → 7 e `failed` de 7 → 8. Migration da Fase 1.5c precisa incluir `UPDATE` pra remapear dados existentes:
->
-> ```sql
-> UPDATE analyses
-> SET status = CASE status
->   WHEN 7 THEN 8  -- failed: 7 → 8
->   WHEN 6 THEN 7  -- completed: 6 → 7
->   ELSE status
-> END
-> WHERE status IN (6, 7);
-> ```
->
-> A ordem do CASE importa: remapear os valores altos primeiro pra não colidir.
+> ⚠️ **Nota sobre o índice 6:** o status `refining` foi inserido na Fase 1.5a e removido na Fase 1.5b. O índice 6 está reservado — não reusar para novos status sem migration de dados (evitar colisão com dados históricos).
 
 ### Post#post_type
 
@@ -345,13 +329,15 @@ enum :provider, {
 ```ruby
 enum :last_validation_status, {
   unknown: 0,          # ainda não validada
-  valid: 1,            # última validação ok
-  invalid: 2,          # 401 do provider (chave revogada/errada)
+  verified: 1,         # última validação ok
+  failed: 2,           # 401 do provider (chave revogada/errada)
   quota_exceeded: 3    # 429 do provider (sem crédito/rate limit)
-}
+}, _prefix: :validation
 ```
 
-> **Nota:** `unknown` é default pra credential recém-criada antes de ser validada. `ValidateService` move pra um dos outros 3 estados.
+> **Nota:** `unknown` é default pra credential recém-criada antes de ser validada. `ValidateService` move pra `verified`, `failed` ou `quota_exceeded`.
+>
+> **Atenção:** `valid` e `invalid` são proibidos como valores de enum no Rails 7.1 (conflito com `#valid?/#invalid?` de `ActiveRecord::Validations`), mesmo com `_prefix`. Usar `verified`/`failed`.
 
 ---
 
@@ -488,8 +474,8 @@ Inflections registradas:
 ### Services
 
 - Organizados por domínio em `app/services/{dominio}/`
-- ✅ `Analyses::ScrapeStep`, `Analyses::ProfileMetricsStep`, `Analyses::ScoreAndSelectStep`, `Analyses::TranscribeStep`, `Analyses::AnalyzeStep`, `Analyses::GenerateSuggestionsStep`, `Analyses::CritiqueAndRefineStep`
-- ✅ `Scraping::ApifyProvider`, `Transcription::OpenAIProvider`
+- ✅ `Analyses::ScrapeStep`, `Analyses::ProfileMetricsStep`, `Analyses::ScoreAndSelectStep`, `Analyses::TranscribeStep`, `Analyses::AnalyzeStep`, `Analyses::GenerateSuggestionsStep`
+- ✅ `Scraping::ApifyProvider`, `Transcription::Providers::OpenAI`, `Transcription::Providers::AssemblyAI`
 - ✅ `LLM::Gateway`, `LLM::Providers::OpenAI`, `LLM::Providers::Anthropic`
 - Método público padrão: `self.call(...)` ou `#call`
 
@@ -497,19 +483,22 @@ Inflections registradas:
 
 - Em `app/workers/{dominio}/`
 - Sufixo `Worker`
-- ✅ `Analyses::RunAnalysisWorker`, `Notifications::SendEmailWorker`
+- ✅ `Analyses::RunAnalysisWorker`
 
 ### ViewComponents
 
-- Em `app/components/`
-- Sufixo `Component`
-- ✅ `StatusBadgeComponent`, `SuggestionCardComponent`, `ProfileMetricsComponent`, `PostRankingComponent`, `ProgressStepsComponent`
+**Decisão MVP:** não usar gem `view_component`. Reuso visual é feito via partials ERB em `app/views/`.
+
+- Partials compartilhadas ficam em `app/views/shared/` ou subdiretório do contexto
+- Ex.: `app/views/analyses/shared/_status_badge.html.erb`
 
 ### Stimulus controllers
 
 - Arquivo snake_case, termina em `_controller.js`
 - `data-controller` em kebab-case
 - ✅ `copy_to_clipboard_controller.js` → `data-controller="copy-to-clipboard"`
+- ✅ `api_key_form_controller.js` → `data-controller="api-key-form"` (validação inline de chaves)
+- ✅ `hello_controller.js` → boilerplate Rails (pode ser removido)
 
 ### Rotas
 
@@ -519,9 +508,8 @@ Inflections registradas:
 ### Migrations
 
 - Timestamp + verbo descritivo
+- ✅ `20260419161251_add_max_posts_and_refining_status_to_analyses.rb`
 - ✅ `20260420123456_create_competitors.rb`
-- ✅ `20260420123457_add_max_posts_to_analyses.rb`
-- ✅ `20260420123458_add_refining_status_to_analyses.rb`
 
 ### Testes
 
@@ -548,14 +536,16 @@ Variáveis esperadas (padrão `.env.example`):
 | `APIFY_API_TOKEN` | Token Apify | Sim | Scraping é responsabilidade da plataforma |
 | `VIRALSPY_HOST` | Hostname do app | Sim | MVP: `viralspy.curt.com.br` |
 | `SCRAPING_PROVIDER` | `apify` (único no MVP) | Não | Default: `apify` |
-| `SCRAPING_POSTS_PER_ANALYSIS` | Quantos posts por análise | Não | Default: `30` |
+| `SCRAPING_POSTS_PER_ANALYSIS` | Fallback de max_posts quando não informado | Não | Default: `30` |
 | `OPENAI_API_KEY` | **APENAS DEV/TESTES.** Em produção é BYOK via `ApiCredential` | Não | ADR-013 |
 | `ANTHROPIC_API_KEY` | **APENAS DEV/TESTES.** Em produção é BYOK via `ApiCredential` | Não | ADR-013 |
 | `ASSEMBLYAI_API_KEY` | **APENAS DEV/TESTES.** Em produção é BYOK via `ApiCredential` | Não | ADR-013 |
-| `TRANSCRIPTION_PROVIDER` | **DEPRECATED.** Não usar — agora é `account.llm_preferences[:transcription_provider]` | Não | Remover após Fase 1.6a |
-| `TRANSCRIPTION_MODEL` | **DEPRECATED.** Idem | Não | Remover após Fase 1.6a |
-| `DEFAULT_LLM_PROVIDER` | **DEPRECATED.** Idem | Não | Remover após Fase 1.6a |
-| `SMTP_*` | Config email (futuro) | Não no MVP | — |
+| `ENABLE_SIGNUP` | Feature flag de signup público | Não | Default: `true` |
+| `BACKUP_S3_ENDPOINT` | Endpoint Cloudflare R2 para backups | Não | `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` |
+| `BACKUP_S3_ACCESS_KEY` | Access key do token R2 | Não | — |
+| `BACKUP_S3_SECRET_KEY` | Secret key do token R2 | Não | — |
+| `BACKUP_S3_BUCKET` | Nome do bucket de backup | Não | Default: `viralspy-backups` |
+| `BACKUP_S3_REGION` | Região R2 (literalmente `auto`) | Não | — |
 
 ---
 
@@ -591,6 +581,4 @@ Não criar "ViralSpyPro", "ViralSpy2.0" ou variações.
 
 ---
 
-**Última atualização:** preparação da Fase 1.6a (BYOK). Adicionados: model `ApiCredential` com provider enum (openai/anthropic/assemblyai), enum `last_validation_status`, tabela de ENV vars atualizada marcando `OPENAI_API_KEY`/`ANTHROPIC_API_KEY`/`ASSEMBLYAI_API_KEY` como dev-only, `TRANSCRIPTION_PROVIDER`/`TRANSCRIPTION_MODEL`/`DEFAULT_LLM_PROVIDER` marcadas deprecated.
-
-Anteriores: amendment pós-Fase 1.5a. Adicionado: `Analysis#max_posts`, status `refining`, `ContentSuggestion#refinement_notes`, `use_case="critique_and_refine"` no LLMUsageLog, seleção proporcional em scoring. Removido: ENV `SCRAPING_POSTS_PER_ANALYSIS`.
+**Última atualização:** Fase 1.6 T5 — Interface Web concluída. Sincronizado com código real: pipeline sem refinement, enums corrigidos (`Analysis` sem `refining`, `ApiCredential` com `verified`/`failed`), schemas `post_type`/`content_type` como integer, `refinement_notes` removido, ENV vars sincronizadas com `.env.example` (deprecated removidas, BACKUP_S3_* e ENABLE_SIGNUP adicionadas), naming conventions atualizadas com classes e controllers reais.

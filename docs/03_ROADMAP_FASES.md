@@ -246,7 +246,7 @@ Essas fases dependem de validação do MVP. **Não devem ser iniciadas sem confi
 - UI de Playbooks: criar, editar, ver versões, histórico de diff
 - UI de Feedbacks: registrar feedback manual, feedback do Claude Project
 - Botão "Exportar Playbook" — gera markdown pronto para upload no Claude Project
-- Seleção de playbooks ao disparar análise (já prevista na Fase 1.6)
+- Seleção de playbooks ao disparar análise (ainda não implementada)
 
 #### Critério de aceite
 

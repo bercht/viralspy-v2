@@ -11,27 +11,91 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
 
   before { sign_in user }
 
+  def stub_ready_for_analysis
+    allow_any_instance_of(Account).to receive(:ready_for_analysis?).and_return(true)
+  end
+
+  describe "GET /competitors/:competitor_id/analyses/new" do
+    context "com credenciais configuradas" do
+      before { stub_ready_for_analysis }
+
+      it "renderiza o form de nova análise" do
+        get new_competitor_analysis_path(competitor)
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include(I18n.t("analyses.form.submit"))
+      end
+
+      it "retorna 404 para competitor de outra account" do
+        get new_competitor_analysis_path(other_competitor)
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "sem credenciais configuradas" do
+      before do
+        allow_any_instance_of(Account).to receive(:ready_for_analysis?).and_return(false)
+        allow_any_instance_of(Account).to receive(:missing_credentials_for_analysis).and_return([ :openai, :assemblyai ])
+      end
+
+      it "redireciona para settings/api_keys com flash listando providers" do
+        get new_competitor_analysis_path(competitor)
+        expect(response).to redirect_to(settings_api_keys_path)
+        expect(flash[:alert]).to include("OpenAI")
+        expect(flash[:alert]).to include("AssemblyAI")
+      end
+    end
+  end
+
   describe "POST /competitors/:competitor_id/analyses" do
-    before { allow(Analyses::RunAnalysisWorker).to receive(:perform_async) }
+    before do
+      stub_ready_for_analysis
+      allow(Analyses::RunAnalysisWorker).to receive(:perform_async)
+    end
 
     it "cria analysis em :pending e enfileira RunAnalysisWorker" do
       expect {
-        post competitor_analyses_path(competitor)
+        post competitor_analyses_path(competitor), params: { analysis: { max_posts: 80 } }
       }.to change { Analysis.unscoped.count }.by(1)
 
       expect(Analyses::RunAnalysisWorker).to have_received(:perform_async)
-      expect(Analysis.unscoped.last.status).to eq("pending")
+      analysis = Analysis.unscoped.last
+      expect(analysis.status).to eq("pending")
+      expect(analysis.max_posts).to eq(80)
+      expect(analysis.account_id).to eq(account.id)
     end
 
     it "redireciona para o show da analysis criada" do
-      post competitor_analyses_path(competitor)
+      post competitor_analyses_path(competitor), params: { analysis: { max_posts: 50 } }
       analysis = Analysis.unscoped.last
       expect(response).to redirect_to(competitor_analysis_path(competitor, analysis))
     end
 
+    it "usa max_posts padrão quando não informado" do
+      post competitor_analyses_path(competitor), params: { analysis: {} }
+      expect(Analysis.unscoped.last.max_posts).to eq(50)
+    end
+
+    it "re-renderiza new com 422 quando max_posts fora do intervalo" do
+      expect {
+        post competitor_analyses_path(competitor), params: { analysis: { max_posts: 5 } }
+      }.not_to change { Analysis.unscoped.count }
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
     it "retorna 404 para competitor de outra account" do
-      post competitor_analyses_path(other_competitor)
+      post competitor_analyses_path(other_competitor), params: { analysis: { max_posts: 50 } }
       expect(response).to have_http_status(:not_found)
+    end
+
+    it "redireciona quando credentials ausentes" do
+      allow_any_instance_of(Account).to receive(:ready_for_analysis?).and_return(false)
+      allow_any_instance_of(Account).to receive(:missing_credentials_for_analysis).and_return([ :openai ])
+
+      expect {
+        post competitor_analyses_path(competitor), params: { analysis: { max_posts: 50 } }
+      }.not_to change { Analysis.unscoped.count }
+
+      expect(response).to redirect_to(settings_api_keys_path)
     end
   end
 
@@ -42,16 +106,22 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
       it "retorna 200 e renderiza in_progress" do
         get competitor_analysis_path(competitor, analysis)
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include(I18n.t("analyses.show.in_progress.pending"))
+        expect(response.body).to include(I18n.t("analyses.status.pending"))
+      end
+
+      it "não requer credentials configuradas" do
+        allow_any_instance_of(Account).to receive(:ready_for_analysis?).and_return(false)
+        get competitor_analysis_path(competitor, analysis)
+        expect(response).to have_http_status(:ok)
       end
     end
 
     context "status scraping" do
       let!(:analysis) { ActsAsTenant.with_tenant(account) { create(:analysis, :scraping, account: account, competitor: competitor) } }
 
-      it "renderiza in_progress com texto de scraping" do
+      it "renderiza in_progress com texto do step scraping" do
         get competitor_analysis_path(competitor, analysis)
-        expect(response.body).to include(I18n.t("analyses.show.in_progress.scraping"))
+        expect(response.body).to include(I18n.t("analyses.status.scraping"))
       end
     end
 

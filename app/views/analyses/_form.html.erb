@@ -1,0 +1,37 @@
+<%= form_with(model: [ competitor, analysis ], class: "space-y-6") do |f| %>
+  <% if analysis.errors.any? %>
+    <div class="rounded-card border border-semantic-danger/30 bg-semantic-danger-bg px-4 py-3">
+      <ul class="text-body-sm text-semantic-danger">
+        <% analysis.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <article class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+    <%= f.label :max_posts, t("analyses.form.max_posts_label"),
+        class: "block text-body-sm font-medium text-text-body" %>
+
+    <%= f.select :max_posts,
+        [
+          [ t("analyses.form.max_posts_options.thirty"),  30 ],
+          [ t("analyses.form.max_posts_options.fifty"),   50 ],
+          [ t("analyses.form.max_posts_options.eighty"),  80 ],
+          [ t("analyses.form.max_posts_options.hundred"), 100 ]
+        ],
+        {},
+        class: "mt-1 block w-full rounded-input border border-border-default bg-surface-canvas px-3 py-2 text-body text-text-body focus:border-brand-primary focus:outline-none focus:shadow-focus" %>
+
+    <p class="mt-2 text-caption text-text-muted">
+      <%= t("analyses.form.max_posts_hint") %>
+    </p>
+  </article>
+
+  <div class="flex items-center justify-end gap-3">
+    <%= link_to t("analyses.form.cancel"), competitor_path(competitor),
+        class: "rounded-pill px-4 py-2 text-button text-text-muted transition-colors hover:text-text-body" %>
+    <%= f.submit t("analyses.form.submit"),
+        class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
+  </div>
+<% end %>

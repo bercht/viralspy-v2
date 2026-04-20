@@ -1,19 +1,32 @@
-<div class="mb-8">
-  <div class="flex items-center gap-2 text-sm text-gray-500">
-    <%= link_to "@#{@competitor.instagram_handle}", competitor_path(@competitor), class: "hover:underline" %>
-    <span>/</span>
-    <span><%= l(@analysis.created_at, format: :short) %></span>
-  </div>
-  <div class="mt-2 flex items-center gap-3">
-    <h1 class="text-2xl font-bold text-gray-900"><%= t("analyses.show.title") %></h1>
-    <%= render "shared/status_badge", status: @analysis.status %>
-  </div>
-</div>
+<div class="mx-auto max-w-5xl">
+  <header class="mb-8">
+    <%= link_to "@#{@competitor.instagram_handle}", competitor_path(@competitor),
+        class: "text-body-sm text-brand-primary hover:text-brand-primary-hover" %>
 
-<% if @analysis.failed? %>
-  <%= render "failed" %>
-<% elsif @analysis.completed? %>
-  <%= render "completed" %>
-<% else %>
-  <%= render "in_progress" %>
-<% end %>
+    <div class="mt-2 flex items-start justify-between gap-4">
+      <div class="min-w-0">
+        <h1 class="text-display text-text-display">
+          <%= t("analyses.show.title") %> — @<%= @competitor.instagram_handle %>
+        </h1>
+        <p class="mt-1 text-body-sm text-text-muted">
+          <%= t("analyses.show.in_progress.description") %>
+          <% if @analysis.finished_at %>
+            · <%= l(@analysis.finished_at, format: :short) %>
+          <% end %>
+          <% if @analysis.duration_seconds %>
+            · <%= @analysis.duration_seconds %>s
+          <% end %>
+        </p>
+      </div>
+      <%= render "shared/status_badge", status: @analysis.status %>
+    </div>
+  </header>
+
+  <% if @analysis.completed? %>
+    <%= render "completed" %>
+  <% elsif @analysis.failed? %>
+    <%= render "failed", analysis: @analysis, competitor: @competitor %>
+  <% else %>
+    <%= render "in_progress", analysis: @analysis %>
+  <% end %>
+</div>

@@ -1,12 +1,18 @@
-<div class="rounded-lg border border-blue-200 bg-blue-50 p-8 text-center">
-  <div class="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
-  <h2 class="text-lg font-semibold text-blue-900">
-    <%= t("analyses.show.in_progress.#{@analysis.status}") %>
-  </h2>
-  <p class="mt-2 text-sm text-blue-700">
-    <%= t("analyses.show.in_progress.description") %>
+<% content_for :head do %>
+  <meta http-equiv="refresh" content="10">
+<% end %>
+
+<article class="rounded-feature border border-border-subtle bg-surface-canvas p-12 text-center shadow-card">
+  <div class="mx-auto mb-4 h-12 w-12 animate-spin rounded-pill border-4 border-border-subtle border-t-brand-primary"></div>
+
+  <h2 class="text-heading text-text-body"><%= t("analyses.show.in_progress.pending") %></h2>
+  <p class="mt-2 text-body text-text-muted"><%= t("analyses.show.in_progress.description") %></p>
+
+  <p class="mt-4 text-body-sm font-medium text-brand-primary">
+    <%= t("analyses.status.#{analysis.status}") %>
   </p>
-  <p class="mt-4 text-xs text-blue-600">
-    <%= t("analyses.show.in_progress.refresh_hint") %>
-  </p>
-</div>
+
+  <%= link_to t("analyses.show.in_progress.refresh_hint"),
+      competitor_analysis_path(analysis.competitor, analysis),
+      class: "mt-6 inline-block rounded-pill border border-border-default bg-surface-canvas px-5 py-2 text-button text-text-body transition-colors hover:border-brand-primary hover:text-brand-primary focus:outline-none focus:shadow-focus-strong" %>
+</article>

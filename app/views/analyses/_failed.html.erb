@@ -1,11 +1,12 @@
-<div class="rounded-lg border border-red-200 bg-red-50 p-8">
-  <h2 class="text-lg font-semibold text-red-900"><%= t("analyses.show.failed.title") %></h2>
-  <p class="mt-2 text-sm text-red-800">
-    <%= @analysis.error_message.presence || t("analyses.show.failed.default_message") %>
+<article class="rounded-feature border border-semantic-danger/30 bg-semantic-danger-bg p-8 shadow-card">
+  <h2 class="text-heading text-semantic-danger"><%= t("analyses.show.failed.title") %></h2>
+  <p class="mt-2 text-body text-text-body">
+    <%= analysis.error_message.presence || t("analyses.show.failed.default_message") %>
   </p>
+
   <div class="mt-6">
-    <%= button_to t("analyses.show.failed.retry"),
-        competitor_analyses_path(@competitor), method: :post,
-        class: "rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800" %>
+    <%= link_to t("analyses.show.failed.retry"),
+        new_competitor_analysis_path(competitor),
+        class: "inline-block rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
   </div>
-</div>
+</article>

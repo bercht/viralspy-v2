@@ -20,6 +20,18 @@ RSpec.describe AnalysisPolicy, type: :policy do
     end
   end
 
+  describe "new?" do
+    it "permite ao dono da account" do
+      new_analysis = Analysis.new(account: account)
+      expect(subject.new(user, new_analysis).new?).to be true
+    end
+
+    it "nega para usuário de outra account" do
+      new_analysis = Analysis.new(account: account)
+      expect(subject.new(other_user, new_analysis).new?).to be false
+    end
+  end
+
   describe "create?" do
     it "permite ao dono da account" do
       new_analysis = Analysis.new(account: account)

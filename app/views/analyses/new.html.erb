@@ -1,0 +1,12 @@
+<div class="mx-auto max-w-2xl">
+  <header class="mb-8">
+    <%= link_to t("analyses.new.back_to_competitor"), competitor_path(@competitor),
+        class: "text-body-sm text-brand-primary hover:text-brand-primary-hover" %>
+    <h1 class="mt-2 text-display text-text-display"><%= t("analyses.new.title") %></h1>
+    <p class="mt-2 text-body text-text-muted">
+      <%= t("analyses.new.subtitle", handle: @competitor.instagram_handle) %>
+    </p>
+  </header>
+
+  <%= render "form", analysis: @analysis, competitor: @competitor %>
+</div>

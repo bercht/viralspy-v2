@@ -1,14 +1,13 @@
 <% badge_classes = case status.to_sym
-   when :pending, :scraping, :scoring, :transcribing, :analyzing, :generating_suggestions
-     "bg-blue-100 text-blue-800"
+   when :pending, :scraping, :scoring, :transcribing, :analyzing, :generating_suggestions, :refining
+     "bg-semantic-info-bg text-semantic-info"
    when :completed
-     "bg-emerald-100 text-emerald-800"
+     "bg-semantic-success-bg text-semantic-success"
    when :failed
-     "bg-red-100 text-red-800"
+     "bg-semantic-danger-bg text-semantic-danger"
    else
-     "bg-gray-100 text-gray-800"
+     "bg-semantic-neutral-bg text-semantic-neutral"
    end %>
-
-<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <%= badge_classes %>">
+<span class="inline-flex items-center rounded-pill px-2.5 py-0.5 text-caption <%= badge_classes %>">
   <%= t("analysis.status.#{status}") %>
 </span>

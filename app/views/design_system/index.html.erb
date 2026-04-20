@@ -1,0 +1,176 @@
+<div class="space-y-12">
+  <header>
+    <h1 class="text-display-xl text-text-display">Design System — ViralSpy</h1>
+    <p class="mt-2 text-body text-text-muted">Referência visual dos tokens. Dev-only.</p>
+  </header>
+
+  <!-- CORES -->
+  <section>
+    <h2 class="text-display-lg text-text-display">Cores</h2>
+
+    <h3 class="mt-6 text-heading text-text-body">Brand</h3>
+    <div class="mt-3 grid grid-cols-3 gap-3">
+      <div class="rounded-card border border-border-subtle bg-surface-canvas p-4 shadow-card">
+        <div class="h-16 w-full rounded-sm bg-brand-primary"></div>
+        <p class="mt-2 text-body-sm font-medium text-text-body">brand-primary</p>
+        <p class="text-caption text-text-muted">#0070cc</p>
+      </div>
+      <div class="rounded-card border border-border-subtle bg-surface-canvas p-4 shadow-card">
+        <div class="h-16 w-full rounded-sm bg-brand-primary-hover"></div>
+        <p class="mt-2 text-body-sm font-medium text-text-body">brand-primary-hover</p>
+        <p class="text-caption text-text-muted">#005fa8</p>
+      </div>
+      <div class="rounded-card border border-border-subtle bg-surface-canvas p-4 shadow-card">
+        <div class="h-16 w-full rounded-sm bg-brand-accent"></div>
+        <p class="mt-2 text-body-sm font-medium text-text-body">brand-accent</p>
+        <p class="text-caption text-text-muted">#1eaedb</p>
+      </div>
+    </div>
+
+    <h3 class="mt-6 text-heading text-text-body">Surface</h3>
+    <div class="mt-3 grid grid-cols-5 gap-3">
+      <% { "surface-canvas" => "#ffffff", "surface-base" => "#f5f7fa", "surface-raised" => "#ffffff", "surface-dark" => "#0a0a0b", "surface-dark-raised" => "#1a1a1d" }.each do |token, hex| %>
+        <div class="rounded-card border border-border-subtle bg-surface-canvas p-4 shadow-card">
+          <div class="h-16 w-full rounded-sm border border-border-subtle" style="background-color: <%= hex %>"></div>
+          <p class="mt-2 text-body-sm font-medium text-text-body"><%= token %></p>
+          <p class="text-caption text-text-muted"><%= hex %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <h3 class="mt-6 text-heading text-text-body">Semantic (com par bg)</h3>
+    <div class="mt-3 grid grid-cols-5 gap-3">
+      <div class="rounded-card border border-border-subtle bg-surface-canvas p-4 shadow-card">
+        <div class="flex h-16 w-full items-center justify-center rounded-sm bg-semantic-success-bg">
+          <span class="text-body-sm font-medium text-semantic-success">Amostra</span>
+        </div>
+        <p class="mt-2 text-body-sm font-medium text-text-body">semantic-success</p>
+        <p class="text-caption text-text-muted">#059669</p>
+      </div>
+      <div class="rounded-card border border-border-subtle bg-surface-canvas p-4 shadow-card">
+        <div class="flex h-16 w-full items-center justify-center rounded-sm bg-semantic-danger-bg">
+          <span class="text-body-sm font-medium text-semantic-danger">Amostra</span>
+        </div>
+        <p class="mt-2 text-body-sm font-medium text-text-body">semantic-danger</p>
+        <p class="text-caption text-text-muted">#c81b3a</p>
+      </div>
+      <div class="rounded-card border border-border-subtle bg-surface-canvas p-4 shadow-card">
+        <div class="flex h-16 w-full items-center justify-center rounded-sm bg-semantic-warning-bg">
+          <span class="text-body-sm font-medium text-semantic-warning">Amostra</span>
+        </div>
+        <p class="mt-2 text-body-sm font-medium text-text-body">semantic-warning</p>
+        <p class="text-caption text-text-muted">#d97706</p>
+      </div>
+      <div class="rounded-card border border-border-subtle bg-surface-canvas p-4 shadow-card">
+        <div class="flex h-16 w-full items-center justify-center rounded-sm bg-semantic-info-bg">
+          <span class="text-body-sm font-medium text-semantic-info">Amostra</span>
+        </div>
+        <p class="mt-2 text-body-sm font-medium text-text-body">semantic-info</p>
+        <p class="text-caption text-text-muted">#0070cc</p>
+      </div>
+      <div class="rounded-card border border-border-subtle bg-surface-canvas p-4 shadow-card">
+        <div class="flex h-16 w-full items-center justify-center rounded-sm bg-semantic-neutral-bg">
+          <span class="text-body-sm font-medium text-semantic-neutral">Amostra</span>
+        </div>
+        <p class="mt-2 text-body-sm font-medium text-text-body">semantic-neutral</p>
+        <p class="text-caption text-text-muted">#6b6b6b</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIPOGRAFIA -->
+  <section>
+    <h2 class="text-display-lg text-text-display">Tipografia</h2>
+    <div class="mt-6 space-y-4 rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+      <p class="text-display-xl text-text-display">Display XL — 48px / 300</p>
+      <p class="text-display-lg text-text-display">Display LG — 36px / 300</p>
+      <p class="text-display text-text-display">Display — 28px / 300</p>
+      <p class="text-heading text-text-body">Heading — 20px / 600</p>
+      <p class="text-heading-sm text-text-body">Heading SM — 16px / 600</p>
+      <p class="text-body text-text-body">Body — 15px / 400. The quick brown fox jumps over the lazy dog.</p>
+      <p class="text-body-sm text-text-body">Body SM — 14px / 400. The quick brown fox jumps over the lazy dog.</p>
+      <p class="text-caption text-text-muted">Caption — 12px / 500 tracking 0.01em</p>
+      <p class="text-button text-brand-primary">Button label — 14px / 500 tracking 0.02em</p>
+    </div>
+  </section>
+
+  <!-- BOTÕES -->
+  <section>
+    <h2 class="text-display-lg text-text-display">Botões</h2>
+    <div class="mt-6 flex flex-wrap gap-3 rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+      <button class="rounded-pill bg-brand-primary px-6 py-2.5 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:ring-2 focus:ring-brand-primary/35">
+        Primary
+      </button>
+      <button class="rounded-pill border border-border-default bg-surface-canvas px-6 py-2.5 text-button text-text-body transition-colors hover:border-brand-primary hover:text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/35">
+        Secondary
+      </button>
+      <button class="rounded-pill px-6 py-2.5 text-button text-text-muted transition-colors hover:text-text-body">
+        Ghost
+      </button>
+      <button class="rounded-pill bg-semantic-danger px-6 py-2.5 text-button text-text-on-dark transition-colors hover:bg-semantic-danger/90 focus:outline-none focus:ring-2 focus:ring-semantic-danger/35">
+        Destructive
+      </button>
+    </div>
+  </section>
+
+  <!-- INPUTS -->
+  <section>
+    <h2 class="text-display-lg text-text-display">Inputs</h2>
+    <div class="mt-6 space-y-4 rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+      <div>
+        <label class="block text-body-sm font-medium text-text-body">Label</label>
+        <input type="text" placeholder="Digite aqui..." class="mt-1 block w-full rounded-input border border-border-default bg-surface-canvas px-3 py-2 text-body text-text-body placeholder:text-text-subtle focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/25">
+      </div>
+      <div>
+        <label class="block text-body-sm font-medium text-text-body">Label com erro</label>
+        <input type="text" value="valor-invalido" class="mt-1 block w-full rounded-input border border-semantic-danger bg-surface-canvas px-3 py-2 text-body text-text-body focus:outline-none focus:ring-2 focus:ring-semantic-danger/25">
+        <p class="mt-1 text-body-sm text-semantic-danger">Mensagem de erro</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- BADGES -->
+  <section>
+    <h2 class="text-display-lg text-text-display">Badges (Status)</h2>
+    <div class="mt-6 flex flex-wrap gap-2 rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+      <% %w[pending completed failed scraping analyzing].each do |status| %>
+        <%= render "shared/status_badge", status: status %>
+      <% end %>
+    </div>
+  </section>
+
+  <!-- FLASHES (simulados) -->
+  <section>
+    <h2 class="text-display-lg text-text-display">Flashes</h2>
+    <div class="mt-6 space-y-3">
+      <div class="mb-6 rounded-card border border-semantic-success/30 bg-semantic-success-bg px-4 py-3 text-body-sm text-semantic-success">
+        Notice — operação concluída com sucesso.
+      </div>
+      <div class="mb-6 rounded-card border border-semantic-danger/30 bg-semantic-danger-bg px-4 py-3 text-body-sm text-semantic-danger">
+        Alert — ocorreu um erro ao processar.
+      </div>
+      <div class="mb-6 rounded-card border border-semantic-neutral/30 bg-semantic-neutral-bg px-4 py-3 text-body-sm text-semantic-neutral">
+        Info — aqui vai uma mensagem genérica.
+      </div>
+    </div>
+  </section>
+
+  <!-- CARDS -->
+  <section>
+    <h2 class="text-display-lg text-text-display">Cards</h2>
+    <div class="mt-6 grid grid-cols-3 gap-4">
+      <div class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-feather">
+        <h3 class="text-heading text-text-body">Card Feather</h3>
+        <p class="mt-2 text-body-sm text-text-muted">Elevação mínima, shadow-feather.</p>
+      </div>
+      <div class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+        <h3 class="text-heading text-text-body">Card Standard</h3>
+        <p class="mt-2 text-body-sm text-text-muted">Padrão do app, shadow-card.</p>
+      </div>
+      <div class="rounded-feature border border-border-subtle bg-surface-canvas p-6 shadow-raised">
+        <h3 class="text-heading text-text-body">Card Feature</h3>
+        <p class="mt-2 text-body-sm text-text-muted">Destaque, rounded-feature + shadow-raised.</p>
+      </div>
+    </div>
+  </section>
+</div>

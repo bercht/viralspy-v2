@@ -224,4 +224,46 @@ RSpec.describe Analysis, type: :model do
       end
     end
   end
+
+  describe "broadcasting" do
+    let(:analysis) do
+      ActsAsTenant.with_tenant(account) do
+        create(:analysis, account: account, competitor: competitor, max_posts: 50, status: :pending)
+      end
+    end
+
+    it "broadcasts to analysis stream when status changes" do
+      ActsAsTenant.with_tenant(account) do
+        expect {
+          analysis.update!(status: :scraping)
+        }.to have_broadcasted_to("analysis_#{analysis.id}").from_channel(Turbo::StreamsChannel)
+      end
+    end
+
+    it "broadcasts to competitor analyses stream when status changes" do
+      ActsAsTenant.with_tenant(account) do
+        expect {
+          analysis.update!(status: :scraping)
+        }.to have_broadcasted_to("competitor_#{competitor.id}_analyses").from_channel(Turbo::StreamsChannel)
+      end
+    end
+
+    it "does not broadcast when a non-status field changes" do
+      ActsAsTenant.with_tenant(account) do
+        analysis.update!(status: :scraping)  # setup — status already set
+        expect {
+          analysis.update!(posts_scraped_count: 10)
+        }.not_to have_broadcasted_to("analysis_#{analysis.id}").from_channel(Turbo::StreamsChannel)
+      end
+    end
+
+    it "does not broadcast when status value is unchanged" do
+      ActsAsTenant.with_tenant(account) do
+        analysis.update!(status: :scraping)  # setup
+        expect {
+          analysis.update!(status: :scraping)  # same value
+        }.not_to have_broadcasted_to("analysis_#{analysis.id}").from_channel(Turbo::StreamsChannel)
+      end
+    end
+  end
 end

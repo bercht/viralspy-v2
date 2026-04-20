@@ -30,9 +30,28 @@ class Analysis < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
   scope :in_progress, -> { where(status: %i[pending scraping scoring transcribing analyzing generating_suggestions]) }
 
+  after_update_commit :broadcast_status_change, if: :saved_change_to_status?
+
   def duration_seconds
     return nil unless started_at && finished_at
 
     (finished_at - started_at).to_i
+  end
+
+  private
+
+  def broadcast_status_change
+    broadcast_replace_to(
+      "analysis_#{id}",
+      target: ActionView::RecordIdentifier.dom_id(self),
+      partial: "analyses/analysis_body",
+      locals: { analysis: self }
+    )
+    broadcast_replace_to(
+      "competitor_#{competitor_id}_analyses",
+      target: ActionView::RecordIdentifier.dom_id(self, :list_item),
+      partial: "analyses/list_item",
+      locals: { analysis: self, competitor: competitor }
+    )
   end
 end

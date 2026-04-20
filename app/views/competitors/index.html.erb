@@ -27,13 +27,11 @@
       <% end %>
     </div>
   <% else %>
-    <div class="rounded-card border border-border-subtle bg-surface-canvas p-12 text-center shadow-card">
-      <h2 class="text-heading text-text-body"><%= t("competitors.index.empty") %></h2>
-      <p class="mx-auto mt-2 max-w-md text-body text-text-muted">
-        <%= t("competitors.index.subtitle") %>
-      </p>
-      <%= link_to t("competitors.index.new"), new_competitor_path,
-          class: "mt-6 inline-block rounded-pill bg-brand-primary px-6 py-2.5 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
-    </div>
+    <section class="rounded-feature border border-border-subtle bg-surface-canvas p-8 text-center shadow-card md:p-12">
+      <h2 class="text-heading text-text-body"><%= t("competitors.empty.title") %></h2>
+      <p class="mx-auto mt-2 max-w-md text-body text-text-muted"><%= t("competitors.empty.description") %></p>
+      <%= link_to t("competitors.empty.cta"), new_competitor_path,
+          class: "mt-6 inline-block rounded-pill bg-brand-primary px-6 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
+    </section>
   <% end %>
 </div>

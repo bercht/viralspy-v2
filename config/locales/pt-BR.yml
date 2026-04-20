@@ -162,6 +162,10 @@ pt-BR:
       handle_hint: "Sem @. Exemplo: imobiliariaxyz"
       cancel: "Cancelar"
       submit: "Adicionar"
+    empty:
+      title: "Nenhum concorrente cadastrado"
+      description: "Adicione um perfil do Instagram pra começar a rastrear."
+      cta: "Adicionar concorrente"
     show:
       followers: "seguidores"
       no_data_yet: "Rode uma análise para capturar dados do perfil."

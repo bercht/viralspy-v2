@@ -1,10 +1,6 @@
 <article class="rounded-feature border border-border-subtle bg-surface-canvas p-12 text-center shadow-card">
   <div class="mx-auto mb-4 h-12 w-12 animate-spin rounded-pill border-4 border-border-subtle border-t-brand-primary"></div>
 
-  <h2 class="text-heading text-text-body"><%= t("analyses.show.in_progress.pending") %></h2>
+  <h2 class="text-heading text-text-body"><%= t("analyses.status.#{analysis.status}") %></h2>
   <p class="mt-2 text-body text-text-muted"><%= t("analyses.show.in_progress.realtime_hint") %></p>
-
-  <p class="mt-4 text-body-sm font-medium text-brand-primary">
-    <%= t("analyses.status.#{analysis.status}") %>
-  </p>
 </article>

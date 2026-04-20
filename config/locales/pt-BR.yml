@@ -195,7 +195,6 @@ pt-BR:
         analyzing: "Analisando conteúdo..."
         generating_suggestions: "Gerando sugestões..."
         description: "Estamos processando a análise. Isso pode levar 3-4 minutos."
-        refresh_hint: "Atualize a página em alguns instantes para ver o progresso."
         realtime_hint: "O progresso atualiza em tempo real — sem precisar recarregar a página."
       failed:
         title: "A análise falhou"

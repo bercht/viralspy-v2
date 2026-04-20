@@ -111,7 +111,7 @@ RSpec.describe Analyses::UpdatePlaybookStep do
         ActsAsTenant.with_tenant(account) do
           feedback = create(:playbook_feedback, account: account, playbook: playbook, status: :pending)
           described_class.call(analysis_playbook)
-          expect(feedback.reload.incorporated_in_version).to be_present
+          expect(feedback.reload.incorporated_in_version_id).to be_present
         end
       end
 

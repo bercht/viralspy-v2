@@ -29,7 +29,7 @@ module Analyses
         triggered_by_analysis_id: @analysis.id
       )
 
-      incorporate_feedbacks(pending_feedbacks, version.version_number)
+      incorporate_feedbacks(pending_feedbacks, version)
       @playbook.update!(current_version_number: version_number)
       @ap.playbook_update_completed!
 
@@ -95,9 +95,9 @@ module Analyses
       [ content, diff_summary ]
     end
 
-    def incorporate_feedbacks(feedbacks, version_number)
+    def incorporate_feedbacks(feedbacks, version)
       feedbacks.each do |feedback|
-        feedback.update!(status: :incorporated, incorporated_in_version: version_number)
+        feedback.update!(status: :incorporated, incorporated_in_version_id: version.id)
       end
     end
 

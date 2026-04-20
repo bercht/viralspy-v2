@@ -26,18 +26,39 @@ RSpec.describe Analyses::TranscribeStep do
   let(:success_result) { Transcription::Result.success(transcript: "Bom dia pessoal...", duration_seconds: 30) }
 
   describe ".call" do
+    context "sets :transcribing status on entry" do
+      before { allow(mock_provider).to receive(:transcribe).and_return(success_result) }
+
+      it "sets analysis status to :transcribing before processing posts" do
+        analysis.update!(status: :scoring)
+        captured_status = nil
+
+        allow_any_instance_of(described_class).to receive(:mark_non_reels_as_skipped) do |instance|
+          captured_status = analysis.reload.status
+          # call original
+          instance.instance_variable_get(:@analysis).posts
+                  .where(selected_for_analysis: true)
+                  .where.not(post_type: Post.post_types[:reel])
+                  .update_all(transcript_status: Post.transcript_statuses[:skipped])
+        end
+
+        ActsAsTenant.with_tenant(account) { described_class.call(analysis) }
+        expect(captured_status).to eq("transcribing")
+      end
+    end
+
     context "happy path — all reels succeed" do
       let!(:reel1) { create_reel }
       let!(:reel2) { create_reel }
 
       before { allow(mock_provider).to receive(:transcribe).and_return(success_result) }
 
-      it "transcribes all selected reels and advances status to analyzing" do
+      it "transcribes all selected reels and leaves status at :transcribing (AnalyzeStep advances)" do
         ActsAsTenant.with_tenant(account) do
           result = described_class.call(analysis)
 
           expect(result).to be_success
-          expect(analysis.reload.status).to eq("analyzing")
+          expect(analysis.reload.status).to eq("transcribing")
           expect(reel1.reload.transcript).to eq("Bom dia pessoal...")
           expect(reel1.reload.transcript_status).to eq("completed")
           expect(reel2.reload.transcript_status).to eq("completed")
@@ -71,7 +92,7 @@ RSpec.describe Analyses::TranscribeStep do
           expect(result).to be_success
           expect(reel_ok.reload.transcript_status).to eq("completed")
           expect(reel_fail.reload.transcript_status).to eq("failed")
-          expect(analysis.reload.status).to eq("analyzing")
+          expect(analysis.reload.status).to eq("transcribing")
         end
       end
     end
@@ -133,12 +154,12 @@ RSpec.describe Analyses::TranscribeStep do
           .and_return(Transcription::Result.failure(error: "network error", error_code: :download_failed))
       end
 
-      it "advances to analyzing even when all transcriptions fail" do
+      it "leaves status at :transcribing even when all transcriptions fail (AnalyzeStep advances)" do
         ActsAsTenant.with_tenant(account) do
           result = described_class.call(analysis)
 
           expect(result).to be_success
-          expect(analysis.reload.status).to eq("analyzing")
+          expect(analysis.reload.status).to eq("transcribing")
           expect(reel1.reload.transcript_status).to eq("failed")
           expect(reel2.reload.transcript_status).to eq("failed")
         end
@@ -148,13 +169,13 @@ RSpec.describe Analyses::TranscribeStep do
     context "no selected reels" do
       before { allow(mock_provider).to receive(:transcribe) }
 
-      it "advances status without calling provider" do
+      it "returns success and leaves status at :transcribing without calling provider" do
         ActsAsTenant.with_tenant(account) do
           result = described_class.call(analysis)
 
           expect(result).to be_success
           expect(mock_provider).not_to have_received(:transcribe)
-          expect(analysis.reload.status).to eq("analyzing")
+          expect(analysis.reload.status).to eq("transcribing")
         end
       end
     end
@@ -166,13 +187,13 @@ RSpec.describe Analyses::TranscribeStep do
         allow(mock_provider).to receive(:transcribe).and_raise(RuntimeError, "unexpected crash")
       end
 
-      it "marks post as failed but pipeline continues" do
+      it "marks post as failed but pipeline continues at :transcribing" do
         ActsAsTenant.with_tenant(account) do
           result = described_class.call(analysis)
 
           expect(result).to be_success
           expect(reel.reload.transcript_status).to eq("failed")
-          expect(analysis.reload.status).to eq("analyzing")
+          expect(analysis.reload.status).to eq("transcribing")
         end
       end
     end

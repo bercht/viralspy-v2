@@ -10,9 +10,10 @@ module Analyses
     end
 
     def call
+      analysis.update!(status: :transcribing)
+
       mark_non_reels_as_skipped
       transcribe_selected_reels
-      advance_status
 
       Analyses::Result.success(data: transcription_summary)
     rescue => e
@@ -71,11 +72,6 @@ module Analyses
     rescue => e
       Rails.logger.error("[Analysis##{analysis.id}] Unexpected error transcribing post #{post.id}: #{e.class} - #{e.message}")
       post.update!(transcript_status: :failed)
-    end
-
-    def advance_status
-      analysis.update!(status: :analyzing)
-      Rails.logger.info("[Analysis##{analysis.id}] TranscribeStep completed, advancing to analyzing")
     end
 
     def transcription_summary

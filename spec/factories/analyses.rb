@@ -49,9 +49,5 @@ FactoryBot.define do
       error_message { 'Apify scraping failed: rate limit' }
     end
 
-    trait :refining do
-      status { :refining }
-      started_at { 5.minutes.ago }
-    end
   end
 end

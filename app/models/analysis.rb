@@ -15,7 +15,8 @@ class Analysis < ApplicationRecord
     transcribing: 3,
     analyzing: 4,
     generating_suggestions: 5,
-    refining: 6,
+    # index 6 reserved — previously `refining`, removed in Fase 1.5b Tarefa 3.4
+    # Do NOT reuse index 6 without checking for zombie data in production.
     completed: 7,
     failed: 8
   }
@@ -27,7 +28,7 @@ class Analysis < ApplicationRecord
   }
 
   scope :recent, -> { order(created_at: :desc) }
-  scope :in_progress, -> { where(status: %i[pending scraping scoring transcribing analyzing generating_suggestions refining]) }
+  scope :in_progress, -> { where(status: %i[pending scraping scoring transcribing analyzing generating_suggestions]) }
 
   def duration_seconds
     return nil unless started_at && finished_at

@@ -85,17 +85,17 @@ RSpec.describe Analysis, type: :model do
 
   describe 'enums' do
     describe '#status' do
-      it 'defines 9 states including refining' do
+      it 'defines 8 states (refining removed)' do
         expect(Analysis.statuses.keys).to match_array(
-          %w[pending scraping scoring transcribing analyzing generating_suggestions refining completed failed]
+          %w[pending scraping scoring transcribing analyzing generating_suggestions completed failed]
         )
       end
 
-      it 'has refining at value 6' do
-        expect(Analysis.statuses['refining']).to eq(6)
+      it 'does not include refining' do
+        expect(Analysis.statuses.keys).not_to include('refining')
       end
 
-      it 'has completed at value 7' do
+      it 'has completed at value 7 (gap at index 6 is intentional)' do
         expect(Analysis.statuses['completed']).to eq(7)
       end
 
@@ -140,7 +140,7 @@ RSpec.describe Analysis, type: :model do
     end
 
     describe '.in_progress' do
-      it 'returns analyses with pending/scraping/scoring/transcribing/analyzing/generating_suggestions status' do
+      it 'returns analyses with pending/scraping/scoring/transcribing/analyzing/generating_suggestions/transcribing status' do
         ActsAsTenant.with_tenant(account) do
           pending_a   = create(:analysis, account: account, competitor: competitor, status: :pending)
           scraping_a  = create(:analysis, account: account, competitor: competitor, status: :scraping)

@@ -39,3 +39,4 @@
 # Dependências
 node_modules/
 vendor/bundle/
+.worktrees/

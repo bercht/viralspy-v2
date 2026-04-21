@@ -105,7 +105,9 @@ module MediaGeneration
           return Result.new(success: false, error: "Invalid API key", error_code: :invalid_api_key)
         end
 
-        data = response.parsed_response&.dig("data")
+        parsed = response.parsed_response
+        parsed = JSON.parse(parsed) if parsed.is_a?(String)
+        data = parsed.is_a?(Hash) ? parsed["data"] : nil
         return Result.new(success: false, error: "Invalid response shape",
                           error_code: :parse_error) if data.nil?
 

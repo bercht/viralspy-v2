@@ -10,8 +10,21 @@ class Playbook < ApplicationRecord
 
   validates :name, presence: true
   validates :name, uniqueness: { scope: :account_id, case_sensitive: false }
+  validates :author_role, length: { maximum: 200 }, allow_nil: true
+  validates :target_audience, length: { maximum: 200 }, allow_nil: true
+
+  before_save :strip_author_fields
 
   scope :recent, -> { order(created_at: :desc) }
+
+  private
+
+  def strip_author_fields
+    self.author_role = author_role&.strip.presence
+    self.target_audience = target_audience&.strip.presence
+  end
+
+  public
 
   def current_version
     return nil if current_version_number == 0

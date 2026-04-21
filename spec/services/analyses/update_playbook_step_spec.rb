@@ -98,6 +98,48 @@ RSpec.describe Analyses::UpdatePlaybookStep do
       end
     end
 
+    context "quando playbook tem author_role e target_audience" do
+      let(:playbook_with_context) do
+        ActsAsTenant.with_tenant(account) do
+          create(:playbook, account: account,
+            name: "Marketing Imobiliário",
+            niche: "corretores",
+            author_role: "Especialista em marketing imobiliário",
+            target_audience: "Corretores de imóveis brasileiros")
+        end
+      end
+      let(:ap_with_context) { ActsAsTenant.with_tenant(account) { create(:analysis_playbook, analysis: analysis, playbook: playbook_with_context) } }
+
+      it "passa author_role e target_audience nos locals do prompt" do
+        captured_locals = []
+        allow(Analyses::PromptRenderer).to receive(:render) do |**kwargs|
+          captured_locals << kwargs[:locals]
+          "mocked prompt"
+        end
+
+        ActsAsTenant.with_tenant(account) { described_class.call(ap_with_context) }
+
+        expect(captured_locals).to all(include(
+          author_role: "Especialista em marketing imobiliário",
+          target_audience: "Corretores de imóveis brasileiros"
+        ))
+      end
+    end
+
+    context "quando playbook não tem author_role nem target_audience" do
+      it "passa nil nos locals do prompt" do
+        captured_locals = []
+        allow(Analyses::PromptRenderer).to receive(:render) do |**kwargs|
+          captured_locals << kwargs[:locals]
+          "mocked prompt"
+        end
+
+        ActsAsTenant.with_tenant(account) { described_class.call(analysis_playbook) }
+
+        expect(captured_locals).to all(include(author_role: nil, target_audience: nil))
+      end
+    end
+
     context "incorporação de feedbacks pendentes" do
       it "marca feedbacks como incorporated" do
         ActsAsTenant.with_tenant(account) do

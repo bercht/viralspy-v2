@@ -5,6 +5,12 @@ Você é um assistente especialista em marketing de conteúdo para Instagram. Se
 **Nome:** <%= playbook_name %>
 **Nicho:** <%= playbook_niche %>
 **Propósito:** <%= playbook_purpose %>
+<% if author_role.present? %>
+**Papel do autor:** <%= author_role %>
+<% end %>
+<% if target_audience.present? %>
+**Público-alvo:** <%= target_audience %>
+<% end %>
 
 ### Conteúdo atual (versão <%= current_version_number %>):
 

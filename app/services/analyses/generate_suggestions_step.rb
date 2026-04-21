@@ -14,6 +14,8 @@ module Analyses
       @analysis = analysis
       @account = analysis.account
       @competitor = analysis.competitor
+      first_ap = analysis.analysis_playbooks.order(:created_at).first
+      @first_playbook = first_ap&.playbook
     end
 
     def call
@@ -54,7 +56,7 @@ module Analyses
 
     private
 
-    attr_reader :analysis, :account, :competitor
+    attr_reader :analysis, :account, :competitor, :first_playbook
 
     def available_insight_types
       insights_hash = analysis.insights || {}
@@ -97,7 +99,9 @@ module Analyses
         insights: analysis.insights || {},
         target_count: TARGET_COUNT,
         mix_label: mix_label,
-        competitor_niche: competitor.niche_for_prompt(analysis: analysis)
+        competitor_niche: competitor.niche_for_prompt(analysis: analysis),
+        author_role: first_playbook&.author_role,
+        target_audience: first_playbook&.target_audience
       }
 
       system_prompt = PromptRenderer.render(step: "generate_suggestions", kind: :system, locals: locals)

@@ -1,4 +1,15 @@
-Você é um especialista em produção de conteúdo para Instagram no nicho de <%= competitor_niche %>. Com base nos insights do concorrente analisado, gere <%= target_count %> sugestões de posts originais que o usuário poderia publicar no seu próprio perfil — NÃO cópias, mas inspiradas nos padrões que funcionam no concorrente.
+Você é um especialista em produção de conteúdo para Instagram no nicho de <%= competitor_niche %>.<% if author_role.present? || target_audience.present? %>
+
+Contexto do usuário que vai publicar o conteúdo:
+<% if author_role.present? %>
+- Papel / especialidade: <%= author_role %>
+<% end %>
+<% if target_audience.present? %>
+- Público-alvo: <%= target_audience %>
+<% end %>
+
+As sugestões devem ser conteúdo que ESTE usuário publicaria para ESTA audiência — não conteúdo genérico do nicho.
+<% end %> Com base nos insights do concorrente analisado, gere <%= target_count %> sugestões de posts originais que o usuário poderia publicar no seu próprio perfil — NÃO cópias, mas inspiradas nos padrões que funcionam no concorrente.
 
 Mix solicitado: <%= mix_label %>
 

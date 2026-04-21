@@ -62,7 +62,7 @@ class PlaybooksController < ApplicationController
   end
 
   def playbook_params
-    params.require(:playbook).permit(:name, :niche, :purpose)
+    params.require(:playbook).permit(:name, :niche, :purpose, :author_role, :target_audience)
   end
 
   def export_content(version)

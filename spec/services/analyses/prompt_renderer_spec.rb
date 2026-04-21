@@ -65,7 +65,9 @@ RSpec.describe Analyses::PromptRenderer do
           insights: {},
           target_count: 5,
           mix_label: "2 reels + 2 carousels + 1 image",
-          competitor_niche: "Fitness"
+          competitor_niche: "Fitness",
+          author_role: nil,
+          target_audience: nil
         }
         result = described_class.render(step: "generate_suggestions", kind: :system, locals: gen_locals)
         expect(result).to include("5")

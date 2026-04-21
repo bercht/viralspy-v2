@@ -356,6 +356,46 @@ RSpec.describe Analyses::GenerateSuggestionsStep do
     end
   end
 
+  describe "author_role and target_audience propagation" do
+    let!(:anthropic_cred) { create(:api_credential, :anthropic, account: account, encrypted_api_key: "sk-ant-test") }
+
+    it "passes author_role and target_audience to PromptRenderer when first playbook has them" do
+      playbook = ActsAsTenant.with_tenant(account) do
+        create(:playbook, account: account, author_role: "Especialista em marketing imobiliário", target_audience: "Corretores de imóveis")
+      end
+      ActsAsTenant.with_tenant(account) do
+        create(:analysis_playbook, analysis: analysis, playbook: playbook)
+      end
+
+      captured_locals = []
+      allow(Analyses::PromptRenderer).to receive(:render) do |**kwargs|
+        captured_locals << kwargs[:locals]
+        "mocked prompt"
+      end
+      allow(LLM::Gateway).to receive(:complete).and_return(mock_llm_response(five_suggestions_json))
+
+      ActsAsTenant.with_tenant(account) { described_class.call(analysis) }
+
+      expect(captured_locals).to all(include(
+        author_role: "Especialista em marketing imobiliário",
+        target_audience: "Corretores de imóveis"
+      ))
+    end
+
+    it "passes nil author_role and target_audience when analysis has no associated playbooks" do
+      captured_locals = []
+      allow(Analyses::PromptRenderer).to receive(:render) do |**kwargs|
+        captured_locals << kwargs[:locals]
+        "mocked prompt"
+      end
+      allow(LLM::Gateway).to receive(:complete).and_return(mock_llm_response(five_suggestions_json))
+
+      ActsAsTenant.with_tenant(account) { described_class.call(analysis) }
+
+      expect(captured_locals).to all(include(author_role: nil, target_audience: nil))
+    end
+  end
+
   describe "niche propagation" do
     let!(:anthropic_cred) { create(:api_credential, :anthropic, account: account, encrypted_api_key: "sk-ant-test") }
 

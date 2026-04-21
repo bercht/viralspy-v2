@@ -88,6 +88,52 @@ RSpec.describe Playbook, type: :model do
     end
   end
 
+  describe "author_role and target_audience" do
+    it "accepts nil for both fields" do
+      ActsAsTenant.with_tenant(account) do
+        playbook = build(:playbook, account: account, author_role: nil, target_audience: nil)
+        expect(playbook).to be_valid
+      end
+    end
+
+    it "rejects author_role longer than 200 characters" do
+      ActsAsTenant.with_tenant(account) do
+        playbook = build(:playbook, account: account, author_role: "a" * 201)
+        expect(playbook).not_to be_valid
+        expect(playbook.errors[:author_role]).to be_present
+      end
+    end
+
+    it "accepts author_role with exactly 200 characters" do
+      ActsAsTenant.with_tenant(account) do
+        playbook = build(:playbook, account: account, author_role: "a" * 200)
+        expect(playbook).to be_valid
+      end
+    end
+
+    it "rejects target_audience longer than 200 characters" do
+      ActsAsTenant.with_tenant(account) do
+        playbook = build(:playbook, account: account, target_audience: "b" * 201)
+        expect(playbook).not_to be_valid
+        expect(playbook.errors[:target_audience]).to be_present
+      end
+    end
+
+    it "strips whitespace from author_role before save" do
+      ActsAsTenant.with_tenant(account) do
+        playbook = create(:playbook, account: account, author_role: "  Especialista em marketing  ")
+        expect(playbook.reload.author_role).to eq("Especialista em marketing")
+      end
+    end
+
+    it "strips whitespace from target_audience before save" do
+      ActsAsTenant.with_tenant(account) do
+        playbook = create(:playbook, account: account, target_audience: "  Corretores de imóveis  ")
+        expect(playbook.reload.target_audience).to eq("Corretores de imóveis")
+      end
+    end
+  end
+
   describe "scopes" do
     it ".recent returns playbooks ordered by created_at desc" do
       ActsAsTenant.with_tenant(account) do

@@ -60,7 +60,9 @@ module Analyses
         competitor_handle: @analysis.competitor.instagram_handle,
         pending_feedbacks: pending_feedbacks,
         profile_metrics: @analysis.profile_metrics || {},
-        insights: @analysis.insights || {}
+        insights: @analysis.insights || {},
+        author_role: @playbook.author_role,
+        target_audience: @playbook.target_audience
       }
 
       user_prompt = PromptRenderer.render(step: "update_playbook", kind: :user, locals: locals)

@@ -244,6 +244,8 @@ create_table :playbooks do |t|
   t.string :name, null: false                       # unique per account_id
   t.string :niche
   t.text :purpose
+  t.string :author_role                              # opcional, max 200 — papel/especialidade do autor no nicho
+  t.string :target_audience                          # opcional, max 200 — público-alvo do conteúdo produzido
   t.integer :current_version_number, default: 0, null: false
   t.timestamps
   t.index [:account_id, :name], unique: true

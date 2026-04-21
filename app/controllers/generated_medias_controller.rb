@@ -1,5 +1,16 @@
 class GeneratedMediasController < ApplicationController
-  before_action :set_content_suggestion
+  before_action :set_content_suggestion, only: [ :create ]
+  before_action :set_generated_media, only: [ :show ]
+
+  def index
+    @generated_medias = current_tenant.generated_medias
+                                      .includes(content_suggestion: { analysis: :competitor })
+                                      .recent
+    @generated_medias = @generated_medias.where(status: params[:status]) if params[:status].present?
+  end
+
+  def show
+  end
 
   def create
     authorize @content_suggestion, :generate_media?
@@ -43,5 +54,9 @@ class GeneratedMediasController < ApplicationController
 
   def set_content_suggestion
     @content_suggestion = current_tenant.content_suggestions.find(params[:content_suggestion_id])
+  end
+
+  def set_generated_media
+    @generated_media = current_tenant.generated_medias.includes(content_suggestion: { analysis: :competitor }).find(params[:id])
   end
 end

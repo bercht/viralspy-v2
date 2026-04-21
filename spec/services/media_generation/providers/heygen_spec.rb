@@ -240,16 +240,15 @@ RSpec.describe MediaGeneration::Providers::Heygen do
     context "quando API retorna 200 com vozes" do
       before do
         stub_request(:get, voices_url)
+          .with(query: { "limit" => "100" })
           .to_return(
             status: 200,
             body: {
-              data: {
-                voices: [
-                  { "voice_id" => "voice_pt_1", "display_name" => "Voz PT 1", "language" => "pt-BR" },
-                  { "voice_id" => "voice_en_1", "display_name" => "Voice EN 1", "language" => "en-US" },
-                  { "voice_id" => "voice_pt_2", "display_name" => "Voz PT 2", "language" => "pt" }
-                ]
-              }
+              data: [
+                { "voice_id" => "voice_pt_1", "name" => "Voz PT 1", "language" => "pt-BR" },
+                { "voice_id" => "voice_en_1", "name" => "Voice EN 1", "language" => "en-US" },
+                { "voice_id" => "voice_pt_2", "name" => "Voz PT 2", "language" => "pt" }
+              ]
             }.to_json,
             headers: { "Content-Type" => "application/json" }
           )

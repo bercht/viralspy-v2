@@ -14,6 +14,8 @@ Rails.application.routes.draw do
     resources :analyses, only: [ :new, :create, :show ]
   end
 
+  resources :generated_medias, only: [ :index, :show ]
+
   resources :content_suggestions, only: [ :update ] do
     resource :video, only: [ :new ], controller: "content_suggestions/video"
     resources :generated_medias, only: [ :create ]

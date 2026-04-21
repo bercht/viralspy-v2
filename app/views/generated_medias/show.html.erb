@@ -1,0 +1,92 @@
+<% suggestion = @generated_media.content_suggestion %>
+<% competitor = suggestion.analysis.competitor %>
+
+<div class="mx-auto max-w-3xl">
+  <header class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-500">
+      <%= link_to "Vídeos gerados", generated_medias_path, class: "hover:text-blue-600" %>
+      <span aria-hidden="true">›</span>
+      <%= link_to "@#{competitor.instagram_handle}", competitor_path(competitor), class: "hover:text-blue-600" %>
+    </div>
+    <h1 class="mt-2 text-2xl font-semibold text-gray-900">Vídeo gerado</h1>
+    <div class="mt-1 flex items-center gap-3">
+      <%= render "generated_medias/status", generated_media: @generated_media %>
+      <span class="text-sm text-gray-400"><%= l(@generated_media.created_at, format: :long) %></span>
+    </div>
+  </header>
+
+  <div class="space-y-6">
+    <%# Player %>
+    <section class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">Vídeo</h2>
+      <% if @generated_media.completed? && @generated_media.output_url.present? %>
+        <video
+          controls
+          playsinline
+          class="w-full rounded-md bg-black"
+          style="--progress: 0%; max-height: 70vh;"
+          aria-label="Vídeo gerado"
+        >
+          <source src="<%= @generated_media.output_url %>" type="video/mp4">
+          Seu navegador não suporta reprodução de vídeo.
+        </video>
+        <div class="mt-4 flex items-center justify-between">
+          <p class="text-xs text-gray-400">Link válido por ~7 dias. Faça download para guardar.</p>
+          <a href="<%= @generated_media.output_url %>"
+             download
+             class="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+             aria-label="Fazer download do vídeo">
+            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Download
+          </a>
+        </div>
+      <% elsif @generated_media.pending? || @generated_media.processing? %>
+        <div class="flex items-center gap-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-6">
+          <div class="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" aria-hidden="true"></div>
+          <span class="text-sm text-blue-700">Gerando vídeo... pode levar alguns minutos.</span>
+        </div>
+      <% elsif @generated_media.failed? %>
+        <div class="rounded-md border border-red-200 bg-red-50 px-4 py-4">
+          <p class="text-sm font-medium text-red-700">Falha na geração</p>
+          <p class="mt-1 text-xs text-red-600"><%= @generated_media.error_message %></p>
+        </div>
+      <% end %>
+    </section>
+
+    <%# Legenda sugerida %>
+    <section class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500">Legenda sugerida</h2>
+        <button
+          type="button"
+          onclick="navigator.clipboard.writeText(this.closest('section').querySelector('p').textContent.trim()); this.textContent = 'Copiado!'; setTimeout(() => this.textContent = 'Copiar', 2000)"
+          class="rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label="Copiar legenda"
+        >Copiar</button>
+      </div>
+      <p class="whitespace-pre-wrap text-sm text-gray-700"><%= suggestion.caption_draft.presence || "Nenhuma legenda disponível." %></p>
+    </section>
+
+    <%# Hashtags %>
+    <% if suggestion.suggested_hashtags.present? %>
+      <section class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="mb-3 flex items-center justify-between">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500">Hashtags</h2>
+          <button
+            type="button"
+            onclick="navigator.clipboard.writeText(this.closest('section').querySelector('.hashtags-text').textContent.trim()); this.textContent = 'Copiado!'; setTimeout(() => this.textContent = 'Copiar', 2000)"
+            class="rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Copiar hashtags"
+          >Copiar</button>
+        </div>
+        <div class="hashtags-text flex flex-wrap gap-2">
+          <% Array(suggestion.suggested_hashtags).each do |tag| %>
+            <span class="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">#<%= tag.to_s.delete_prefix("#") %></span>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </div>
+</div>

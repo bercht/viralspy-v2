@@ -1,1 +1,151 @@
-<p>show</p>
+<%# TOKEN EXPIRY BANNER %>
+<% if @own_profile.token_expiring_soon? && @own_profile.token_valid? %>
+  <div class="mb-6 rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3 flex items-center justify-between">
+    <span class="text-sm text-yellow-800">
+      &#x26A0;&#xFE0F; Token Meta expira em <%= @own_profile.meta_token_expires_at&.strftime("%d/%m/%Y") %>.
+    </span>
+    <%= link_to "Atualizar token", edit_own_profile_path(@own_profile),
+        class: "text-sm font-medium text-yellow-800 underline hover:text-yellow-900" %>
+  </div>
+<% end %>
+
+<div class="space-y-8">
+  <%# HEADER %>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-light text-slate-900">@<%= @own_profile.instagram_handle %></h1>
+        <% if @own_profile.token_valid? %>
+          <% if @own_profile.token_expiring_soon? %>
+            <span class="rounded-full text-xs px-2 py-0.5 font-medium bg-yellow-100 text-yellow-800">Token expira em breve</span>
+          <% else %>
+            <span class="rounded-full text-xs px-2 py-0.5 font-medium bg-green-100 text-green-800">Token ativo</span>
+          <% end %>
+        <% else %>
+          <span class="rounded-full text-xs px-2 py-0.5 font-medium bg-red-100 text-red-800">Token inválido</span>
+        <% end %>
+      </div>
+      <% if @own_profile.full_name.present? %>
+        <p class="text-slate-500 mt-1"><%= @own_profile.full_name %></p>
+      <% end %>
+    </div>
+    <div class="flex gap-3">
+      <%= button_to "Sincronizar posts", sync_own_profile_path(@own_profile),
+          class: "bg-blue-600 hover:bg-sky-400 text-white rounded-full px-5 py-2 text-sm font-medium transition-all" %>
+      <%= link_to "Editar perfil", edit_own_profile_path(@own_profile),
+          class: "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-full px-5 py-2 text-sm font-medium transition-all" %>
+    </div>
+  </div>
+
+  <%# MÉTRICAS AGREGADAS %>
+  <% if @metrics_summary.any? %>
+    <div>
+      <h2 class="text-lg font-medium text-slate-900 mb-4">Métricas</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          <p class="text-3xl font-semibold text-slate-900"><%= @metrics_summary[:total_posts] %></p>
+          <p class="text-sm text-slate-500 mt-1">Posts totais</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          <p class="text-3xl font-semibold text-slate-900"><%= number_with_delimiter(@metrics_summary[:avg_reach]) %></p>
+          <p class="text-sm text-slate-500 mt-1">Alcance médio</p>
+        </div>
+        <% if @metrics_summary[:avg_plays] %>
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <p class="text-3xl font-semibold text-slate-900"><%= number_with_delimiter(@metrics_summary[:avg_plays]) %></p>
+            <p class="text-sm text-slate-500 mt-1">Plays médios (reels)</p>
+          </div>
+        <% end %>
+        <% if @metrics_summary[:avg_engagement] %>
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <p class="text-3xl font-semibold text-slate-900"><%= number_to_percentage(@metrics_summary[:avg_engagement] * 100, precision: 1) %></p>
+            <p class="text-sm text-slate-500 mt-1">Engajamento médio</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <%# TOP POST %>
+  <% if (top = @metrics_summary[:top_post]) %>
+    <div class="bg-white rounded-xl border border-blue-200 shadow-sm p-6">
+      <h3 class="text-sm font-medium text-blue-600 uppercase tracking-wide mb-3">Melhor post por alcance</h3>
+      <p class="text-slate-700 text-sm mb-4"><%= truncate(top.caption.to_s, length: 120) %></p>
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <p class="text-2xl font-semibold text-slate-900"><%= number_with_delimiter(top.metrics["reach"]) %></p>
+          <p class="text-xs text-slate-500">Alcance</p>
+        </div>
+        <div>
+          <p class="text-2xl font-semibold text-slate-900"><%= number_with_delimiter(top.metrics["plays"]) %></p>
+          <p class="text-xs text-slate-500">Plays</p>
+        </div>
+        <div>
+          <p class="text-2xl font-semibold text-slate-900"><%= number_with_delimiter(top.metrics["saves"]) %></p>
+          <p class="text-xs text-slate-500">Saves</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <%# POSTS RECENTES %>
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-medium text-slate-900">Posts recentes</h2>
+      <%= link_to "Ver todos", own_profile_own_posts_path(@own_profile),
+          class: "text-sm text-blue-600 hover:text-sky-400" %>
+    </div>
+
+    <% if @own_posts.empty? %>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center">
+        <p class="text-slate-500 text-sm">Nenhum post sincronizado ainda.</p>
+        <p class="text-slate-400 text-xs mt-1">Clique em "Sincronizar posts" para importar seus posts do Instagram.</p>
+      </div>
+    <% else %>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Post</th>
+              <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide hidden md:table-cell">Data</th>
+              <th class="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Alcance</th>
+              <th class="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide hidden md:table-cell">Engajamento</th>
+              <th class="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <% @own_posts.each do |post| %>
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <span class="rounded-full text-xs px-2 py-0.5 font-medium <%= post.reel? ? 'bg-purple-100 text-purple-700' : post.carousel? ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600' %>">
+                      <%= post.post_type.capitalize %>
+                    </span>
+                    <span class="text-slate-700 truncate max-w-xs"><%= truncate(post.caption.to_s, length: 50) %></span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-slate-500 hidden md:table-cell">
+                  <%= post.posted_at&.strftime("%d/%m/%Y") %>
+                </td>
+                <td class="px-4 py-3 text-right text-slate-700">
+                  <%= number_with_delimiter(post.metrics["reach"]) %>
+                </td>
+                <td class="px-4 py-3 text-right text-slate-500 hidden md:table-cell">
+                  <% if post.metrics["engagement_rate"] %>
+                    <%= number_to_percentage(post.metrics["engagement_rate"].to_f * 100, precision: 1) %>
+                  <% else %>
+                    &mdash;
+                  <% end %>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <%= link_to "Avaliar", edit_own_profile_own_post_path(@own_profile, post),
+                      class: "text-xs text-blue-600 hover:text-sky-400" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </div>
+</div>

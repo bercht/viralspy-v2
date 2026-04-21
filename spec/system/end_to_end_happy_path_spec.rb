@@ -47,8 +47,8 @@ RSpec.describe "End-to-end — happy path do usuário", type: :system do
     end
   end
 
-  describe "gate de credentials" do
-    it "redireciona pra /settings/llm_preferences/edit ao tentar criar análise sem credenciais" do
+  describe "gate de onboarding" do
+    it "redireciona pra /playbooks/new ao tentar criar análise sem playbook" do
       user = create(:user)
       competitor = ActsAsTenant.with_tenant(user.account) do
         create(:competitor, account: user.account, instagram_handle: "concorrente_teste", niche: "Mercado imobiliário")
@@ -57,8 +57,8 @@ RSpec.describe "End-to-end — happy path do usuário", type: :system do
       login_as(user, scope: :user)
       visit new_competitor_analysis_path(competitor)
 
-      expect(page).to have_current_path(edit_settings_llm_preferences_path, ignore_query: true)
-      expect(page).to have_content(I18n.t("api_credentials.missing.cta", default: "Configure"))
+      expect(page).to have_current_path(new_playbook_path, ignore_query: true)
+      expect(page).to have_content(I18n.t("analyses.errors.no_playbook"))
     end
   end
 
@@ -81,19 +81,27 @@ RSpec.describe "End-to-end — happy path do usuário", type: :system do
       click_button I18n.t("competitors.form.submit")
 
       expect(page).to have_content("concorrente123")
-
-      # Empty state de análises
-      expect(page).to have_content(I18n.t("competitors.show.no_analyses.title"))
-
-      # Tentar iniciar análise → gate de credentials
-      click_link I18n.t("competitors.show.no_analyses.cta")
-      expect(page).to have_current_path(edit_settings_llm_preferences_path, ignore_query: true)
-
-      # Configura credenciais via factory
       competitor = ActsAsTenant.with_tenant(account) do
         account.competitors.find_by(instagram_handle: "concorrente123")
       end
 
+      # Empty state de análises
+      expect(page).to have_content(I18n.t("competitors.show.no_analyses.title"))
+
+      # Tentar iniciar análise → gate de onboarding (playbook)
+      click_link I18n.t("competitors.show.no_analyses.cta")
+      expect(page).to have_current_path(new_playbook_path, ignore_query: true)
+
+      # Configura playbook via factory para liberar criação de análise
+      ActsAsTenant.with_tenant(account) do
+        create(:playbook, account: account, name: "Imobiliário")
+      end
+
+      # Após ter playbook, sem credenciais deve cair no gate de credentials
+      visit new_competitor_analysis_path(competitor)
+      expect(page).to have_current_path(edit_settings_llm_preferences_path, ignore_query: true)
+
+      # Configura credenciais via factory
       ActsAsTenant.with_tenant(account) do
         create(:api_credential, :openai, :valid, account: account)
         create(:api_credential, :anthropic, :valid, account: account)

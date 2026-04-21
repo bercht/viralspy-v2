@@ -4,6 +4,7 @@ class Post < ApplicationRecord
   belongs_to :account
   belongs_to :analysis
   belongs_to :competitor
+  has_many :transcription_usage_logs, dependent: :destroy
 
   enum :post_type, {
     reel: 0,

@@ -1,0 +1,20 @@
+- main [ref=e22]:
+  - generic [ref=e23]: "Translation missing. Options considered were: - pt-BR.devise.failure.user.not_found_in_database - pt-BR.devise.failure.not_found_in_database"
+  - generic [ref=e26]:
+    - heading "Entrar" [level=1] [ref=e27]
+    - generic [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]: Email
+        - textbox "Email" [active] [ref=e31]: seed.crm.prod@fifty.local
+      - generic [ref=e32]:
+        - generic [ref=e33]: Senha
+        - textbox "Senha" [ref=e34]
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - checkbox "Lembrar de mim" [ref=e37]
+          - text: Lembrar de mim
+        - link "Esqueci minha senha" [ref=e38] [cursor=pointer]:
+          - /url: /users/password/new
+      - button "Entrar" [ref=e39] [cursor=pointer]
+    - link "Ainda não tenho conta" [ref=e41] [cursor=pointer]:
+      - /url: /users/sign_up

@@ -37,7 +37,7 @@
       <div class="space-y-2">
         <% current_tenant.playbooks.recent.each do |playbook| %>
           <label class="flex items-center gap-3 cursor-pointer">
-            <%= check_box_tag "analysis[playbook_ids][]", playbook.id, false,
+            <%= check_box_tag "analysis[playbook_ids][]", playbook.id, true,
                 class: "h-4 w-4 text-brand-primary border-border-default rounded" %>
             <span class="text-body-sm text-text-body">
               <%= playbook.name %>

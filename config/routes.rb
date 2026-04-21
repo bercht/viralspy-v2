@@ -43,6 +43,11 @@ Rails.application.routes.draw do
     end
   end
 
+  # Webhooks externos — sem autenticação Devise, sem tenant
+  namespace :webhooks do
+    post :heygen, to: "heygen#receive"
+  end
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   unless Rails.env.production?

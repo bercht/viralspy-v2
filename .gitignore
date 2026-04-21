@@ -40,3 +40,6 @@
 node_modules/
 vendor/bundle/
 .worktrees/
+.DS_Store
+.playwright-mcp/
+*.png

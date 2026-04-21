@@ -1,1 +1,79 @@
-<p>new</p>
+<div class="max-w-2xl mx-auto space-y-6">
+  <%# BREADCRUMB %>
+  <div class="flex items-center gap-2 text-sm text-slate-500">
+    <%= link_to "Concorrentes", competitors_path, class: "hover:text-slate-700" %>
+    <span>/</span>
+    <%= link_to "@#{@competitor.instagram_handle}", competitor_path(@competitor), class: "hover:text-slate-700" %>
+    <span>/</span>
+    <%= link_to "Stories", competitor_story_observations_path(@competitor), class: "hover:text-slate-700" %>
+    <span>/</span>
+    <span class="text-slate-900">Nova observação</span>
+  </div>
+
+  <div>
+    <h1 class="text-2xl font-light text-slate-900">Registrar observação de story</h1>
+    <p class="text-sm text-slate-500 mt-1">@<%= @competitor.instagram_handle %></p>
+  </div>
+
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+    <%= form_with model: [@competitor, @story_observation], class: "space-y-5" do |f| %>
+      <% if @story_observation.errors.any? %>
+        <div class="rounded-lg bg-red-50 border border-red-200 p-4">
+          <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+            <% @story_observation.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :observed_on, "Data observada", class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= f.date_field :observed_on,
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <%= f.label :format, "Formato", class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= f.select :format,
+            StoryObservation::FORMATS.map { |fmt| [fmt.capitalize, fmt] },
+            { include_blank: "Selecionar formato..." },
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <%= f.label :theme, "Tema", class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <p class="text-xs text-slate-500 mb-1">Ex: lançamento, bastidores, depoimento</p>
+        <%= f.text_field :theme,
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <%= f.label :perceived_engagement, "Engajamento percebido", class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= f.select :perceived_engagement,
+            [["Alto", "high"], ["Médio", "medium"], ["Baixo", "low"]],
+            { include_blank: "Selecionar..." },
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <%= f.label :description, "Descrição", class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= f.text_area :description, rows: 4,
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <%= f.label :notes, "Notas adicionais", class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= f.text_area :notes, rows: 2,
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <%= f.submit "Registrar observação",
+            class: "bg-blue-600 hover:bg-sky-400 text-white rounded-full px-6 py-2.5 font-medium transition-all hover:scale-105 cursor-pointer" %>
+        <%= link_to "Cancelar", competitor_story_observations_path(@competitor),
+            class: "text-slate-500 hover:text-slate-700 px-4 py-2 text-sm" %>
+      </div>
+    <% end %>
+  </div>
+</div>

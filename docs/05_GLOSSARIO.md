@@ -36,6 +36,7 @@
 create_table :accounts do |t|
   t.string :name, null: false
   t.jsonb :llm_preferences, default: {}, null: false
+  t.jsonb :media_generation_preferences, default: {}, null: false
   t.timestamps
 end
 ```
@@ -53,7 +54,7 @@ end
 ```ruby
 create_table :api_credentials do |t|
   t.references :account, null: false, foreign_key: true
-  t.string :provider, null: false          # "openai" | "anthropic" | "assemblyai"
+  t.string :provider, null: false          # "openai" | "anthropic" | "assemblyai" | "heygen"
   t.string :encrypted_api_key, null: false # encryptada via ActiveRecord::Encryption
   t.boolean :active, default: true, null: false
   t.datetime :last_validated_at
@@ -63,7 +64,7 @@ end
 add_index :api_credentials, [:account_id, :provider], unique: true
 ```
 
-> Enum `provider`: string-backed (`openai`, `anthropic`, `assemblyai`), prefix `provider_`.
+> Enum `provider`: string-backed (`openai`, `anthropic`, `assemblyai`, `heygen`), prefix `provider_`.
 > Enum `last_validation_status`: integer-backed (`unknown`, `verified`, `failed`, `quota_exceeded`), prefix `validation_`.
 
 ### User
@@ -109,8 +110,8 @@ create_table :analyses do |t|
   t.jsonb :raw_data, default: {}
   t.jsonb :profile_metrics, default: {}  # Ruby puro
   t.jsonb :insights, default: {}          # LLM, segmentado por tipo
-  t.integer :posts_scraped_count, default: 0
-  t.integer :posts_analyzed_count, default: 0
+  t.integer :posts_scraped_count, default: 0, null: false
+  t.integer :posts_analyzed_count, default: 0, null: false
   t.text :error_message
   t.datetime :started_at
   t.datetime :finished_at
@@ -193,6 +194,132 @@ end
 > - `carousel`: `{ slides: [{ title: "...", body: "..." }, ...] }`
 > - `image`: `{ composition_tips: "...", text_overlay: "..." }`
 
+### GeneratedMedia
+
+```ruby
+create_table :generated_medias do |t|
+  t.references :account, null: false, foreign_key: true
+  t.references :content_suggestion, null: false, foreign_key: true
+  t.string :provider, default: "heygen", null: false  # enum: "heygen"
+  t.integer :media_type, default: 0, null: false       # enum: avatar_video(0)
+  t.integer :status, default: 0, null: false            # enum: pending(0), processing(1), completed(2), failed(3)
+  t.text :prompt_sent
+  t.jsonb :provider_params, default: {}
+  t.string :provider_job_id
+  t.string :output_url
+  t.integer :duration_seconds
+  t.integer :cost_cents
+  t.text :error_message
+  t.datetime :started_at
+  t.datetime :finished_at
+  t.timestamps
+  t.index [:account_id, :created_at]
+  t.index :content_suggestion_id
+  t.index :provider_job_id
+  t.index :status
+end
+```
+
+### MediaGenerationUsageLog
+
+```ruby
+create_table :media_generation_usage_logs do |t|
+  t.references :account, null: false, foreign_key: true
+  t.references :generated_media, null: false, foreign_key: true
+  t.string :provider, null: false
+  t.integer :duration_seconds
+  t.integer :cost_cents
+  t.timestamps
+  t.index [:account_id, :created_at]
+  t.index :generated_media_id
+end
+```
+
+### Playbook
+
+```ruby
+create_table :playbooks do |t|
+  t.references :account, null: false, foreign_key: true
+  t.string :name, null: false                       # unique per account_id
+  t.string :niche
+  t.text :purpose
+  t.integer :current_version_number, default: 0, null: false
+  t.timestamps
+  t.index [:account_id, :name], unique: true
+end
+```
+
+### PlaybookVersion
+
+```ruby
+create_table :playbook_versions do |t|
+  t.references :account, null: false, foreign_key: true
+  t.references :playbook, null: false, foreign_key: true
+  t.integer :version_number, null: false             # unique per playbook_id
+  t.text :content, null: false
+  t.text :diff_summary
+  t.bigint :triggered_by_analysis_id                 # FK → analyses
+  t.bigint :incorporated_in_version_id               # FK → playbook_versions
+  t.integer :feedbacks_incorporated_count, default: 0, null: false
+  t.timestamps
+  t.index :account_id
+  t.index [:playbook_id, :version_number], unique: true
+  t.index :triggered_by_analysis_id
+  t.index :incorporated_in_version_id
+end
+```
+
+### PlaybookFeedback
+
+```ruby
+create_table :playbook_feedbacks do |t|
+  t.references :account, null: false, foreign_key: true
+  t.references :playbook, null: false, foreign_key: true
+  t.text :content, null: false
+  t.string :source, null: false                      # enum: manual(0), auto(1)
+  t.integer :status, default: 0, null: false          # enum: pending(0), incorporated(1), dismissed(2)
+  t.bigint :incorporated_in_version_id               # FK → playbook_versions
+  t.bigint :related_analysis_id                      # FK → analyses
+  t.integer :related_own_post_id
+  t.timestamps
+  t.index :account_id
+  t.index [:playbook_id, :status]
+  t.index :incorporated_in_version_id
+  t.index :related_analysis_id
+end
+```
+
+### PlaybookSuggestion
+
+```ruby
+create_table :playbook_suggestions do |t|
+  t.references :account, null: false, foreign_key: true
+  t.references :playbook, null: false, foreign_key: true
+  t.string :content_type, null: false                # enum: "reel", "carousel", "image", "story"
+  t.string :hook
+  t.text :caption_draft
+  t.jsonb :format_details, default: {}
+  t.string :suggested_hashtags, array: true, default: []
+  t.text :rationale
+  t.integer :status, default: 0, null: false          # enum: draft(0), saved(1), discarded(2)
+  t.timestamps
+  t.index [:account_id, :created_at]
+  t.index [:playbook_id, :status]
+end
+```
+
+### AnalysisPlaybook
+
+```ruby
+create_table :analysis_playbooks do |t|
+  t.references :analysis, null: false, foreign_key: true
+  t.references :playbook, null: false, foreign_key: true
+  t.integer :update_status, default: 0, null: false  # enum: playbook_update_pending(0), playbook_update_completed(1), playbook_update_failed(2)
+  t.timestamps
+  t.index [:analysis_id, :playbook_id], unique: true
+end
+```
+
 ### LLMUsageLog
 
 > Constante Ruby: `LLMUsageLog` (acrônimo `LLM` em `config/initializers/inflections.rb`). Tabela: `llm_usage_logs` (snake_case padrão).
@@ -235,7 +362,7 @@ end
 ```ruby
 create_table :api_credentials do |t|
   t.references :account, null: false, foreign_key: true
-  t.string :provider, null: false            # 'openai' | 'anthropic' | 'assemblyai'
+  t.string :provider, null: false            # 'openai' | 'anthropic' | 'assemblyai' | 'heygen'
   t.string :encrypted_api_key, null: false   # ActiveRecord::Encryption — ADR-006
   t.boolean :active, default: true, null: false
   t.datetime :last_validated_at
@@ -318,7 +445,8 @@ enum :content_type, {
 enum :provider, {
   openai: 'openai',
   anthropic: 'anthropic',
-  assemblyai: 'assemblyai'
+  assemblyai: 'assemblyai',
+  heygen: 'heygen'
 }, _prefix: true
 ```
 
@@ -338,6 +466,85 @@ enum :last_validation_status, {
 > **Nota:** `unknown` é default pra credential recém-criada antes de ser validada. `ValidateService` move pra `verified`, `failed` ou `quota_exceeded`.
 >
 > **Atenção:** `valid` e `invalid` são proibidos como valores de enum no Rails 7.1 (conflito com `#valid?/#invalid?` de `ActiveRecord::Validations`), mesmo com `_prefix`. Usar `verified`/`failed`.
+
+### GeneratedMedia#status
+
+```ruby
+enum :status, {
+  pending: 0,
+  processing: 1,
+  completed: 2,
+  failed: 3
+}
+```
+
+### GeneratedMedia#media_type
+
+```ruby
+enum :media_type, {
+  avatar_video: 0
+}
+```
+
+### GeneratedMedia#provider
+
+```ruby
+enum :provider, {
+  heygen: 'heygen'
+}, _prefix: :provider
+```
+
+### PlaybookFeedback#status
+
+```ruby
+enum :status, {
+  pending: 0,
+  incorporated: 1,
+  dismissed: 2
+}, _prefix: :status
+```
+
+### PlaybookFeedback#source
+
+```ruby
+enum :source, {
+  manual: 0,
+  auto: 1
+}, _prefix: :source
+```
+
+### PlaybookSuggestion#status
+
+```ruby
+enum :status, {
+  draft: 0,
+  saved: 1,
+  discarded: 2
+}
+```
+
+### PlaybookSuggestion#content_type
+
+```ruby
+enum :content_type, {
+  reel: 'reel',
+  carousel: 'carousel',
+  image: 'image',
+  story: 'story'
+}
+```
+
+> **Nota:** string-backed (ao contrário de `ContentSuggestion#content_type` que é integer-backed).
+
+### AnalysisPlaybook#update_status
+
+```ruby
+enum :update_status, {
+  playbook_update_pending: 0,
+  playbook_update_completed: 1,
+  playbook_update_failed: 2
+}
+```
 
 ---
 
@@ -474,16 +681,23 @@ Inflections registradas:
 ### Services
 
 - Organizados por domínio em `app/services/{dominio}/`
-- ✅ `Analyses::ScrapeStep`, `Analyses::ProfileMetricsStep`, `Analyses::ScoreAndSelectStep`, `Analyses::TranscribeStep`, `Analyses::AnalyzeStep`, `Analyses::GenerateSuggestionsStep`
-- ✅ `Scraping::ApifyProvider`, `Transcription::Providers::OpenAI`, `Transcription::Providers::AssemblyAI`
-- ✅ `LLM::Gateway`, `LLM::Providers::OpenAI`, `LLM::Providers::Anthropic`
+- ✅ `Analyses::ScrapeStep`, `Analyses::ProfileMetricsStep`, `Analyses::ScoreAndSelectStep`, `Analyses::TranscribeStep`, `Analyses::AnalyzeStep`, `Analyses::GenerateSuggestionsStep`, `Analyses::UpdatePlaybookStep`
+- ✅ `Analyses::PromptRenderer`, `Analyses::Result`
+- ✅ `Analyses::Scoring::Formula`, `Analyses::Scoring::Selector`
+- ✅ `Scraping::ApifyProvider`, `Scraping::Apify::Client`, `Scraping::Apify::Parser`, `Scraping::Apify::RunPoller`, `Scraping::Factory`, `Scraping::Result`
+- ✅ `Transcription::Providers::OpenAI`, `Transcription::Providers::AssemblyAI`, `Transcription::Factory`, `Transcription::UsageLogger`, `Transcription::Pricing`
+- ✅ `LLM::Gateway`, `LLM::Providers::OpenAI`, `LLM::Providers::Anthropic`, `LLM::UsageLogger`, `LLM::Response`
+- ✅ `MediaGeneration::Start`, `MediaGeneration::Factory`, `MediaGeneration::Providers::Heygen`, `MediaGeneration::ScriptBuilder`, `MediaGeneration::Result`
+- ✅ `ApiCredentials::ValidateService`, `ApiCredentials::Result`
+- ✅ `Playbooks::GenerateSuggestionsService`
 - Método público padrão: `self.call(...)` ou `#call`
 
 ### Workers (Sidekiq)
 
 - Em `app/workers/{dominio}/`
 - Sufixo `Worker`
-- ✅ `Analyses::RunAnalysisWorker`
+- ✅ `Analyses::RunAnalysisWorker` — queue `analyses`, retry 0, executa pipeline de 6 steps
+- ✅ `MediaGeneration::PollWorker` — queue `media_generation`, retry 3, polling HeyGen (MAX_ATTEMPTS=60, POLL_INTERVAL=10s)
 
 ### ViewComponents
 
@@ -546,6 +760,7 @@ Variáveis esperadas (padrão `.env.example`):
 | `BACKUP_S3_SECRET_KEY` | Secret key do token R2 | Não | — |
 | `BACKUP_S3_BUCKET` | Nome do bucket de backup | Não | Default: `viralspy-backups` |
 | `BACKUP_S3_REGION` | Região R2 (literalmente `auto`) | Não | — |
+| `HEYGEN_WEBHOOK_TOKEN` | Token aleatório para autenticar webhooks do HeyGen | Não (recomendado) | URL: `https://viralspy.curt.com.br/webhooks/heygen?token=TOKEN` |
 
 ---
 
@@ -581,4 +796,4 @@ Não criar "ViralSpyPro", "ViralSpy2.0" ou variações.
 
 ---
 
-**Última atualização:** Fase 1.6 T5 — Interface Web concluída. Sincronizado com código real: pipeline sem refinement, enums corrigidos (`Analysis` sem `refining`, `ApiCredential` com `verified`/`failed`), schemas `post_type`/`content_type` como integer, `refinement_notes` removido, ENV vars sincronizadas com `.env.example` (deprecated removidas, BACKUP_S3_* e ENABLE_SIGNUP adicionadas), naming conventions atualizadas com classes e controllers reais.
+**Última atualização:** 2026-04-21 — Sincronização automática com código real (schema version 2026_04_21_035646). Adicionados: `media_generation_preferences` em Account; schemas de `generated_medias`, `media_generation_usage_logs`, `playbooks`, `playbook_versions`, `playbook_feedbacks`, `playbook_suggestions`, `analysis_playbooks`; enums de `GeneratedMedia`, `PlaybookFeedback`, `PlaybookSuggestion`, `AnalysisPlaybook`; `heygen` ao enum `ApiCredential#provider`; `MediaGeneration::PollWorker` nos workers; serviços `UpdatePlaybookStep`, `PromptRenderer`, `Scoring::Formula/Selector`, classes MediaGeneration/Playbooks; `HEYGEN_WEBHOOK_TOKEN` nas ENV vars. Ver `/tmp/drift_items.md` para itens que requerem atenção.

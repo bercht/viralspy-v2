@@ -40,7 +40,9 @@
       <h2 class="mb-1 text-base font-semibold text-gray-900"><%= t("settings.llm_preferences.sections.analysis.title") %></h2>
       <p class="mb-4 text-xs text-gray-500"><%= t("settings.llm_preferences.sections.analysis.description") %></p>
 
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2"
+           data-controller="provider-select"
+           data-provider-select-current-model-value="<%= @preferences["analysis_model"] %>">
         <div>
           <label class="mb-1 block text-sm font-medium text-gray-700"><%= t("settings.llm_preferences.provider_label") %></label>
           <%= select_tag "llm_preferences[analysis_provider]",
@@ -49,7 +51,8 @@
                 @preferences["analysis_provider"]
               ),
               class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500",
-              disabled: (@available_providers & %w[openai anthropic]).empty? %>
+              disabled: (@available_providers & %w[openai anthropic]).empty?,
+              data: { role: "provider", action: "change->provider-select#providerChanged" } %>
         </div>
         <div>
           <label class="mb-1 block text-sm font-medium text-gray-700"><%= t("settings.llm_preferences.model_label") %></label>
@@ -58,7 +61,8 @@
                 analysis_model_options(@preferences["analysis_provider"]),
                 @preferences["analysis_model"]
               ),
-              class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+              class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500",
+              data: { provider_select_target: "modelSelect" } %>
         </div>
       </div>
 
@@ -71,7 +75,9 @@
       <h2 class="mb-1 text-base font-semibold text-gray-900"><%= t("settings.llm_preferences.sections.generation.title") %></h2>
       <p class="mb-4 text-xs text-gray-500"><%= t("settings.llm_preferences.sections.generation.description") %></p>
 
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2"
+           data-controller="provider-select"
+           data-provider-select-current-model-value="<%= @preferences["generation_model"] %>">
         <div>
           <label class="mb-1 block text-sm font-medium text-gray-700"><%= t("settings.llm_preferences.provider_label") %></label>
           <%= select_tag "llm_preferences[generation_provider]",
@@ -80,7 +86,8 @@
                 @preferences["generation_provider"]
               ),
               class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500",
-              disabled: (@available_providers & %w[openai anthropic]).empty? %>
+              disabled: (@available_providers & %w[openai anthropic]).empty?,
+              data: { role: "provider", action: "change->provider-select#providerChanged" } %>
         </div>
         <div>
           <label class="mb-1 block text-sm font-medium text-gray-700"><%= t("settings.llm_preferences.model_label") %></label>
@@ -89,7 +96,8 @@
                 generation_model_options(@preferences["generation_provider"]),
                 @preferences["generation_model"]
               ),
-              class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+              class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500",
+              data: { provider_select_target: "modelSelect" } %>
         </div>
       </div>
 

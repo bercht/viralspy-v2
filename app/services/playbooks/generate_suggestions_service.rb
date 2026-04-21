@@ -87,9 +87,7 @@ module Playbooks
     def parse_suggestions(raw)
       data = JSON.parse(raw)
       data["suggestions"] || []
-    rescue JSON::ParserError => e
-      Rails.logger.error("[Playbooks::GenerateSuggestionsService] JSON parse error: #{e.message}")
-      []
+      # SEM rescue aqui — deixar JSON::ParserError subir para o rescue no call
     end
 
     def persist_suggestions(items)

@@ -107,17 +107,15 @@ RSpec.describe Playbooks::GenerateSuggestionsService do
         allow(LLM::Gateway).to receive(:complete).and_return(invalid_response)
       end
 
-      it "retorna success com suggestions vazias (parse interno silencioso)" do
+      it "retorna failure com error_code :parse_error" do
         ActsAsTenant.with_tenant(account) do
           result = described_class.call(
             playbook: playbook_with_version,
             content_type: "reel",
             quantity: 1
           )
-          # parse_suggestions captura JSON::ParserError internamente e retorna []
-          # o service retorna success com suggestions vazio
-          expect(result).to be_success
-          expect(result.data[:suggestions]).to be_empty
+          expect(result).to be_failure
+          expect(result.error_code).to eq(:parse_error)
         end
       end
     end

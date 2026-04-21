@@ -3,6 +3,7 @@ class PlaybookSuggestionsController < ApplicationController
   before_action :set_suggestion, only: [:update]
 
   def create
+    authorize PlaybookSuggestion
     result = Playbooks::GenerateSuggestionsService.call(
       playbook: @playbook,
       content_type: params[:content_type],
@@ -30,6 +31,11 @@ class PlaybookSuggestionsController < ApplicationController
 
   def update
     authorize @suggestion
+    allowed_statuses = %w[saved discarded]
+    unless allowed_statuses.include?(params[:status])
+      head :unprocessable_entity
+      return
+    end
     @suggestion.update!(status: params[:status])
     respond_to do |format|
       format.turbo_stream

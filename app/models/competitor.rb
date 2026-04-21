@@ -15,6 +15,7 @@ class Competitor < ApplicationRecord
   before_validation :normalize_handle, :strip_niche
 
   has_many :analyses, dependent: :destroy
+  has_many :story_observations, dependent: :destroy
 
   scope :recent, -> { order(created_at: :desc) }
 

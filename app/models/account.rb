@@ -30,6 +30,7 @@ class Account < ApplicationRecord
   has_many :playbook_suggestions, dependent: :destroy
   has_many :generated_medias, dependent: :destroy
   has_many :media_generation_usage_logs, dependent: :destroy
+  has_many :own_profiles, dependent: :destroy
 
   validates :name, presence: true
 

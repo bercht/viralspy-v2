@@ -48,12 +48,12 @@ module MediaGeneration
       end
 
       def fetch_voices
-        response = self.class.get(VOICES_ENDPOINT, headers: headers)
+        response = self.class.get(VOICES_ENDPOINT, headers: headers, query: { limit: 100 })
         return { voices: [] } unless response.code == 200
 
-        voices = response.parsed_response.dig("data", "voices") || []
-        pt_voices = voices.select { |v| v["language"]&.start_with?("pt") }
-        { voices: pt_voices.map { |v| { id: v["voice_id"], name: v["display_name"] } } }
+        voices = response.parsed_response["data"] || []
+        pt_voices = voices.select { |v| v["language"].to_s =~ /port|pt|br/i }
+        { voices: pt_voices.map { |v| { id: v["voice_id"], name: v["name"] } } }
       rescue StandardError => e
         Rails.logger.error("[HeyGen#fetch_voices] #{e.message}")
         { voices: [] }

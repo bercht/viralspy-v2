@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_20_232958) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_21_031641) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -178,6 +178,24 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_232958) do
     t.index ["related_analysis_id"], name: "index_playbook_feedbacks_on_related_analysis_id"
   end
 
+  create_table "playbook_suggestions", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "playbook_id", null: false
+    t.string "content_type", null: false
+    t.string "hook"
+    t.text "caption_draft"
+    t.jsonb "format_details", default: {}
+    t.string "suggested_hashtags", default: [], array: true
+    t.text "rationale"
+    t.integer "status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "created_at"], name: "index_playbook_suggestions_on_account_id_and_created_at"
+    t.index ["account_id"], name: "index_playbook_suggestions_on_account_id"
+    t.index ["playbook_id", "status"], name: "index_playbook_suggestions_on_playbook_id_and_status"
+    t.index ["playbook_id"], name: "index_playbook_suggestions_on_playbook_id"
+  end
+
   create_table "playbook_versions", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "playbook_id", null: false
@@ -290,6 +308,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_232958) do
   add_foreign_key "playbook_feedbacks", "analyses", column: "related_analysis_id"
   add_foreign_key "playbook_feedbacks", "playbook_versions", column: "incorporated_in_version_id"
   add_foreign_key "playbook_feedbacks", "playbooks"
+  add_foreign_key "playbook_suggestions", "accounts"
+  add_foreign_key "playbook_suggestions", "playbooks"
   add_foreign_key "playbook_versions", "accounts"
   add_foreign_key "playbook_versions", "analyses", column: "triggered_by_analysis_id"
   add_foreign_key "playbook_versions", "playbook_versions", column: "incorporated_in_version_id"

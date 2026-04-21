@@ -232,6 +232,8 @@ pt-BR:
     form:
       handle: "Nome de usuário no Instagram"
       handle_hint: "Sem @. Exemplo: imobiliariaxyz"
+      niche: "Nicho / Área de atuação"
+      niche_hint: "Ex: Nutrição funcional, Marketing digital, Fitness. Ajuda o sistema a gerar sugestões contextualizadas."
       cancel: "Cancelar"
       submit: "Adicionar"
     empty:

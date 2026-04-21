@@ -41,6 +41,6 @@ class CompetitorsController < ApplicationController
   end
 
   def competitor_params
-    params.require(:competitor).permit(:instagram_handle)
+    params.require(:competitor).permit(:instagram_handle, :niche)
   end
 end

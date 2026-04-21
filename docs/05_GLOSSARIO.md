@@ -85,6 +85,7 @@ end
 create_table :competitors do |t|
   t.references :account, null: false, foreign_key: true
   t.string :instagram_handle, null: false  # sem @, lowercase
+  t.string :niche                           # nicho livre-texto, max 120 chars. Usado nos prompts LLM via niche_for_prompt
   t.string :full_name
   t.text :bio
   t.integer :followers_count

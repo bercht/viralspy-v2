@@ -78,7 +78,8 @@ module Analyses
         handle: competitor.instagram_handle,
         followers: competitor.followers_count.to_i,
         profile_metrics: analysis.profile_metrics || {},
-        posts: posts
+        posts: posts,
+        competitor_niche: competitor.niche_for_prompt(analysis: analysis)
       }
 
       system_prompt = PromptRenderer.render(step: config[:dir], kind: :system, locals: locals)

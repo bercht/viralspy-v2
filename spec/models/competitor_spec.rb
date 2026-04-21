@@ -97,4 +97,71 @@ RSpec.describe Competitor, type: :model do
       end
     end
   end
+
+  describe 'niche' do
+    it 'is optional' do
+      ActsAsTenant.with_tenant(account) do
+        competitor = build(:competitor, account: account, niche: nil)
+        expect(competitor).to be_valid
+      end
+    end
+
+    it 'accepts up to 120 characters' do
+      ActsAsTenant.with_tenant(account) do
+        competitor = build(:competitor, account: account, niche: 'N' * 120)
+        expect(competitor).to be_valid
+      end
+    end
+
+    it 'rejects more than 120 characters' do
+      ActsAsTenant.with_tenant(account) do
+        competitor = build(:competitor, account: account, niche: 'N' * 121)
+        expect(competitor).not_to be_valid
+        expect(competitor.errors[:niche]).not_to be_empty
+      end
+    end
+
+    it 'strips whitespace from niche before save' do
+      ActsAsTenant.with_tenant(account) do
+        competitor = create(:competitor, account: account, niche: '  Nutrição funcional  ')
+        expect(competitor.niche).to eq('Nutrição funcional')
+      end
+    end
+  end
+
+  describe '#niche_for_prompt' do
+    let(:playbook) { create(:playbook, account: account, niche: 'Fitness') }
+
+    it 'returns own niche when present' do
+      ActsAsTenant.with_tenant(account) do
+        competitor = create(:competitor, account: account, niche: 'Nutrição funcional')
+        expect(competitor.niche_for_prompt).to eq('Nutrição funcional')
+      end
+    end
+
+    it 'falls back to first associated playbook niche when own niche is blank' do
+      ActsAsTenant.with_tenant(account) do
+        competitor = create(:competitor, account: account, niche: nil)
+        analysis = create(:analysis, account: account, competitor: competitor)
+        create(:analysis_playbook, analysis: analysis, playbook: playbook)
+        expect(competitor.niche_for_prompt(analysis: analysis)).to eq('Fitness')
+      end
+    end
+
+    it 'returns the neutral fallback string when no niche is set anywhere' do
+      ActsAsTenant.with_tenant(account) do
+        competitor = create(:competitor, account: account, niche: nil)
+        expect(competitor.niche_for_prompt).to eq('conteúdo de Instagram em português brasileiro')
+      end
+    end
+
+    it 'prefers own niche over playbook niche' do
+      ActsAsTenant.with_tenant(account) do
+        competitor = create(:competitor, account: account, niche: 'Nutrição funcional')
+        analysis = create(:analysis, account: account, competitor: competitor)
+        create(:analysis_playbook, analysis: analysis, playbook: playbook)
+        expect(competitor.niche_for_prompt(analysis: analysis)).to eq('Nutrição funcional')
+      end
+    end
+  end
 end

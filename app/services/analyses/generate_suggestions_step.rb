@@ -96,7 +96,8 @@ module Analyses
         profile_metrics: analysis.profile_metrics || {},
         insights: analysis.insights || {},
         target_count: TARGET_COUNT,
-        mix_label: mix_label
+        mix_label: mix_label,
+        competitor_niche: competitor.niche_for_prompt(analysis: analysis)
       }
 
       system_prompt = PromptRenderer.render(step: "generate_suggestions", kind: :system, locals: locals)

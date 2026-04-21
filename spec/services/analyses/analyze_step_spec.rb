@@ -326,4 +326,48 @@ RSpec.describe Analyses::AnalyzeStep do
       end
     end
   end
+
+  describe "niche propagation" do
+    let!(:openai_cred) { create(:api_credential, :openai, account: account, encrypted_api_key: "sk-test-openai") }
+
+    it "passes competitor_niche to PromptRenderer when competitor has a niche" do
+      niche_competitor = create(:competitor, account: account, instagram_handle: "nutritionista", niche: "Nutrição funcional", followers_count: 10_000)
+      niche_analysis = create(:analysis, account: account, competitor: niche_competitor, status: :analyzing,
+                                         profile_metrics: { "posts_per_week" => 3.0, "avg_engagement_rate" => 0.04, "content_mix" => {} })
+
+      captured_locals = []
+      allow(Analyses::PromptRenderer).to receive(:render) do |**kwargs|
+        captured_locals << kwargs[:locals]
+        "mocked prompt"
+      end
+      allow(LLM::Gateway).to receive(:complete).and_return(mock_llm_response(reel_insights_json))
+
+      ActsAsTenant.with_tenant(account) do
+        create(:post, :reel, :selected, account: account, analysis: niche_analysis, competitor: niche_competitor, posted_at: 3.days.ago)
+        described_class.call(niche_analysis)
+      end
+
+      expect(captured_locals).to all(include(competitor_niche: "Nutrição funcional"))
+    end
+
+    it "uses neutral fallback when competitor has no niche and no playbook" do
+      no_niche_competitor = create(:competitor, account: account, instagram_handle: "semnicho", niche: nil, followers_count: 5_000)
+      no_niche_analysis = create(:analysis, account: account, competitor: no_niche_competitor, status: :analyzing,
+                                            profile_metrics: { "posts_per_week" => 2.0, "avg_engagement_rate" => 0.03, "content_mix" => {} })
+
+      captured_locals = []
+      allow(Analyses::PromptRenderer).to receive(:render) do |**kwargs|
+        captured_locals << kwargs[:locals]
+        "mocked prompt"
+      end
+      allow(LLM::Gateway).to receive(:complete).and_return(mock_llm_response(reel_insights_json))
+
+      ActsAsTenant.with_tenant(account) do
+        create(:post, :reel, :selected, account: account, analysis: no_niche_analysis, competitor: no_niche_competitor, posted_at: 3.days.ago)
+        described_class.call(no_niche_analysis)
+      end
+
+      expect(captured_locals).to all(include(competitor_niche: "conteúdo de Instagram em português brasileiro"))
+    end
+  end
 end

@@ -17,7 +17,22 @@
       </div>
     <% end %>
 
-    <article class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+    <article class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card space-y-5">
+      <div>
+        <%= f.label :niche, t("competitors.form.niche"),
+            class: "block text-body-sm font-medium text-text-body" %>
+
+        <%= f.text_field :niche,
+            autocomplete: "off",
+            maxlength: 120,
+            placeholder: "Ex: Nutrição funcional, Marketing digital, Fitness",
+            class: "mt-1 block w-full rounded-input border border-border-default bg-surface-canvas px-3 py-2 text-body text-text-body placeholder:text-text-subtle focus:border-brand-primary focus:outline-none focus:shadow-focus" %>
+
+        <p class="mt-2 text-caption text-text-muted">
+          <%= t("competitors.form.niche_hint") %>
+        </p>
+      </div>
+
       <div>
         <%= f.label :instagram_handle, t("competitors.form.handle"),
             class: "block text-body-sm font-medium text-text-body" %>
@@ -25,7 +40,7 @@
         <div class="mt-1 flex items-center rounded-input border border-border-default bg-surface-canvas focus-within:border-brand-primary focus-within:shadow-focus">
           <span class="pl-3 text-body text-text-subtle" aria-hidden="true">@</span>
           <%= f.text_field :instagram_handle,
-              autofocus: true,
+              autofocus: false,
               autocomplete: "off",
               placeholder: t("competitors.form.handle_hint"),
               class: "block w-full border-0 bg-transparent px-2 py-2 text-body text-text-body placeholder:text-text-subtle focus:outline-none focus:ring-0" %>

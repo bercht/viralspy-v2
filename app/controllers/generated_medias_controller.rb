@@ -25,7 +25,8 @@ class GeneratedMediasController < ApplicationController
         format.turbo_stream do
           render turbo_stream: turbo_stream.prepend(
             "suggestion_#{@content_suggestion.id}_errors",
-            html: "<p class='mb-2 text-sm text-red-600'>#{ERB::Util.html_escape(outcome.error)}</p>"
+            partial: "generated_medias/error_message",
+            locals: { message: outcome.error }
           )
         end
         format.html do

@@ -21,6 +21,21 @@
       <%= render "shared/navbar" %>
     <% end %>
 
+    <%# Token Meta expiry warning — only when user is signed in %>
+    <% if user_signed_in? && current_tenant.present? %>
+      <% expiring = current_tenant.own_profiles.expiring_soon.first %>
+      <% if expiring %>
+        <div class="bg-yellow-50 border-b border-yellow-200 px-4 py-3 text-sm text-yellow-800 flex items-center justify-between">
+          <span>
+            ⚠️ O token Meta do perfil <strong>@<%= expiring.instagram_handle %></strong>
+            expira em <%= expiring.meta_token_expires_at&.strftime("%d/%m/%Y") %>.
+          </span>
+          <%= link_to "Atualizar token", edit_own_profile_path(expiring),
+              class: "underline font-medium hover:text-yellow-900" %>
+        </div>
+      <% end %>
+    <% end %>
+
     <main class="mx-auto w-full max-w-6xl px-4 py-6 md:px-6 lg:px-8 lg:py-8">
       <div id="flash">
         <%= render "shared/flash" %>

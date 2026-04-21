@@ -1,0 +1,53 @@
+<div class="max-w-2xl mx-auto space-y-6">
+  <%# BREADCRUMB %>
+  <div class="flex items-center gap-2 text-sm text-slate-500">
+    <%= link_to "Meus Perfis", own_profiles_path, class: "hover:text-slate-700" %>
+    <span>/</span>
+    <%= link_to "@#{@own_profile.instagram_handle}", own_profile_path(@own_profile), class: "hover:text-slate-700" %>
+    <span>/</span>
+    <%= link_to "Posts", own_profile_own_posts_path(@own_profile), class: "hover:text-slate-700" %>
+    <span>/</span>
+    <span class="text-slate-900">Avaliar</span>
+  </div>
+
+  <h1 class="text-2xl font-light text-slate-900">Avaliar post</h1>
+
+  <% if @own_post.caption.present? %>
+    <div class="bg-slate-50 rounded-lg px-4 py-3">
+      <p class="text-sm text-slate-600 italic"><%= truncate(@own_post.caption, length: 120) %></p>
+    </div>
+  <% end %>
+
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+    <%= form_with model: [@own_profile, @own_post], class: "space-y-5" do |f| %>
+      <div>
+        <%= f.label :performance_rating, "Como foi este post?", class: "block text-sm font-medium text-slate-700 mb-2" %>
+        <%= f.select :performance_rating,
+            [["🚀 Breakthrough — superou expectativas", "breakthrough"],
+             ["👍 Bom — funcionou bem", "good"],
+             ["😐 Médio — resultado esperado", "average"],
+             ["👎 Fraco — abaixo da média", "flop"]],
+            { include_blank: "Selecionar avaliação..." },
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <%= f.label :performance_notes, "O que funcionou? O que faria diferente?", class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= f.text_area :performance_notes, rows: 3,
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <%= f.label :execution_notes, "Como você adaptou a sugestão original?", class: "block text-sm font-medium text-slate-700 mb-1" %>
+        <%= f.text_area :execution_notes, rows: 2,
+            class: "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <%= f.submit "Salvar avaliação", class: "bg-blue-600 hover:bg-sky-400 text-white rounded-full px-6 py-2.5 font-medium transition-all hover:scale-105 cursor-pointer" %>
+        <%= link_to "Cancelar", own_profile_own_post_path(@own_profile, @own_post),
+            class: "text-slate-500 hover:text-slate-700 px-4 py-2 text-sm" %>
+      </div>
+    <% end %>
+  </div>
+</div>

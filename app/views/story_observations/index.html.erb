@@ -1,0 +1,80 @@
+<div class="space-y-6">
+  <%# BREADCRUMB %>
+  <div class="flex items-center gap-2 text-sm text-slate-500">
+    <%= link_to "Concorrentes", competitors_path, class: "hover:text-slate-700" %>
+    <span>/</span>
+    <%= link_to "@#{@competitor.instagram_handle}", competitor_path(@competitor), class: "hover:text-slate-700" %>
+    <span>/</span>
+    <span class="text-slate-900">Stories</span>
+  </div>
+
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-light text-slate-900">Stories observados</h1>
+      <p class="text-sm text-slate-500 mt-1">@<%= @competitor.instagram_handle %></p>
+    </div>
+    <%= link_to "Registrar observação", new_competitor_story_observation_path(@competitor),
+        class: "bg-blue-600 hover:bg-sky-400 text-white rounded-full px-6 py-2.5 font-medium transition-all hover:scale-105 inline-block" %>
+  </div>
+
+  <% if @story_observations.empty? %>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center">
+      <p class="text-slate-500 text-sm">Nenhuma observação registrada ainda.</p>
+      <p class="text-slate-400 text-xs mt-1">Registre manualmente os stories que você observar neste perfil.</p>
+    </div>
+  <% else %>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Data</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Formato</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide hidden md:table-cell">Tema</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide hidden md:table-cell">Engajamento</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Descrição</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @story_observations.each do |obs| %>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-4 py-3 text-slate-700 whitespace-nowrap">
+                <%= obs.observed_on.strftime("%d/%m/%Y") %>
+              </td>
+              <td class="px-4 py-3">
+                <% if obs.format.present? %>
+                  <span class="rounded-full text-xs px-2 py-0.5 font-medium bg-slate-100 text-slate-600">
+                    <%= obs.format.capitalize %>
+                  </span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-slate-500 hidden md:table-cell">
+                <%= obs.theme %>
+              </td>
+              <td class="px-4 py-3 hidden md:table-cell">
+                <% if obs.perceived_engagement.present? %>
+                  <span class="rounded-full text-xs px-2 py-0.5 font-medium
+                    <%= obs.perceived_engagement == 'high' ? 'bg-green-100 text-green-700' :
+                        obs.perceived_engagement == 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-slate-100 text-slate-600' %>">
+                    <%= obs.perceived_engagement == 'high' ? 'Alto' :
+                        obs.perceived_engagement == 'medium' ? 'Médio' : 'Baixo' %>
+                  </span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-slate-600 max-w-xs">
+                <%= truncate(obs.description.to_s, length: 80) %>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <%= button_to "Remover", competitor_story_observation_path(@competitor, obs),
+                    method: :delete,
+                    data: { turbo_confirm: "Remover esta observação?" },
+                    class: "text-xs text-red-500 hover:text-red-700 bg-transparent border-0 cursor-pointer p-0" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

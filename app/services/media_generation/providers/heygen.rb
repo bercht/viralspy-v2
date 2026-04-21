@@ -5,7 +5,7 @@ module MediaGeneration
       base_uri "https://api.heygen.com"
 
       GENERATE_ENDPOINT  = "/v2/video/generate"
-      STATUS_ENDPOINT    = "/v1/video.status.get"
+      STATUS_ENDPOINT    = "/v1/video_status.get"
       VALIDATE_ENDPOINT  = "/v2/voices"
       AVATARS_ENDPOINT   = "/v3/avatars/looks"
       VOICES_ENDPOINT    = "/v3/voices"
@@ -113,9 +113,9 @@ module MediaGeneration
 
         case data["status"]
         when "pending", "processing"
-          Result.new(success: true, status: data["status"], job_id: data["video_id"])
+          Result.new(success: true, status: data["status"], job_id: data["id"] || data["video_id"])
         when "completed"
-          Result.new(success: true, status: "completed", job_id: data["video_id"],
+          Result.new(success: true, status: "completed", job_id: data["id"] || data["video_id"],
                      output_url: data["video_url"])
         when "failed"
           Result.new(success: false, status: "failed",

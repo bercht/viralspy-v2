@@ -6,7 +6,7 @@ module MediaGeneration
 
       GENERATE_ENDPOINT  = "/v2/video/generate"
       STATUS_ENDPOINT    = "/v1/video.status.get"
-      USER_INFO_ENDPOINT = "/v1/user.info"
+      VALIDATE_ENDPOINT  = "/v2/voices"
       DIMENSION          = { width: 720, height: 1280 }.freeze
 
       def start_generation(script:, avatar_id:, voice_id:, title:)
@@ -26,8 +26,8 @@ module MediaGeneration
       end
 
       def validate_api_key
-        response = self.class.get(USER_INFO_ENDPOINT, headers: headers)
-        Rails.logger.info("[HeyGen#validate_api_key] code=#{response.code} body=#{response.body.to_s.truncate(200)}")
+        response = self.class.get(VALIDATE_ENDPOINT, headers: headers)
+        Rails.logger.info("[HeyGen#validate_api_key] code=#{response.code}")
         response.code == 200
       rescue StandardError => e
         Rails.logger.error("[HeyGen#validate_api_key] error=#{e.class} message=#{e.message}")

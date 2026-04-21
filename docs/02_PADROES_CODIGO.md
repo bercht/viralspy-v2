@@ -117,11 +117,11 @@ app/
 
 Gems de cliente com atenção especial:
 
-| Gem | Observação |
-|---|---|
-| `ruby-openai` | Retorna Hash; stubs WebMock funcionam diretamente |
-| `anthropic` | Retorna **objetos Ruby** com métodos (não Hash) — mocks exigem `instance_double` |
-| `assemblyai` | Pinada com `~> 1.0` no Gemfile |
+| Gem | Versão no Gemfile | Observação |
+|---|---|---|
+| `ruby-openai` | sem pin (rastreada via Gemfile.lock) | Retorna Hash; stubs WebMock funcionam diretamente |
+| `anthropic` | sem pin (rastreada via Gemfile.lock) | Retorna **objetos Ruby** com métodos (não Hash) — mocks exigem `instance_double` |
+| `assemblyai` | `~> 1.0` (flexível) | Constraint mínima no Gemfile; versão exata travada via Gemfile.lock |
 
 **Quando bumpar gems de cliente LLM:**
 
@@ -705,4 +705,4 @@ end
 
 ---
 
-**Última atualização:** Fase 1.6 T5 — Interface Web concluída. Regra CSS: @theme tokens permitidos em `app/assets/tailwind/application.css` (Tailwind v4). ViewComponent: não usado no MVP, reavaiar com >30 componentes. Gems de cliente: versões no Gemfile.lock (não pin explícito). Naming: `Transcription::Providers::OpenAI`/`AssemblyAI` com namespace correto. Novas seções: broadcasts Turbo Stream, decisão ViewComponents.
+**Última atualização:** 2026-04-21 — Tabela de gems de cliente atualizada: coluna "Versão no Gemfile" adicionada; `assemblyai` corrigida de "pinada" para "flexível `~> 1.0`"; `ruby-openai` e `anthropic` documentadas como sem pin explícito. Inflections: LLM + AI confirmados em `config/initializers/inflections.rb`. Todos os paths de exemplo verificados como existentes no codebase.

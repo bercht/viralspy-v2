@@ -10,7 +10,7 @@ Rails.application.routes.draw do
 
   get "dashboard", to: "dashboard#index", as: :dashboard
 
-  resources :competitors, only: [ :index, :new, :create, :show, :destroy ] do
+  resources :competitors, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
     resources :analyses, only: [ :new, :create, :show ]
   end
 

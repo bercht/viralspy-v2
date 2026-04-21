@@ -1,0 +1,10 @@
+<div class="mx-auto max-w-xl">
+  <header class="mb-8">
+    <%= link_to "@#{@competitor.instagram_handle}", competitor_path(@competitor),
+        class: "text-body-sm text-brand-primary hover:text-brand-primary-hover" %>
+    <h1 class="mt-2 text-display text-text-display"><%= t("competitors.edit.title") %></h1>
+    <p class="mt-2 text-body text-text-muted"><%= t("competitors.edit.subtitle") %></p>
+  </header>
+
+  <%= render "form", competitor: @competitor, submit_label: t("competitors.form.update_submit") %>
+</div>

@@ -43,4 +43,14 @@ RSpec.describe CompetitorPolicy, type: :policy do
       expect(subject.new(other_user, competitor).destroy?).to be false
     end
   end
+
+  describe "update?" do
+    it "permite ao dono da account" do
+      expect(subject.new(user, competitor).update?).to be true
+    end
+
+    it "nega para usuário de outra account" do
+      expect(subject.new(other_user, competitor).update?).to be false
+    end
+  end
 end

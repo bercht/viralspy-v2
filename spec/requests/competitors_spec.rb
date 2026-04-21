@@ -42,6 +42,29 @@ RSpec.describe "Competitors", type: :request, skip_tenant: true do
       get new_competitor_path
       expect(response).to have_http_status(:ok)
     end
+
+    it "renderiza datalist com nichos únicos e ordenados do tenant atual" do
+      ActsAsTenant.with_tenant(account) do
+        create(:competitor, account: account, instagram_handle: "comp_a", niche: "Nutrição funcional")
+        create(:competitor, account: account, instagram_handle: "comp_b", niche: "Marketing imobiliário")
+        create(:competitor, account: account, instagram_handle: "comp_c", niche: "Marketing imobiliário")
+        create(:competitor, account: account, instagram_handle: "comp_d", niche: nil)
+        create(:competitor, account: account, instagram_handle: "comp_e", niche: "")
+      end
+      ActsAsTenant.with_tenant(other_account) do
+        create(:competitor, account: other_account, instagram_handle: "comp_outro", niche: "Nicho externo")
+      end
+
+      get new_competitor_path
+
+      doc = Nokogiri::HTML(response.body)
+      input = doc.at_css("input#competitor_niche")
+      datalist = doc.at_css("datalist#niche_suggestions")
+      values = datalist.css("option").map { |option| option["value"] }
+
+      expect(input["list"]).to eq("niche_suggestions")
+      expect(values).to eq([ "Marketing imobiliário", "Nutrição funcional" ])
+    end
   end
 
   describe "POST /competitors" do
@@ -79,6 +102,38 @@ RSpec.describe "Competitors", type: :request, skip_tenant: true do
     it "retorna 404 para competitor de outra account" do
       other_competitor = ActsAsTenant.with_tenant(other_account) { create(:competitor, account: other_account) }
       get competitor_path(other_competitor)
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "GET /competitors/:id/edit" do
+    let(:competitor) { ActsAsTenant.with_tenant(account) { create(:competitor, account: account) } }
+
+    it "retorna 200" do
+      get edit_competitor_path(competitor)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "retorna 404 para competitor de outra account" do
+      other_competitor = ActsAsTenant.with_tenant(other_account) { create(:competitor, account: other_account) }
+      get edit_competitor_path(other_competitor)
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "PATCH /competitors/:id" do
+    let(:competitor) { ActsAsTenant.with_tenant(account) { create(:competitor, account: account, niche: "Antigo") } }
+
+    it "atualiza e redireciona para show" do
+      patch competitor_path(competitor), params: { competitor: { niche: "Novo nicho" } }
+
+      expect(response).to redirect_to(competitor_path(competitor))
+      expect(competitor.reload.niche).to eq("Novo nicho")
+    end
+
+    it "retorna 404 para competitor de outra account" do
+      other_competitor = ActsAsTenant.with_tenant(other_account) { create(:competitor, account: other_account) }
+      patch competitor_path(other_competitor), params: { competitor: { niche: "Novo nicho" } }
       expect(response).to have_http_status(:not_found)
     end
   end

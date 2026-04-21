@@ -216,6 +216,7 @@ pt-BR:
 
   competitors:
     created: "Concorrente adicionado."
+    updated: "Concorrente atualizado."
     destroyed: "Concorrente removido."
     index:
       title: "Concorrentes"
@@ -229,6 +230,9 @@ pt-BR:
     new:
       title: "Novo concorrente"
       subtitle: "Adicione um perfil do Instagram para começar a analisar"
+    edit:
+      title: "Editar concorrente"
+      subtitle: "Atualize os dados do perfil monitorado"
     form:
       handle: "Nome de usuário no Instagram"
       handle_hint: "Sem @. Exemplo: imobiliariaxyz"
@@ -236,6 +240,7 @@ pt-BR:
       niche_hint: "Ex: Nutrição funcional, Marketing digital, Fitness. Ajuda o sistema a gerar sugestões contextualizadas."
       cancel: "Cancelar"
       submit: "Adicionar"
+      update_submit: "Salvar alterações"
     empty:
       title: "Nenhum concorrente cadastrado"
       description: "Adicione um perfil do Instagram pra começar a rastrear."
@@ -244,6 +249,7 @@ pt-BR:
       followers: "seguidores"
       no_data_yet: "Rode uma análise para capturar dados do perfil."
       new_analysis: "Nova análise"
+      edit: "Editar perfil"
       delete: "Excluir"
       delete_confirm: "Tem certeza? Todas as análises e sugestões serão removidas."
       analyses_history: "Histórico de análises"
@@ -262,6 +268,8 @@ pt-BR:
     flash:
       started: "Análise iniciada. Você será notificado quando estiver pronta."
       create_failed: "Não foi possível iniciar a análise. Tente novamente."
+    errors:
+      competitor_niche_missing: "Preencha o nicho deste perfil antes de iniciar uma análise."
     new:
       title: "Nova análise"
       subtitle: "Rode uma análise do perfil @%{handle} pra gerar insights e sugestões de conteúdo."

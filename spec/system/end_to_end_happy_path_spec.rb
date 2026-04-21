@@ -51,7 +51,7 @@ RSpec.describe "End-to-end — happy path do usuário", type: :system do
     it "redireciona pra /settings/llm_preferences/edit ao tentar criar análise sem credenciais" do
       user = create(:user)
       competitor = ActsAsTenant.with_tenant(user.account) do
-        create(:competitor, account: user.account, instagram_handle: "concorrente_teste")
+        create(:competitor, account: user.account, instagram_handle: "concorrente_teste", niche: "Mercado imobiliário")
       end
 
       login_as(user, scope: :user)
@@ -76,6 +76,7 @@ RSpec.describe "End-to-end — happy path do usuário", type: :system do
 
       # Cria competitor
       expect(page).to have_current_path(new_competitor_path, ignore_query: true)
+      fill_in "competitor_niche", with: "Mercado imobiliário"
       fill_in "competitor_instagram_handle", with: "concorrente123"
       click_button I18n.t("competitors.form.submit")
 
@@ -144,7 +145,7 @@ RSpec.describe "End-to-end — happy path do usuário", type: :system do
     let(:account) { user.account }
     let(:competitor) do
       ActsAsTenant.with_tenant(account) do
-        create(:competitor, account: account, instagram_handle: "concorrente_fluxo")
+        create(:competitor, account: account, instagram_handle: "concorrente_fluxo", niche: "Mercado imobiliário")
       end
     end
 

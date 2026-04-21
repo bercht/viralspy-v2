@@ -5,7 +5,7 @@ require "rails_helper"
 RSpec.describe "Analyses", type: :request, skip_tenant: true do
   let(:account) { create(:account) }
   let(:user) { create(:user, account: account) }
-  let(:competitor) { ActsAsTenant.with_tenant(account) { create(:competitor, account: account) } }
+  let(:competitor) { ActsAsTenant.with_tenant(account) { create(:competitor, account: account, niche: "Marketing imobiliário") } }
   let(:other_account) { create(:account) }
   let(:other_competitor) { ActsAsTenant.with_tenant(other_account) { create(:competitor, account: other_account) } }
 
@@ -28,6 +28,20 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
       it "retorna 404 para competitor de outra account" do
         get new_competitor_analysis_path(other_competitor)
         expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "quando competitor não tem nicho" do
+      before do
+        stub_ready_for_analysis
+        competitor.update!(niche: nil)
+      end
+
+      it "redireciona para edição com flash de alerta" do
+        get new_competitor_analysis_path(competitor)
+
+        expect(response).to redirect_to(edit_competitor_path(competitor))
+        expect(flash[:alert]).to eq(I18n.t("analyses.errors.competitor_niche_missing"))
       end
     end
 
@@ -96,6 +110,19 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
       }.not_to change { Analysis.unscoped.count }
 
       expect(response).to redirect_to(edit_settings_llm_preferences_path)
+    end
+
+    context "quando competitor não tem nicho" do
+      before { competitor.update!(niche: nil) }
+
+      it "bloqueia criação e redireciona para edição" do
+        expect {
+          post competitor_analyses_path(competitor), params: { analysis: { max_posts: 50 } }
+        }.not_to change { Analysis.unscoped.count }
+
+        expect(response).to redirect_to(edit_competitor_path(competitor))
+        expect(flash[:alert]).to eq(I18n.t("analyses.errors.competitor_niche_missing"))
+      end
     end
   end
 

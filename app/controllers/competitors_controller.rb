@@ -1,5 +1,5 @@
 class CompetitorsController < ApplicationController
-  before_action :set_competitor, only: [ :show, :destroy ]
+  before_action :set_competitor, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @competitors = current_account.competitors
@@ -26,6 +26,20 @@ class CompetitorsController < ApplicationController
   def show
     authorize @competitor
     @analyses = @competitor.analyses.order(created_at: :desc)
+  end
+
+  def edit
+    authorize @competitor
+  end
+
+  def update
+    authorize @competitor
+
+    if @competitor.update(competitor_params)
+      redirect_to @competitor, notice: t("competitors.updated")
+    else
+      render :edit, status: :unprocessable_content
+    end
   end
 
   def destroy

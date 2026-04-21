@@ -25,6 +25,10 @@
             new_competitor_analysis_path(@competitor),
             class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
 
+        <%= link_to t("competitors.show.edit"),
+            edit_competitor_path(@competitor),
+            class: "rounded-pill px-4 py-2 text-button text-text-muted transition-colors hover:text-text-body" %>
+
         <%= button_to t("competitors.show.delete"),
             competitor_path(@competitor), method: :delete,
             data: { turbo_confirm: t("competitors.show.delete_confirm") },

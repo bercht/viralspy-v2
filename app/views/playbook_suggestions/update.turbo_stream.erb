@@ -1,0 +1,3 @@
+<%= turbo_stream.replace dom_id(@suggestion) do %>
+  <%= render "playbook_suggestions/suggestion", suggestion: @suggestion, playbook: @playbook %>
+<% end %>

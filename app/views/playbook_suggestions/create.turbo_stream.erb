@@ -1,0 +1,4 @@
+<%= turbo_stream.append "playbook_suggestions_results" do %>
+  <%= render partial: "playbook_suggestions/suggestions_batch",
+      locals: { suggestions: @suggestions, playbook: @playbook } %>
+<% end %>

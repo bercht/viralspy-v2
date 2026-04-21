@@ -1,0 +1,7 @@
+<div class="rounded-lg bg-red-50 border border-red-200 p-3 mb-4">
+  <p class="text-sm text-red-700"><%= error %></p>
+  <% if error.to_s.include?("credential") || error.to_s.include?("chave") || error.to_s.include?("API") %>
+    <%= link_to "Configurar API Keys →", settings_api_keys_path,
+        class: "text-xs text-red-600 underline mt-1 inline-block" %>
+  <% end %>
+</div>

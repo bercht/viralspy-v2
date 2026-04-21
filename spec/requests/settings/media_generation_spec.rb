@@ -44,6 +44,17 @@ RSpec.describe "Settings::MediaGeneration", type: :request, skip_tenant: true do
         expect(account.media_generation_preferences["voice_id"]).to eq("my_voice")
       end
     end
+
+    context "com custom_voice_ids" do
+      it "normaliza e persiste lista de IDs customizados" do
+        patch settings_media_generation_path, params: {
+          settings: { custom_voice_ids: "voice_a\nvoice_b, voice_a,  " }
+        }
+
+        account.reload
+        expect(account.media_generation_preferences["custom_voice_ids"]).to eq([ "voice_a", "voice_b" ])
+      end
+    end
   end
 
   describe "POST /settings/media_generation/validate_key" do
@@ -136,6 +147,8 @@ RSpec.describe "Settings::MediaGeneration", type: :request, skip_tenant: true do
 
   describe "GET /settings/media_generation/voices" do
     let(:voices_url) { "https://api.heygen.com/v3/voices" }
+    let(:custom_voice_id) { "kooxE9YPGSSgFoWEWN44" }
+    let(:custom_voice_url) { "https://api.heygen.com/v2/voices/#{custom_voice_id}" }
 
     context "sem credential configurada" do
       it "retorna JSON com erro e status 422" do
@@ -153,11 +166,12 @@ RSpec.describe "Settings::MediaGeneration", type: :request, skip_tenant: true do
                  encrypted_api_key: "test_key", active: true)
         end
         stub_request(:get, voices_url)
+          .with(query: { "limit" => "100" })
           .to_return(
             status: 200,
-            body: { data: { voices: [
-              { "voice_id" => "v1", "display_name" => "Voz 1", "language" => "pt-BR" }
-            ] } }.to_json,
+            body: { data: [
+              { "voice_id" => "v1", "name" => "Voz 1", "language" => "pt-BR" }
+            ] }.to_json,
             headers: { "Content-Type" => "application/json" }
           )
       end
@@ -166,6 +180,43 @@ RSpec.describe "Settings::MediaGeneration", type: :request, skip_tenant: true do
         get voices_settings_media_generation_path
         json = JSON.parse(response.body)
         expect(json["voices"]).to be_an(Array)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "com custom voices configuradas" do
+      before do
+        ActsAsTenant.with_tenant(account) do
+          account.update!(media_generation_preferences: { "custom_voice_ids" => [ custom_voice_id ] })
+          create(:api_credential, account: account, provider: "heygen",
+                 encrypted_api_key: "test_key", active: true)
+        end
+        stub_request(:get, custom_voice_url)
+          .to_return(
+            status: 200,
+            body: {
+              error: nil,
+              data: { voice_id: custom_voice_id, name: "Curt Voice Clone", language: "Portuguese" }
+            }.to_json,
+            headers: { "Content-Type" => "application/json" }
+          )
+        stub_request(:get, voices_url)
+          .with(query: { "limit" => "100" })
+          .to_return(
+            status: 200,
+            body: { data: [
+              { "voice_id" => "v1", "name" => "Voz 1", "language" => "pt-BR" }
+            ] }.to_json,
+            headers: { "Content-Type" => "application/json" }
+          )
+      end
+
+      it "inclui custom voices no topo quando configuradas" do
+        get voices_settings_media_generation_path
+        json = JSON.parse(response.body)
+
+        expect(json["voices"].map { |voice| voice["id"] }).to eq([ custom_voice_id, "v1" ])
+        expect(json["voices"].first["name"]).to eq("Curt Voice Clone ★")
         expect(response).to have_http_status(:ok)
       end
     end

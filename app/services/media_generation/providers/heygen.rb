@@ -9,7 +9,6 @@ module MediaGeneration
       VALIDATE_ENDPOINT  = "/v2/voices"
       AVATARS_ENDPOINT   = "/v3/avatars/looks"
       VOICES_ENDPOINT    = "/v3/voices"
-      VOICE_CLONES_ENDPOINT = "/v2/voice_clones"
       DIMENSION          = { width: 720, height: 1280 }.freeze
 
       def start_generation(script:, avatar_id:, voice_id:, title:)
@@ -48,10 +47,10 @@ module MediaGeneration
         { avatars: [] }
       end
 
-      def fetch_voices
+      def fetch_voices(custom_voice_ids: [])
         library_voices = fetch_library_voices
-        cloned_voices  = fetch_cloned_voices
-        { voices: cloned_voices + library_voices }
+        custom_voices  = fetch_custom_voices(custom_voice_ids)
+        { voices: (custom_voices + library_voices).uniq { |voice| voice[:id] } }
       rescue StandardError => e
         Rails.logger.error("[HeyGen#fetch_voices] #{e.message}")
         { voices: [] }
@@ -68,14 +67,23 @@ module MediaGeneration
         pt_voices.map { |v| { id: v["voice_id"], name: v["name"] } }
       end
 
-      def fetch_cloned_voices
-        response = self.class.get(VOICE_CLONES_ENDPOINT, headers: headers)
-        return [] unless response.code == 200
+      def fetch_custom_voices(ids)
+        voice_ids = Array(ids).map(&:to_s).map(&:strip).reject(&:blank?).uniq
+        return [] if voice_ids.empty?
 
-        clones = response.parsed_response["data"] || []
-        clones.map { |v| { id: v["voice_id"] || v["id"], name: "#{v["name"]} ★" } }
+        voice_ids.filter_map do |voice_id|
+          response = self.class.get("/v2/voices/#{voice_id}", headers: headers)
+          next unless response.code == 200
+
+          data = response.parsed_response["data"]
+          next unless data.present?
+
+          resolved_id = data["voice_id"].presence || voice_id
+          resolved_name = data["name"].presence || resolved_id
+          { id: resolved_id, name: "#{resolved_name} ★" }
+        end
       rescue StandardError => e
-        Rails.logger.error("[HeyGen#fetch_cloned_voices] #{e.message}")
+        Rails.logger.error("[HeyGen#fetch_custom_voices] #{e.message}")
         []
       end
 

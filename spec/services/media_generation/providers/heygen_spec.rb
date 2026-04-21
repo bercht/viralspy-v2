@@ -6,6 +6,7 @@ RSpec.describe MediaGeneration::Providers::Heygen do
   let(:generate_url) { "https://api.heygen.com/v2/video/generate" }
   let(:status_url) { "https://api.heygen.com/v1/video_status.get" }
   let(:user_info_url) { "https://api.heygen.com/v2/voices" }
+  let(:voices_url) { "https://api.heygen.com/v3/voices" }
 
   describe "#start_generation" do
     subject(:result) do
@@ -234,44 +235,92 @@ RSpec.describe MediaGeneration::Providers::Heygen do
     end
   end
 
+  describe "#fetch_custom_voices" do
+    let(:custom_voice_id) { "kooxE9YPGSSgFoWEWN44" }
+    let(:custom_voice_url) { "https://api.heygen.com/v2/voices/#{custom_voice_id}" }
+
+    it "retorna voz correta para ID válido" do
+      stub_request(:get, custom_voice_url)
+        .to_return(
+          status: 200,
+          body: {
+            error: nil,
+            data: {
+              voice_id: custom_voice_id,
+              name: "Curt Voice Clone",
+              language: "Portuguese",
+              gender: "unknown"
+            }
+          }.to_json,
+          headers: { "Content-Type" => "application/json" }
+        )
+
+      result = provider.send(:fetch_custom_voices, [ custom_voice_id ])
+      expect(result).to eq([ { id: custom_voice_id, name: "Curt Voice Clone ★" } ])
+    end
+
+    it "retorna [] para ID inválido (404)" do
+      stub_request(:get, custom_voice_url).to_return(status: 404, body: {}.to_json)
+      result = provider.send(:fetch_custom_voices, [ custom_voice_id ])
+      expect(result).to eq([])
+    end
+  end
+
   describe "#fetch_voices" do
-    let(:voices_url) { "https://api.heygen.com/v3/voices" }
+    let(:custom_voice_id) { "kooxE9YPGSSgFoWEWN44" }
+    let(:custom_voice_url) { "https://api.heygen.com/v2/voices/#{custom_voice_id}" }
 
-    context "quando API retorna 200 com vozes" do
-      before do
-        stub_request(:get, voices_url)
-          .with(query: { "limit" => "100" })
-          .to_return(
-            status: 200,
-            body: {
-              data: [
-                { "voice_id" => "voice_pt_1", "name" => "Voz PT 1", "language" => "pt-BR" },
-                { "voice_id" => "voice_en_1", "name" => "Voice EN 1", "language" => "en-US" },
-                { "voice_id" => "voice_pt_2", "name" => "Voz PT 2", "language" => "pt" }
-              ]
-            }.to_json,
-            headers: { "Content-Type" => "application/json" }
-          )
-      end
+    before do
+      stub_request(:get, voices_url)
+        .with(query: { "limit" => "100" })
+        .to_return(
+          status: 200,
+          body: {
+            data: [
+              { "voice_id" => "voice_pt_1", "name" => "Voz PT 1", "language" => "pt-BR" },
+              { "voice_id" => "voice_en_1", "name" => "Voice EN 1", "language" => "en-US" },
+              { "voice_id" => "voice_pt_2", "name" => "Voz PT 2", "language" => "pt" }
+            ]
+          }.to_json,
+          headers: { "Content-Type" => "application/json" }
+        )
+    end
 
-      it "filtra apenas vozes pt-BR/pt" do
-        result = provider.fetch_voices
-        expect(result[:voices].map { |v| v[:id] }).to contain_exactly("voice_pt_1", "voice_pt_2")
-      end
+    it "adiciona custom voices no topo do resultado" do
+      stub_request(:get, custom_voice_url)
+        .to_return(
+          status: 200,
+          body: {
+            error: nil,
+            data: {
+              voice_id: custom_voice_id,
+              name: "Curt Voice Clone",
+              language: "Portuguese",
+              gender: "unknown"
+            }
+          }.to_json,
+          headers: { "Content-Type" => "application/json" }
+        )
 
-      it "mapeia voice_id para id" do
-        result = provider.fetch_voices
-        expect(result[:voices].first).to include(id: "voice_pt_1", name: "Voz PT 1")
-      end
+      result = provider.fetch_voices(custom_voice_ids: [ custom_voice_id ])
+      expect(result[:voices].map { |voice| voice[:id] }).to eq([ custom_voice_id, "voice_pt_1", "voice_pt_2" ])
+      expect(result[:voices].first[:name]).to eq("Curt Voice Clone ★")
+    end
+
+    it "filtra apenas vozes pt-BR/pt da biblioteca" do
+      result = provider.fetch_voices(custom_voice_ids: [])
+      expect(result[:voices].map { |voice| voice[:id] }).to contain_exactly("voice_pt_1", "voice_pt_2")
     end
 
     context "quando API retorna erro" do
       before do
-        stub_request(:get, voices_url).to_return(status: 500, body: {}.to_json)
+        stub_request(:get, voices_url)
+          .with(query: { "limit" => "100" })
+          .to_return(status: 500, body: {}.to_json)
       end
 
       it "retorna voices vazio" do
-        result = provider.fetch_voices
+        result = provider.fetch_voices(custom_voice_ids: [ custom_voice_id ])
         expect(result[:voices]).to eq([])
       end
     end

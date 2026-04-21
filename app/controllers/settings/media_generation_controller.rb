@@ -3,6 +3,8 @@ module Settings
     def show
       @heygen_credential = current_tenant.api_credentials.find_or_initialize_by(provider: "heygen")
       @preferences = current_tenant.media_generation_preferences
+      @custom_voice_ids = normalized_custom_voice_ids(@preferences["custom_voice_ids"])
+      @custom_voices = fetch_configured_custom_voices(@custom_voice_ids)
     end
 
     def update
@@ -13,6 +15,8 @@ module Settings
       else
         @heygen_credential = current_tenant.api_credentials.find_or_initialize_by(provider: "heygen")
         @preferences = current_tenant.media_generation_preferences
+        @custom_voice_ids = normalized_custom_voice_ids(@preferences["custom_voice_ids"])
+        @custom_voices = fetch_configured_custom_voices(@custom_voice_ids)
         flash.now[:alert] = result[:error]
         render :show, status: :unprocessable_content
       end
@@ -34,8 +38,9 @@ module Settings
         return render json: { error: "API key não configurada" }, status: :unprocessable_entity
       end
 
+      custom_voice_ids = normalized_custom_voice_ids(current_tenant.media_generation_preferences["custom_voice_ids"])
       provider = MediaGeneration::Factory.build(provider: "heygen", api_key: credential.api_key)
-      render json: provider.fetch_voices
+      render json: provider.fetch_voices(custom_voice_ids: custom_voice_ids)
     end
 
     def validate_key
@@ -61,7 +66,7 @@ module Settings
     private
 
     def settings_params
-      params.require(:settings).permit(:api_key, :avatar_id, :voice_id)
+      params.require(:settings).permit(:api_key, :avatar_id, :voice_id, :custom_voice_ids)
     end
 
     def update_settings(params)
@@ -76,12 +81,35 @@ module Settings
         prefs = current_tenant.media_generation_preferences.dup
         prefs["avatar_id"] = params[:avatar_id] if params[:avatar_id].present?
         prefs["voice_id"] = params[:voice_id] if params[:voice_id].present?
+        prefs["custom_voice_ids"] = normalized_custom_voice_ids(params[:custom_voice_ids])
         current_tenant.update!(media_generation_preferences: prefs)
 
         { success: true }
       end
     rescue ActiveRecord::RecordInvalid => e
       { success: false, error: e.message }
+    end
+
+    def normalized_custom_voice_ids(raw_ids)
+      Array(raw_ids)
+        .flat_map { |value| value.to_s.split(/[\n,]/) }
+        .map(&:strip)
+        .reject(&:blank?)
+        .uniq
+    end
+
+    def fetch_configured_custom_voices(custom_voice_ids)
+      return [] if custom_voice_ids.empty?
+
+      credential = current_tenant.api_credentials.find_by(provider: "heygen", active: true)
+      return [] if credential.nil?
+
+      provider = MediaGeneration::Factory.build(provider: "heygen", api_key: credential.api_key)
+      voices = provider.fetch_voices(custom_voice_ids: custom_voice_ids)[:voices]
+      Array(voices).select { |voice| custom_voice_ids.include?(voice[:id]) }
+    rescue StandardError => e
+      Rails.logger.error("[Settings::MediaGenerationController#fetch_configured_custom_voices] #{e.message}")
+      []
     end
   end
 end

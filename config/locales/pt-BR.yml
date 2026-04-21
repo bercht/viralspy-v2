@@ -53,6 +53,9 @@ pt-BR:
     logout: "Sair"
 
   settings:
+    navigation:
+      api_keys: "API Keys"
+      llm_preferences: "Preferências de Provider"
     api_keys:
       title: "Chaves de API"
       subtitle: "Configure suas chaves de API dos provedores que o ViralSpy utiliza. Suas chaves ficam encriptadas e são usadas apenas nas suas próprias análises."
@@ -101,6 +104,35 @@ pt-BR:
         destroyed: "%{provider}: chave removida."
         invalid_provider: "Provedor inválido."
         not_found: "%{provider}: nenhuma chave configurada para remover."
+    llm_preferences:
+      title: "Preferências de Provider"
+      subtitle: "Escolha qual provedor de IA usar em cada etapa da análise. Apenas provedores com chave válida configurada ficam disponíveis."
+      empty: "Nenhum provedor configurado ainda."
+      api_keys_link: "Configure suas chaves de API"
+      provider_label: "Provider"
+      model_label: "Modelo"
+      save: "Salvar preferências"
+      back_to_api_keys: "Voltar para chaves de API"
+      flash:
+        updated: "Preferências atualizadas."
+      sections:
+        transcription:
+          title: "Transcrição de reels"
+          description: "Provider usado para transcrever o áudio dos reels analisados."
+          missing: "Configure chave OpenAI ou AssemblyAI para transcrição."
+        analysis:
+          title: "Análise estruturada"
+          description: "Usado para extrair insights dos posts (AnalyzeStep). OpenAI gpt-4o-mini é mais barato; Anthropic também funciona muito bem."
+          missing: "Configure chave OpenAI ou Anthropic para análise."
+        generation:
+          title: "Geração de conteúdo"
+          description: "Usado para gerar sugestões e atualizar playbooks. Anthropic Claude é recomendado para criatividade e contexto longo."
+          missing: "Configure chave OpenAI ou Anthropic para geração."
+      summary:
+        title: "Configuração atual"
+        transcription: "Transcrição: %{provider}"
+        analysis: "Análise: %{provider} · %{model}"
+        generation: "Geração: %{provider} · %{model}"
 
   time:
     formats:
@@ -278,7 +310,7 @@ pt-BR:
         openai: "análise estruturada e/ou transcrição"
         anthropic: "análise estruturada e/ou geração de conteúdo"
         assemblyai: "transcrição de reels"
-      cta: "Acesse Configurações → API Keys para configurar."
+      cta: "Acesse Configurações → Preferências de Provider para ajustar o provider e, se necessário, Configurações → API Keys."
 
   content_suggestions:
     updated:

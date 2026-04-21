@@ -40,7 +40,7 @@ RSpec.describe "End-to-end — happy path do usuário", type: :system do
   end
 
   describe "gate de credentials" do
-    it "redireciona pra /settings/api_keys ao tentar criar análise sem credenciais" do
+    it "redireciona pra /settings/llm_preferences/edit ao tentar criar análise sem credenciais" do
       user = create(:user)
       competitor = ActsAsTenant.with_tenant(user.account) do
         create(:competitor, account: user.account, instagram_handle: "concorrente_teste")
@@ -49,7 +49,7 @@ RSpec.describe "End-to-end — happy path do usuário", type: :system do
       login_as(user, scope: :user)
       visit new_competitor_analysis_path(competitor)
 
-      expect(page).to have_current_path(settings_api_keys_path, ignore_query: true)
+      expect(page).to have_current_path(edit_settings_llm_preferences_path, ignore_query: true)
       expect(page).to have_content(I18n.t("api_credentials.missing.cta", default: "Configure"))
     end
   end
@@ -78,7 +78,7 @@ RSpec.describe "End-to-end — happy path do usuário", type: :system do
 
       # Tentar iniciar análise → gate de credentials
       click_link I18n.t("competitors.show.no_analyses.cta")
-      expect(page).to have_current_path(settings_api_keys_path, ignore_query: true)
+      expect(page).to have_current_path(edit_settings_llm_preferences_path, ignore_query: true)
 
       # Configura credenciais via factory
       competitor = ActsAsTenant.with_tenant(account) do

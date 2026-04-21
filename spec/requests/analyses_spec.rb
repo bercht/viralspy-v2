@@ -37,9 +37,9 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
         allow_any_instance_of(Account).to receive(:missing_credentials_for_analysis).and_return([ :openai, :assemblyai ])
       end
 
-      it "redireciona para settings/api_keys com flash listando providers" do
+      it "redireciona para settings/llm_preferences com flash listando providers" do
         get new_competitor_analysis_path(competitor)
-        expect(response).to redirect_to(settings_api_keys_path)
+        expect(response).to redirect_to(edit_settings_llm_preferences_path)
         expect(flash[:alert]).to include("OpenAI")
         expect(flash[:alert]).to include("AssemblyAI")
       end
@@ -95,7 +95,7 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
         post competitor_analyses_path(competitor), params: { analysis: { max_posts: 50 } }
       }.not_to change { Analysis.unscoped.count }
 
-      expect(response).to redirect_to(settings_api_keys_path)
+      expect(response).to redirect_to(edit_settings_llm_preferences_path)
     end
   end
 

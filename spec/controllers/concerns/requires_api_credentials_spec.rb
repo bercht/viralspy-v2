@@ -40,12 +40,12 @@ RSpec.describe RequiresApiCredentials, type: :controller do
       allow_any_instance_of(Account).to receive(:ready_for_analysis?).and_return(false)
       allow_any_instance_of(Account)
         .to receive(:missing_credentials_for_analysis)
-        .and_return([:openai, :assemblyai])
+        .and_return([ :openai, :assemblyai ])
     end
 
-    it "redirects to settings api keys page" do
+    it "redirects to settings llm preferences page" do
       get :index
-      expect(response).to redirect_to(settings_api_keys_path)
+      expect(response).to redirect_to(edit_settings_llm_preferences_path)
     end
 
     it "sets an alert flash listing missing providers with use cases" do
@@ -54,7 +54,7 @@ RSpec.describe RequiresApiCredentials, type: :controller do
       expect(flash[:alert]).to include("AssemblyAI")
       expect(flash[:alert]).to include("análise estruturada")
       expect(flash[:alert]).to include("transcrição")
-      expect(flash[:alert]).to include("Configurações → API Keys")
+      expect(flash[:alert]).to include("Configurações → Preferências de Provider")
     end
 
     it "does not include providers that are configured" do

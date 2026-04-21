@@ -9,6 +9,7 @@ module MediaGeneration
       VALIDATE_ENDPOINT  = "/v2/voices"
       AVATARS_ENDPOINT   = "/v3/avatars/looks"
       VOICES_ENDPOINT    = "/v3/voices"
+      VOICE_CLONES_ENDPOINT = "/v2/voice_clones"
       DIMENSION          = { width: 720, height: 1280 }.freeze
 
       def start_generation(script:, avatar_id:, voice_id:, title:)
@@ -48,18 +49,35 @@ module MediaGeneration
       end
 
       def fetch_voices
-        response = self.class.get(VOICES_ENDPOINT, headers: headers, query: { limit: 100 })
-        return { voices: [] } unless response.code == 200
-
-        voices = response.parsed_response["data"] || []
-        pt_voices = voices.select { |v| v["language"].to_s =~ /port|pt|br/i }
-        { voices: pt_voices.map { |v| { id: v["voice_id"], name: v["name"] } } }
+        library_voices = fetch_library_voices
+        cloned_voices  = fetch_cloned_voices
+        { voices: cloned_voices + library_voices }
       rescue StandardError => e
         Rails.logger.error("[HeyGen#fetch_voices] #{e.message}")
         { voices: [] }
       end
 
       private
+
+      def fetch_library_voices
+        response = self.class.get(VOICES_ENDPOINT, headers: headers, query: { limit: 100 })
+        return [] unless response.code == 200
+
+        voices = response.parsed_response["data"] || []
+        pt_voices = voices.select { |v| v["language"].to_s =~ /port|pt|br/i }
+        pt_voices.map { |v| { id: v["voice_id"], name: v["name"] } }
+      end
+
+      def fetch_cloned_voices
+        response = self.class.get(VOICE_CLONES_ENDPOINT, headers: headers)
+        return [] unless response.code == 200
+
+        clones = response.parsed_response["data"] || []
+        clones.map { |v| { id: v["voice_id"] || v["id"], name: "#{v["name"]} ★" } }
+      rescue StandardError => e
+        Rails.logger.error("[HeyGen#fetch_cloned_voices] #{e.message}")
+        []
+      end
 
       def headers
         { "X-Api-Key" => api_key, "Content-Type" => "application/json" }

@@ -10,7 +10,14 @@
 **Última fase concluída:** Fase 1.6 (Interface Web) — mergeada em main
 **Próxima fase esperada:** Fase 2.0 → 2.1 → 2.2 → 2.3 → 2.4
 
-**Contexto:** MVP funcional (signup → BYOK → competitor → análise → sugestões). 658 specs verdes. Fase 1.7 (polimento MVP original) e todo roadmap pós-MVP foi repriorizado para uso pessoal + 4-5 convidados. Sem beta pago, sem Stripe, sem landing pública no horizonte curto.
+**Contexto:** MVP funcional (signup → BYOK → competitor → análise → sugestões → playbooks → geração de mídia). 860 examples, 0 failures. Fase 1.7 (polimento MVP original) e todo roadmap pós-MVP foi repriorizado para uso pessoal + 4-5 convidados. Sem beta pago, sem Stripe, sem landing pública no horizonte curto.
+
+**Artefatos confirmados (2026-04-21):**
+- Models: 16 (Account, User, ApiCredential, Competitor, Analysis, Post, ContentSuggestion, GeneratedMedia, LLMUsageLog, TranscriptionUsageLog, MediaGenerationUsageLog, Playbook, PlaybookVersion, PlaybookFeedback, PlaybookSuggestion, AnalysisPlaybook)
+- Services: 30+ (Analyses, LLM, Scraping, Transcription, MediaGeneration, ApiCredentials, Playbooks)
+- Workers: 2 (Analyses::RunAnalysisWorker, MediaGeneration::PollWorker)
+- Prompts LLM: 6 namespaces, 12 arquivos ERB
+- Specs: 860 examples, 0 failures
 
 ---
 
@@ -152,7 +159,7 @@ Criar esqueleto Rails, Docker, gems base, banco inicializado.
 
 ---
 
-## Fase 1.6a — BYOK: API Keys e Preferências de Provider ⚠️ NOVA
+## Fase 1.6a — BYOK: API Keys e Preferências de Provider ✅ CONCLUÍDA
 
 **Duração estimada:** 2-3 dias
 **Commits:** 2
@@ -161,18 +168,19 @@ Criar esqueleto Rails, Docker, gems base, banco inicializado.
 
 Implementar o sistema de chaves próprias do usuário (ADR-013) antes de qualquer UI de análise. Pré-requisito para o usuário conseguir rodar sua primeira análise.
 
-### Escopo
+### Entregas
 
-- Model `ApiCredential` com `encrypts :encrypted_api_key`
-- JSONB `llm_preferences` no `Account`
-- `ApiCredentials::ValidateService` — chamada de teste mínima ao provider
-- Atualizar `LLM::Gateway` para resolver provider/chave via `account` (não ENV)
-- Atualizar `Transcription::Factory` idem
-- Controller + views de configuração: tela "API Keys" + tela "Preferências de Provider"
-- Onboarding gate: antes da primeira análise, verifica chaves e redireciona se não configuradas
-- Tutorial inline com links para geração de chaves em cada provider
+- Model `ApiCredential` com `encrypts :encrypted_api_key` (providers: openai, anthropic, assemblyai, heygen)
+- JSONB `llm_preferences` e `media_generation_preferences` no `Account`
+- `ApiCredentials::ValidateService` e `ApiCredentials::Result` — chamada de teste mínima ao provider
+- `LLM::Gateway` resolve provider/chave via `account` (não ENV)
+- `Transcription::Factory` idem
+- `Settings::ApiKeysController` (show, create, update, destroy)
+- `Settings::LLMPreferencesController` (edit, update)
+- Concern `RequiresApiCredentials` — onboarding gate antes da análise
+- `Account#ready_for_analysis?` e `Account#missing_credentials_for_analysis`
 
-### Critério de aceite
+### Critério de aceite — atingido
 
 - Usuário sem chaves configuradas não consegue iniciar análise — é redirecionado com mensagem clara
 - Usuário configura chave OpenAI → sistema valida → badge "válida" aparece
@@ -183,7 +191,7 @@ Implementar o sistema de chaves próprias do usuário (ADR-013) antes de qualque
 
 ---
 
-## Fase 1.6 — Interface Web
+## Fase 1.6 — Interface Web ✅ CONCLUÍDA
 
 **Duração estimada:** 5-7 dias
 **Commits:** 2-3
@@ -192,33 +200,75 @@ Implementar o sistema de chaves próprias do usuário (ADR-013) antes de qualque
 
 UI completa para criar competitor, disparar análise, ver progresso e resultado.
 
-### Escopo
+### Entregas
 
 **Controllers:**
 - `CompetitorsController` (index, new, create, show, destroy)
-- `AnalysesController` (create, show) — seleção de Playbooks ao criar
+- `AnalysesController` (new, create, show)
 - `ContentSuggestionsController` (update — save/discard)
+- `DashboardController` (index)
 
 **Views principais:**
 - Competitors index + competitor show
 - Analysis new: input de handle + seleção de playbooks que receberão a análise
-- Analysis show: status em tempo real, profile metrics, top posts rankeados, 5 sugestões
+- Analysis show: status em tempo real via Turbo, profile metrics, top posts rankeados, 5 sugestões
 
-**Components:**
-- `StatusBadgeComponent`, `SuggestionCardComponent`
-- `ProfileMetricsComponent`, `PostRankingComponent`, `ProgressStepsComponent`
+**Artefatos adicionais confirmados no inventário (não listados no escopo original):**
+- `Analyses::PromptRenderer` — renderiza prompts ERB para LLM
+- `Transcription::Providers::AssemblyAI` — segundo provider de transcrição
+- `PlaybooksController` (index, show, new, create, edit, update, destroy, export)
+- `PlaybookVersionsController` (index, show)
+- `PlaybookFeedbacksController` (create, incorporate, dismiss)
+- `PlaybookSuggestionsController` (create, update)
+- `ContentSuggestions::VideoController` (new)
+- `GeneratedMediasController` (index, show, create)
+- `Settings::MediaGenerationController` (show, update, validate_key, avatars, voices)
+- `Webhooks::HeygenController` (receive)
 
-**Stimulus controllers:**
-- `analysis_status_controller`, `copy_to_clipboard_controller`
-- `confirm_controller`, `tab_controller`
-
-### Critério de aceite
+### Critério de aceite — atingido
 
 - Fluxo end-to-end: cadastro → configurar chaves → criar competitor → rodar análise → ver resultado
 - Seleção de playbooks ao disparar análise funcional
 - Sugestões com save/discard funcionais
 - Zero CSS custom, zero classes criadas, zero CSS inline
 - System spec crítico verde
+
+---
+
+## Fase 1.6b — Playbooks e Geração de Mídia (HeyGen) ✅ CONCLUÍDA
+
+> Fase retroativamente documentada em 2026-04-21 (sync automática). Artefatos existiam no código mas não tinham fase correspondente no roadmap.
+
+### Objetivo
+
+Implementar o sistema de Playbooks (criação, versionamento, feedback, sugestões derivadas) e a integração de geração de vídeo avatar via HeyGen.
+
+### Entregas
+
+**Models:**
+- `Playbook` (name, niche, purpose, current_version_number)
+- `PlaybookVersion` (version_number, content, diff_summary, triggered_by_analysis_id)
+- `PlaybookFeedback` (content, source, status, incorporated_in_version_id)
+- `PlaybookSuggestion` (content_type, hook, caption_draft, format_details, suggested_hashtags, rationale, status)
+- `AnalysisPlaybook` (join table com update_status)
+- `GeneratedMedia` (provider, media_type, status, provider_job_id, output_url, cost_cents)
+- `MediaGenerationUsageLog` (provider, duration_seconds, cost_cents)
+
+**Services:**
+- `Analyses::UpdatePlaybookStep` — atualiza playbook com insights da análise
+- `Playbooks::GenerateSuggestionsService` — gera sugestões de conteúdo derivadas do playbook
+- `MediaGeneration::Factory`, `MediaGeneration::Start`, `MediaGeneration::ScriptBuilder`
+- `MediaGeneration::Providers::Heygen`
+
+**Workers:**
+- `MediaGeneration::PollWorker` — poll assíncrono do job HeyGen (MAX 60 tentativas, 10s intervalo)
+
+**Prompts LLM adicionados:**
+- `playbook_suggestions/user.erb`
+- `update_playbook/user.erb`
+
+**Webhook:**
+- `Webhooks::HeygenController` — recebe eventos de conclusão de vídeo
 
 ---
 
@@ -255,10 +305,10 @@ Coleta de feedback por 4-6 semanas antes de abrir para qualquer pagante.
 ---
 
 **Fase atual:** Fase 2.0 (Fix Anthropic) — pré-requisito, em andamento
-**Última fase concluída:** Fase 1.6 (Interface Web) — mergeada em main
+**Última fase concluída:** Fase 1.6b (Playbooks + MediaGen) — mergeada em main
 **Próxima fase esperada:** Fase 2.0 → 2.1 → 2.2 → 2.3 → 2.4
 
-**Contexto:** MVP funcional (signup → BYOK → competitor → análise → sugestões). 658 specs verdes. Fase 1.7 (polimento MVP original) e todo roadmap pós-MVP foi repriorizado para uso pessoal + 4-5 convidados. Sem beta pago, sem Stripe, sem landing pública no horizonte curto.
+**Contexto:** MVP funcional (signup → BYOK → competitor → análise → sugestões → playbooks → geração de vídeo). 860 examples, 0 failures. Fase 1.7 (polimento MVP original) e todo roadmap pós-MVP foi repriorizado para uso pessoal + 4-5 convidados. Sem beta pago, sem Stripe, sem landing pública no horizonte curto.
 
 
 
@@ -270,4 +320,4 @@ Se o Curt sugerir feature que:
 
 ---
 
-**Última atualização:** pós-Fase 1.6 mergeada. Roadmap pós-MVP completamente redesenhado para uso pessoal + 4-5 convidados (sem beta pago, sem Stripe, sem landing). Nova sequência: 2.0 Fix Anthropic → 2.1 Playbook integral → 2.2 MediaGen HeyGen enxuto → 2.3 OwnProfile + Meta Graph → 2.4 Loop Completo. Fases antigas 2.2-2.5 e todo o 06_ROADMAP_PERFORMANCE.md arquivados como referência — ver "Fases futuras" no fim do arquivo.
+**Última atualização:** 2026-04-21 (sync automática docs-sync-20260421). Fases 1.6a e 1.6 marcadas como ✅ CONCLUÍDA. Fase 1.6b criada retroativamente para documentar Playbooks + MediaGeneration. Contagem de specs atualizada para 860 examples (era 658). Nova sequência de fases futuras: 2.0 Fix Anthropic → 2.1 Playbook integral → 2.2 MediaGen HeyGen enxuto → 2.3 OwnProfile + Meta Graph → 2.4 Loop Completo. Fases antigas 2.2-2.5 e todo o 06_ROADMAP_PERFORMANCE.md arquivados como referência.

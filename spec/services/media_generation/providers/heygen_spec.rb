@@ -4,7 +4,7 @@ RSpec.describe MediaGeneration::Providers::Heygen do
   let(:api_key) { "test_heygen_key" }
   let(:provider) { described_class.new(api_key: api_key) }
   let(:generate_url) { "https://api.heygen.com/v2/video/generate" }
-  let(:status_url) { "https://api.heygen.com/v1/video.status.get" }
+  let(:status_url) { "https://api.heygen.com/v1/video_status.get" }
   let(:user_info_url) { "https://api.heygen.com/v2/voices" }
 
   describe "#start_generation" do

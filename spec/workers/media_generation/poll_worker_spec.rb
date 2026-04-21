@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe MediaGeneration::PollWorker, type: :worker do
   let(:account) { create(:account) }
   let(:suggestion) { create(:content_suggestion, account: account) }
-  let(:status_url) { "https://api.heygen.com/v1/video.status.get" }
+  let(:status_url) { "https://api.heygen.com/v1/video_status.get" }
 
   around do |example|
     ActsAsTenant.with_tenant(account) { example.run }

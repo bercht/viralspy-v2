@@ -12,6 +12,14 @@ Rails.application.routes.draw do
 
   resources :competitors, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
     resources :analyses, only: [ :new, :create, :show ]
+    resources :story_observations, only: [ :new, :create, :index, :destroy ]
+  end
+
+  resources :own_profiles do
+    member do
+      post :sync
+    end
+    resources :own_posts, only: [ :index, :show, :edit, :update ]
   end
 
   resources :generated_medias, only: [ :index, :show ]

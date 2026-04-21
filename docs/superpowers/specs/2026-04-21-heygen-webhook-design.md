@@ -118,6 +118,27 @@ No dashboard HeyGen → Settings → Webhooks:
 - `app/workers/media_generation/poll_worker.rb`
 - `app/models/generated_media.rb`
 
+## Turbo Stream esperado
+
+Ao atualizar `GeneratedMedia` para `completed` ou `failed`, reusar exatamente o mesmo broadcast já usado pelo `PollWorker`:
+
+```ruby
+Turbo::StreamsChannel.broadcast_replace_to(
+  "media_generation_#{generated_media.account_id}",
+  target: "generated_media_#{generated_media.id}",
+  partial: "generated_medias/status",
+  locals: { generated_media: generated_media }
+)
+```
+
+- **Canal:** `media_generation_<account_id>`
+- **Action:** `replace`
+- **Target:** `generated_media_<id>`
+- **Partial:** `generated_medias/_status.html.erb` (já existe em `app/views/generated_medias/`)
+- **Locals:** `{ generated_media: generated_media }`
+
+O controller deve extrair esse broadcast para um método privado `broadcast_update(generated_media)` idêntico ao do `PollWorker`.
+
 ## Testes
 
 Spec de request em `spec/requests/webhooks/heygen_spec.rb`. Casos obrigatórios:

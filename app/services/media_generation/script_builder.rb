@@ -43,8 +43,8 @@ module MediaGeneration
     end
 
     def has_cta?(text)
-      cta_patterns = [/segue/, /me chama/, /comenta/, /salva/, /compartilha/,
-                      /acessa/, /clica/, /link na bio/]
+      cta_patterns = [ /segue/, /me chama/, /comenta/, /salva/, /compartilha/,
+                      /acessa/, /clica/, /link na bio/ ]
       cta_patterns.any? { |pattern| text.match?(pattern) }
     end
 

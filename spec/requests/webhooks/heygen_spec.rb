@@ -135,7 +135,7 @@ RSpec.describe "Webhooks::Heygen", type: :request, skip_tenant: true do
       expect(final_count).to eq(initial_count + 1)
 
       log = ActsAsTenant.with_tenant(account) { MediaGenerationUsageLog.last }
-      expect(log.generated_media).to eq(gm)
+      expect(ActsAsTenant.with_tenant(account) { log.generated_media }).to eq(gm)
       expect(log.provider).to eq("heygen")
     end
 

@@ -203,16 +203,13 @@ RSpec.describe MediaGeneration::Providers::Heygen do
     context "quando API retorna 200 com lista" do
       before do
         stub_request(:get, avatars_url)
-          .with(query: { avatar_type: "digital_twin", ownership: "private" })
           .to_return(
             status: 200,
             body: {
-              data: {
-                list: [
-                  { "id" => "avatar_1", "name" => "Avatar Um", "preview_image_url" => "https://example.com/1.jpg" },
-                  { "id" => "avatar_2", "name" => "Avatar Dois", "preview_image_url" => "https://example.com/2.jpg" }
-                ]
-              }
+              data: [
+                { "id" => "avatar_1", "name" => "Avatar Um", "preferred_orientation" => "horizontal", "preview_image_url" => "https://example.com/1.jpg" },
+                { "id" => "avatar_2", "name" => "Avatar Dois", "preferred_orientation" => "vertical", "preview_image_url" => "https://example.com/2.jpg" }
+              ]
             }.to_json,
             headers: { "Content-Type" => "application/json" }
           )
@@ -221,7 +218,7 @@ RSpec.describe MediaGeneration::Providers::Heygen do
       it "retorna lista mapeada de avatares" do
         result = provider.fetch_avatars
         expect(result[:avatars].length).to eq(2)
-        expect(result[:avatars].first).to include(id: "avatar_1", name: "Avatar Um")
+        expect(result[:avatars].first).to include(id: "avatar_1", name: "Avatar Um (horizontal)")
       end
     end
 

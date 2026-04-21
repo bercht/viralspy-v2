@@ -37,12 +37,11 @@ module MediaGeneration
       end
 
       def fetch_avatars
-        response = self.class.get(AVATARS_ENDPOINT, headers: headers,
-                                  query: { avatar_type: "digital_twin", ownership: "private" })
+        response = self.class.get(AVATARS_ENDPOINT, headers: headers)
         return { avatars: [] } unless response.code == 200
 
-        list = response.parsed_response.dig("data", "list") || []
-        { avatars: list.map { |a| { id: a["id"], name: a["name"], preview_url: a["preview_image_url"] } } }
+        avatars = response.parsed_response["data"] || []
+        { avatars: avatars.map { |a| { id: a["id"], name: "#{a['name']} (#{a['preferred_orientation']})", preview_url: a["preview_image_url"] } } }
       rescue StandardError => e
         Rails.logger.error("[HeyGen#fetch_avatars] #{e.message}")
         { avatars: [] }

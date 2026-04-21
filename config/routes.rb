@@ -26,6 +26,7 @@ Rails.application.routes.draw do
         patch :dismiss
       end
     end
+    resources :playbook_suggestions, only: [ :create, :update ]
     member do
       get :export
     end

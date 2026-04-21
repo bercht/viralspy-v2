@@ -6,6 +6,7 @@ class Playbook < ApplicationRecord
   has_many :playbook_feedbacks, dependent: :destroy
   has_many :analysis_playbooks, dependent: :destroy
   has_many :analyses, through: :analysis_playbooks
+  has_many :playbook_suggestions, dependent: :destroy
 
   validates :name, presence: true
   validates :name, uniqueness: { scope: :account_id, case_sensitive: false }

@@ -27,6 +27,7 @@ class Account < ApplicationRecord
   has_many :api_credentials, dependent: :destroy
   has_many :playbooks, dependent: :destroy
   has_many :playbook_feedbacks, dependent: :destroy
+  has_many :playbook_suggestions, dependent: :destroy
   has_many :generated_medias, dependent: :destroy
   has_many :media_generation_usage_logs, dependent: :destroy
 

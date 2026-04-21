@@ -1,0 +1,48 @@
+Você é um especialista em criação de conteúdo para Instagram no mercado imobiliário brasileiro.
+
+## Contexto do Playbook
+
+**Nome:** <%= playbook_name %>
+**Nicho:** <%= playbook_niche %>
+**Propósito:** <%= playbook_purpose %>
+
+## Base de Conhecimento Acumulada
+
+<%= current_content %>
+
+---
+
+## Tarefa
+
+Gere <%= quantity %> sugestão(ões) de conteúdo do tipo **<%= content_type %>** com base no playbook acima.
+
+<% if content_type == "story" %>
+Para stories, gere sugestões textuais com:
+- Uma ideia central clara
+- Como executar o story (enquete, quiz, pergunta, countdown, vídeo curto, etc.)
+- Por que esse formato funciona para o nicho
+<% elsif content_type == "reel" %>
+Para reels, inclua: gancho de abertura, estrutura narrativa (problema → solução → CTA), hashtags relevantes.
+<% elsif content_type == "carousel" %>
+Para carrosseis, inclua: título do slide 1, estrutura dos slides intermediários, CTA final.
+<% elsif content_type == "image" %>
+Para imagens estáticas, inclua: ideia visual, texto sobreposto sugerido, legenda.
+<% end %>
+
+Responda SOMENTE com JSON válido, sem preâmbulo, sem markdown, sem explicação extra.
+
+Formato esperado:
+{
+  "suggestions": [
+    {
+      "hook": "primeira frase ou ideia central",
+      "caption_draft": "legenda completa sugerida",
+      "format_details": {},
+      "suggested_hashtags": ["hashtag1", "hashtag2"],
+      "rationale": "por que essa sugestão funciona para o nicho"
+    }
+  ]
+}
+
+Para stories: `format_details` deve ser `{}`. `hook` é a ideia central. `caption_draft` é a descrição de como executar.
+Para outros tipos: preencha `format_details` conforme o tipo.

@@ -4,14 +4,14 @@ class OwnPost < ApplicationRecord
   belongs_to :account
   belongs_to :own_profile
   belongs_to :inspired_by_suggestion,
-    class_name: 'ContentSuggestion',
+    class_name: "ContentSuggestion",
     optional: true
 
   enum :post_type, {
-    reel:     'reel',
-    carousel: 'carousel',
-    image:    'image',
-    story:    'story'
+    reel:     "reel",
+    carousel: "carousel",
+    image:    "image",
+    story:    "story"
   }
 
   enum :transcript_status, {
@@ -34,17 +34,17 @@ class OwnPost < ApplicationRecord
   scope :recent, -> { order(posted_at: :desc) }
   scope :reels,  -> { where(post_type: :reel) }
   scope :needs_metrics_refresh, -> {
-    where('metrics_last_fetched_at IS NULL OR metrics_last_fetched_at < ?', 23.hours.ago)
+    where("metrics_last_fetched_at IS NULL OR metrics_last_fetched_at < ?", 23.hours.ago)
   }
 
   def engagement_rate
-    metrics['engagement_rate']
+    metrics["engagement_rate"]
   end
 
   def add_metrics_snapshot(new_metrics)
-    snapshot = new_metrics.merge('captured_at' => Time.current.iso8601)
+    snapshot = new_metrics.merge("captured_at" => Time.current.iso8601)
     self.metrics = new_metrics
-    self.metrics_history = (metrics_history || []) + [snapshot]
+    self.metrics_history = (metrics_history || []) + [ snapshot ]
     self.metrics_last_fetched_at = Time.current
   end
 end

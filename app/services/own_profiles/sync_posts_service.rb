@@ -1,10 +1,10 @@
 module OwnProfiles
   class SyncPostsService
     MEDIA_TYPE_MAP = {
-      'REEL'           => 'reel',
-      'CAROUSEL_ALBUM' => 'carousel',
-      'IMAGE'          => 'image',
-      'VIDEO'          => 'reel'
+      "REEL"           => "reel",
+      "CAROUSEL_ALBUM" => "carousel",
+      "IMAGE"          => "image",
+      "VIDEO"          => "reel"
     }.freeze
 
     def initialize(own_profile)
@@ -15,7 +15,7 @@ module OwnProfiles
     def call
       unless @own_profile.token_valid?
         return OwnProfiles::Result.failure(
-          error: 'Token ausente ou expirado',
+          error: "Token ausente ou expirado",
           error_code: :invalid_token
         )
       end
@@ -24,7 +24,7 @@ module OwnProfiles
 
       raw_posts = fetch_media(api)
       if raw_posts.empty?
-        return OwnProfiles::Result.failure(error: 'Nenhum post retornado pela API')
+        return OwnProfiles::Result.failure(error: "Nenhum post retornado pela API")
       end
 
       synced_count = 0
@@ -60,30 +60,30 @@ module OwnProfiles
 
     def fetch_media(api)
       api.fetch_media(
-        fields: 'id,caption,media_type,permalink,timestamp',
+        fields: "id,caption,media_type,permalink,timestamp",
         limit: 50
       )
     end
 
     def sync_single_post(api, raw)
-      post_type = MEDIA_TYPE_MAP[raw['media_type']] || 'image'
+      post_type = MEDIA_TYPE_MAP[raw["media_type"]] || "image"
 
       ActsAsTenant.with_tenant(@account) do
         own_post = OwnPost.find_or_initialize_by(
           own_profile: @own_profile,
-          instagram_post_id: raw['id']
+          instagram_post_id: raw["id"]
         )
 
         own_post.assign_attributes(
           account:   @account,
           post_type: post_type,
-          caption:   raw['caption'],
-          permalink: raw['permalink'],
-          posted_at: raw['timestamp']&.then { |t| Time.zone.parse(t) }
+          caption:   raw["caption"],
+          permalink: raw["permalink"],
+          posted_at: raw["timestamp"]&.then { |t| Time.zone.parse(t) }
         )
 
         if own_post.new_record? || own_post.metrics.blank?
-          metrics = fetch_insights(api, raw['id'], post_type)
+          metrics = fetch_insights(api, raw["id"], post_type)
           own_post.add_metrics_snapshot(metrics) if metrics.present?
         end
 
@@ -94,11 +94,11 @@ module OwnProfiles
 
     def fetch_insights(api, media_id, post_type)
       metric_names = case post_type
-                     when 'reel'     then Meta::GraphApi::REEL_METRICS
-                     when 'carousel' then Meta::GraphApi::CAROUSEL_METRICS
-                     when 'story'    then Meta::GraphApi::STORY_METRICS
-                     else                 Meta::GraphApi::IMAGE_METRICS
-                     end
+      when "reel"     then Meta::GraphApi::REEL_METRICS
+      when "carousel" then Meta::GraphApi::CAROUSEL_METRICS
+      when "story"    then Meta::GraphApi::STORY_METRICS
+      else                 Meta::GraphApi::IMAGE_METRICS
+      end
 
       api.fetch_post_insights(media_id, metric_names: metric_names)
     rescue => e
@@ -111,7 +111,7 @@ module OwnProfiles
 
     def schedule_future_metrics(own_post)
       base_time = own_post.posted_at || Time.current
-      [1, 7, 30].each do |days|
+      [ 1, 7, 30 ].each do |days|
         run_at = base_time + days.days
         next if run_at < Time.current
 

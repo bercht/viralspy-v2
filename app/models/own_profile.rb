@@ -13,12 +13,12 @@ class OwnProfile < ApplicationRecord
 
   scope :with_valid_token, -> {
     where.not(meta_access_token: nil)
-         .where('meta_token_expires_at > ?', Time.current)
+         .where("meta_token_expires_at > ?", Time.current)
   }
 
   scope :expiring_soon, -> {
-    where('meta_token_expires_at < ?', 7.days.from_now)
-         .where('meta_token_expires_at > ?', Time.current)
+    where("meta_token_expires_at < ?", 7.days.from_now)
+         .where("meta_token_expires_at > ?", Time.current)
   }
 
   def token_valid?
@@ -32,6 +32,6 @@ class OwnProfile < ApplicationRecord
   private
 
   def normalize_handle
-    self.instagram_handle = instagram_handle.to_s.strip.delete('@').downcase
+    self.instagram_handle = instagram_handle.to_s.strip.delete("@").downcase
   end
 end

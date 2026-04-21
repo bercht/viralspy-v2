@@ -25,8 +25,7 @@
           playsinline
           class="w-full rounded-md bg-black"
           style="--progress: 0%; max-height: 70vh;"
-          aria-label="Vídeo gerado"
-        >
+          aria-label="Vídeo gerado">
           <source src="<%= @generated_media.output_url %>" type="video/mp4">
           Seu navegador não suporta reprodução de vídeo.
         </video>
@@ -63,8 +62,7 @@
           type="button"
           onclick="navigator.clipboard.writeText(this.closest('section').querySelector('p').textContent.trim()); this.textContent = 'Copiado!'; setTimeout(() => this.textContent = 'Copiar', 2000)"
           class="rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          aria-label="Copiar legenda"
-        >Copiar</button>
+          aria-label="Copiar legenda">Copiar</button>
       </div>
       <p class="whitespace-pre-wrap text-sm text-gray-700"><%= suggestion.caption_draft.presence || "Nenhuma legenda disponível." %></p>
     </section>
@@ -78,8 +76,7 @@
             type="button"
             onclick="navigator.clipboard.writeText(this.closest('section').querySelector('.hashtags-text').textContent.trim()); this.textContent = 'Copiado!'; setTimeout(() => this.textContent = 'Copiar', 2000)"
             class="rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Copiar hashtags"
-          >Copiar</button>
+            aria-label="Copiar hashtags">Copiar</button>
         </div>
         <div class="hashtags-text flex flex-wrap gap-2">
           <% Array(suggestion.suggested_hashtags).each do |tag| %>

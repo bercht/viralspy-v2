@@ -1,6 +1,6 @@
 module Meta
   class GraphApi
-    BASE_URL = 'https://graph.instagram.com/v21.0'.freeze
+    BASE_URL = "https://graph.instagram.com/v21.0".freeze
 
     class AuthenticationError < StandardError; end
     class RateLimitError < StandardError; end
@@ -23,23 +23,23 @@ module Meta
     end
 
     def fetch_media(fields: nil, limit: 25)
-      default_fields = 'id,caption,media_type,permalink,timestamp'
-      response = get('/me/media', {
+      default_fields = "id,caption,media_type,permalink,timestamp"
+      response = get("/me/media", {
         fields: fields || default_fields,
         limit: limit
       })
-      response['data'] || []
+      response["data"] || []
     end
 
     def fetch_post_insights(media_id, metric_names:)
       response = get("/#{media_id}/insights", {
-        metric: metric_names.join(',')
+        metric: metric_names.join(",")
       })
-      parse_insights(response['data'] || [])
+      parse_insights(response["data"] || [])
     end
 
-    def fetch_profile(fields: 'id,username,name,biography,followers_count,media_count')
-      get('/me', { fields: fields })
+    def fetch_profile(fields: "id,username,name,biography,followers_count,media_count")
+      get("/me", { fields: fields })
     end
 
     private
@@ -59,11 +59,11 @@ module Meta
       raise AuthenticationError, "Token inválido ou expirado (401)" if response.code == 401
       raise RateLimitError, "Rate limit atingido (429)" if response.code == 429
 
-      if body.is_a?(Hash) && body['error'].present?
-        error = body['error']
+      if body.is_a?(Hash) && body["error"].present?
+        error = body["error"]
         raise ApiError.new(
-          error['message'] || 'Erro desconhecido da Graph API',
-          code: error['code']
+          error["message"] || "Erro desconhecido da Graph API",
+          code: error["code"]
         )
       end
 
@@ -76,9 +76,9 @@ module Meta
 
     def parse_insights(data)
       data.each_with_object({}) do |item, hash|
-        name   = item['name']
-        values = item['values']
-        value  = values&.first&.dig('value') || values&.first
+        name   = item["name"]
+        values = item["values"]
+        value  = values&.first&.dig("value") || values&.first
         hash[name] = value
       end
     end

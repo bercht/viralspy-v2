@@ -1,0 +1,19 @@
+<div class="mb-6 flex flex-wrap gap-2">
+  <% current_path = request.path %>
+
+  <%= link_to settings_api_keys_path,
+      class: [
+        "rounded-lg border px-3 py-2 text-sm font-medium",
+        (current_path == settings_api_keys_path ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50")
+      ].join(" ") do %>
+    <%= t("settings.navigation.api_keys") %>
+  <% end %>
+
+  <%= link_to edit_settings_llm_preferences_path,
+      class: [
+        "rounded-lg border px-3 py-2 text-sm font-medium",
+        (current_path == edit_settings_llm_preferences_path ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50")
+      ].join(" ") do %>
+    <%= t("settings.navigation.llm_preferences") %>
+  <% end %>
+</div>

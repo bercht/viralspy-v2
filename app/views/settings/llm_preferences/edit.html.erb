@@ -1,0 +1,116 @@
+<div class="mx-auto max-w-4xl px-4 py-8">
+  <header class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900"><%= t("settings.llm_preferences.title") %></h1>
+    <p class="mt-2 text-sm text-gray-500"><%= t("settings.llm_preferences.subtitle") %></p>
+  </header>
+
+  <%= render "settings/navigation" %>
+
+  <% if @available_providers.empty? %>
+    <section class="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+      <p class="text-sm text-yellow-800">
+        <%= t("settings.llm_preferences.empty") %>
+        <%= link_to t("settings.llm_preferences.api_keys_link"), settings_api_keys_path, class: "font-medium underline" %>.
+      </p>
+    </section>
+  <% end %>
+
+  <%= form_with url: settings_llm_preferences_path, method: :patch, class: "space-y-6" do %>
+    <section class="rounded-lg border border-gray-200 bg-white p-5">
+      <h2 class="mb-1 text-base font-semibold text-gray-900"><%= t("settings.llm_preferences.sections.transcription.title") %></h2>
+      <p class="mb-4 text-xs text-gray-500"><%= t("settings.llm_preferences.sections.transcription.description") %></p>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-gray-700"><%= t("settings.llm_preferences.provider_label") %></label>
+        <%= select_tag "llm_preferences[transcription_provider]",
+            options_for_select(
+              transcription_provider_options(@available_providers),
+              @preferences["transcription_provider"]
+            ),
+            class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500",
+            disabled: (@available_providers & %w[openai assemblyai]).empty? %>
+      </div>
+
+      <% unless (@available_providers & %w[openai assemblyai]).any? %>
+        <p class="mt-2 text-xs text-red-500"><%= t("settings.llm_preferences.sections.transcription.missing") %></p>
+      <% end %>
+    </section>
+
+    <section class="rounded-lg border border-gray-200 bg-white p-5">
+      <h2 class="mb-1 text-base font-semibold text-gray-900"><%= t("settings.llm_preferences.sections.analysis.title") %></h2>
+      <p class="mb-4 text-xs text-gray-500"><%= t("settings.llm_preferences.sections.analysis.description") %></p>
+
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700"><%= t("settings.llm_preferences.provider_label") %></label>
+          <%= select_tag "llm_preferences[analysis_provider]",
+              options_for_select(
+                llm_provider_options(@available_providers),
+                @preferences["analysis_provider"]
+              ),
+              class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500",
+              disabled: (@available_providers & %w[openai anthropic]).empty? %>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700"><%= t("settings.llm_preferences.model_label") %></label>
+          <%= select_tag "llm_preferences[analysis_model]",
+              options_for_select(
+                analysis_model_options(@preferences["analysis_provider"]),
+                @preferences["analysis_model"]
+              ),
+              class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+        </div>
+      </div>
+
+      <% unless (@available_providers & %w[openai anthropic]).any? %>
+        <p class="mt-2 text-xs text-red-500"><%= t("settings.llm_preferences.sections.analysis.missing") %></p>
+      <% end %>
+    </section>
+
+    <section class="rounded-lg border border-gray-200 bg-white p-5">
+      <h2 class="mb-1 text-base font-semibold text-gray-900"><%= t("settings.llm_preferences.sections.generation.title") %></h2>
+      <p class="mb-4 text-xs text-gray-500"><%= t("settings.llm_preferences.sections.generation.description") %></p>
+
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700"><%= t("settings.llm_preferences.provider_label") %></label>
+          <%= select_tag "llm_preferences[generation_provider]",
+              options_for_select(
+                llm_provider_options(@available_providers),
+                @preferences["generation_provider"]
+              ),
+              class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500",
+              disabled: (@available_providers & %w[openai anthropic]).empty? %>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700"><%= t("settings.llm_preferences.model_label") %></label>
+          <%= select_tag "llm_preferences[generation_model]",
+              options_for_select(
+                generation_model_options(@preferences["generation_provider"]),
+                @preferences["generation_model"]
+              ),
+              class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+        </div>
+      </div>
+
+      <% unless (@available_providers & %w[openai anthropic]).any? %>
+        <p class="mt-2 text-xs text-red-500"><%= t("settings.llm_preferences.sections.generation.missing") %></p>
+      <% end %>
+    </section>
+
+    <section class="rounded-lg border border-indigo-200 bg-indigo-50 p-4">
+      <h3 class="mb-2 text-sm font-semibold text-indigo-900"><%= t("settings.llm_preferences.summary.title") %></h3>
+      <ul class="space-y-1 text-xs text-indigo-700">
+        <li><%= t("settings.llm_preferences.summary.transcription", provider: @preferences["transcription_provider"]) %></li>
+        <li><%= t("settings.llm_preferences.summary.analysis", provider: @preferences["analysis_provider"], model: @preferences["analysis_model"]) %></li>
+        <li><%= t("settings.llm_preferences.summary.generation", provider: @preferences["generation_provider"], model: @preferences["generation_model"]) %></li>
+      </ul>
+    </section>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <%= submit_tag t("settings.llm_preferences.save"),
+          class: "inline-flex cursor-pointer items-center rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700" %>
+      <%= link_to t("settings.llm_preferences.back_to_api_keys"), settings_api_keys_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,29 @@
+<div id="generated_media_<%= generated_media.id %>"
+     class="mt-3 rounded-md p-3 <%= generated_media.completed? ? 'border border-green-200 bg-green-50' : generated_media.failed? ? 'border border-red-200 bg-red-50' : 'border border-gray-200 bg-gray-50' %>">
+
+  <% if generated_media.pending? || generated_media.processing? %>
+    <div class="flex items-center gap-2">
+      <div class="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" aria-hidden="true"></div>
+      <span class="text-sm text-gray-500">Gerando vídeo... pode levar alguns minutos.</span>
+    </div>
+
+  <% elsif generated_media.completed? %>
+    <div class="flex items-center justify-between">
+      <span class="text-sm font-medium text-green-700">✓ Vídeo gerado</span>
+      <a href="<%= generated_media.output_url %>"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="rounded-md bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+         aria-label="Abrir vídeo gerado em nova aba">
+        Abrir vídeo
+      </a>
+    </div>
+    <p class="mt-1 text-xs text-gray-500">Link válido por ~7 dias. Faça download para guardar.</p>
+
+  <% elsif generated_media.failed? %>
+    <div>
+      <span class="text-sm font-medium text-red-700">✗ Falha na geração</span>
+      <p class="mt-0.5 text-xs text-red-600"><%= generated_media.error_message %></p>
+    </div>
+  <% end %>
+</div>

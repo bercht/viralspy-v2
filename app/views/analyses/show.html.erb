@@ -1,4 +1,5 @@
 <%= turbo_stream_from "analysis_#{@analysis.id}" %>
+<%= turbo_stream_from "media_generation_#{current_tenant.id}" %>
 
 <div class="mx-auto max-w-5xl">
   <header class="mb-8">

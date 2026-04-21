@@ -21,7 +21,7 @@ class GeneratedMediasController < ApplicationController
             locals: { suggestion: @content_suggestion, last_media: outcome.generated_media }
           )
         end
-        format.html { redirect_to analysis_path(@content_suggestion.analysis) }
+        format.html { redirect_to competitor_analysis_path(@content_suggestion.analysis.competitor, @content_suggestion.analysis) }
       end
     else
       respond_to do |format|
@@ -33,7 +33,7 @@ class GeneratedMediasController < ApplicationController
           )
         end
         format.html do
-          redirect_to analysis_path(@content_suggestion.analysis), alert: outcome.error
+          redirect_to competitor_analysis_path(@content_suggestion.analysis.competitor, @content_suggestion.analysis), alert: outcome.error
         end
       end
     end

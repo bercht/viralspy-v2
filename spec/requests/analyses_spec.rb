@@ -6,6 +6,7 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
   let(:account) { create(:account) }
   let(:user) { create(:user, account: account) }
   let(:competitor) { ActsAsTenant.with_tenant(account) { create(:competitor, account: account, niche: "Marketing imobiliário") } }
+  let!(:playbook) { ActsAsTenant.with_tenant(account) { create(:playbook, account: account) } }
   let(:other_account) { create(:account) }
   let(:other_competitor) { ActsAsTenant.with_tenant(other_account) { create(:competitor, account: other_account) } }
 
@@ -42,6 +43,20 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
 
         expect(response).to redirect_to(edit_competitor_path(competitor))
         expect(flash[:alert]).to eq(I18n.t("analyses.errors.competitor_niche_missing"))
+      end
+    end
+
+    context "quando account não tem playbooks" do
+      before do
+        stub_ready_for_analysis
+        ActsAsTenant.with_tenant(account) { account.playbooks.destroy_all }
+      end
+
+      it "redireciona para criação de playbook com flash de alerta" do
+        get new_competitor_analysis_path(competitor)
+
+        expect(response).to redirect_to(new_playbook_path)
+        expect(flash[:alert]).to eq(I18n.t("analyses.errors.no_playbook"))
       end
     end
 
@@ -122,6 +137,19 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
 
         expect(response).to redirect_to(edit_competitor_path(competitor))
         expect(flash[:alert]).to eq(I18n.t("analyses.errors.competitor_niche_missing"))
+      end
+    end
+
+    context "quando account não tem playbooks" do
+      before { ActsAsTenant.with_tenant(account) { account.playbooks.destroy_all } }
+
+      it "bloqueia criação e redireciona para novo playbook" do
+        expect {
+          post competitor_analyses_path(competitor), params: { analysis: { max_posts: 50 } }
+        }.not_to change { Analysis.unscoped.count }
+
+        expect(response).to redirect_to(new_playbook_path)
+        expect(flash[:alert]).to eq(I18n.t("analyses.errors.no_playbook"))
       end
     end
   end

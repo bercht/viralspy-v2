@@ -4,6 +4,7 @@ class AnalysesController < ApplicationController
 
   before_action :set_competitor
   before_action :require_competitor_niche!, only: [ :new, :create ]
+  before_action :require_playbook!, only: [ :new, :create ]
   before_action :require_api_credentials_configured!, only: [ :new, :create ]
   before_action :set_analysis, only: [ :show ]
 
@@ -54,6 +55,13 @@ class AnalysesController < ApplicationController
 
     redirect_to edit_competitor_path(@competitor),
                 alert: t("analyses.errors.competitor_niche_missing")
+  end
+
+  def require_playbook!
+    return if current_account.playbooks.any?
+
+    redirect_to new_playbook_path,
+                alert: t("analyses.errors.no_playbook")
   end
 
   def attach_playbooks(analysis)

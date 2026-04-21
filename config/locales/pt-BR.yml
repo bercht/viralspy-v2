@@ -270,6 +270,7 @@ pt-BR:
       create_failed: "Não foi possível iniciar a análise. Tente novamente."
     errors:
       competitor_niche_missing: "Preencha o nicho deste perfil antes de iniciar uma análise."
+      no_playbook: "Crie ao menos um playbook antes de iniciar uma análise."
     new:
       title: "Nova análise"
       subtitle: "Rode uma análise do perfil @%{handle} pra gerar insights e sugestões de conteúdo."

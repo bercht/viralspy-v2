@@ -5,10 +5,8 @@ module Webhooks
     skip_before_action :authenticate_user!
     skip_before_action :set_current_tenant
 
-    before_action :read_raw_body
-    before_action :verify_signature
+    before_action :verify_token
 
-    SIGNATURE_HEADER   = "X-Signature"
     VIDEO_STATUS_EVENT = "video_status"
 
     def receive
@@ -53,28 +51,21 @@ module Webhooks
 
     private
 
-    def read_raw_body
-      @raw_body = request.body.tap(&:rewind).read
-    end
+    def verify_token
+      expected = ENV["HEYGEN_WEBHOOK_TOKEN"]
 
-    def verify_signature
-      secret = ENV["HEYGEN_WEBHOOK_SECRET"]
-
-      if secret.blank?
-        Rails.logger.error("[Webhooks::HeygenController] HEYGEN_WEBHOOK_SECRET not configured")
+      if expected.blank?
+        Rails.logger.error("[Webhooks::HeygenController] HEYGEN_WEBHOOK_TOKEN not configured")
         return head :internal_server_error
       end
 
-      received = request.headers[SIGNATURE_HEADER].to_s
-      expected = OpenSSL::HMAC.hexdigest("SHA256", secret, @raw_body)
-
-      unless ActiveSupport::SecurityUtils.secure_compare(received, expected)
+      unless ActiveSupport::SecurityUtils.secure_compare(params[:token].to_s, expected)
         head :unauthorized
       end
     end
 
     def payload
-      @payload ||= JSON.parse(@raw_body)
+      @payload ||= JSON.parse(request.body.tap(&:rewind).read)
     rescue JSON::ParserError
       {}
     end

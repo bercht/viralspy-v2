@@ -2,7 +2,7 @@
 require "rails_helper"
 
 RSpec.describe "Webhooks::Heygen", type: :request, skip_tenant: true do
-  let(:webhook_secret) { "test_webhook_secret_abc" }
+  let(:webhook_token) { "test_webhook_token_abc" }
 
   let(:account) do
     ActsAsTenant.without_tenant { create(:account) }
@@ -23,24 +23,17 @@ RSpec.describe "Webhooks::Heygen", type: :request, skip_tenant: true do
   end
 
   around do |example|
-    original = ENV["HEYGEN_WEBHOOK_SECRET"]
-    ENV["HEYGEN_WEBHOOK_SECRET"] = webhook_secret
+    original = ENV["HEYGEN_WEBHOOK_TOKEN"]
+    ENV["HEYGEN_WEBHOOK_TOKEN"] = webhook_token
     example.run
-    ENV["HEYGEN_WEBHOOK_SECRET"] = original
+    ENV["HEYGEN_WEBHOOK_TOKEN"] = original
   end
 
-  def sign(body, secret: webhook_secret)
-    OpenSSL::HMAC.hexdigest("SHA256", secret, body)
-  end
-
-  def post_webhook(payload, secret: webhook_secret)
-    body = payload.to_json
+  def post_webhook(payload, token: webhook_token)
     post "/webhooks/heygen",
-      params: body,
-      headers: {
-        "Content-Type" => "application/json",
-        "X-Signature"  => sign(body, secret: secret)
-      }
+      params: payload.to_json,
+      headers: { "Content-Type" => "application/json" },
+      env: { "QUERY_STRING" => "token=#{token}" }
   end
 
   def completed_payload(video_id: "vid_abc123")
@@ -67,19 +60,13 @@ RSpec.describe "Webhooks::Heygen", type: :request, skip_tenant: true do
     }
   end
 
-  # ─── Assinatura inválida ───────────────────────────────────────────────────
+  # ─── Token inválido ────────────────────────────────────────────────────────
 
-  describe "assinatura inválida" do
+  describe "token inválido" do
     it "retorna 401 e não altera o banco" do
-      generated_media # materializa o registro
+      generated_media
 
-      body = completed_payload.to_json
-      post "/webhooks/heygen",
-        params: body,
-        headers: {
-          "Content-Type" => "application/json",
-          "X-Signature"  => "assinatura_errada"
-        }
+      post_webhook(completed_payload, token: "token_errado")
 
       expect(response).to have_http_status(:unauthorized)
       expect(generated_media.reload.status).to eq("processing")
@@ -90,7 +77,7 @@ RSpec.describe "Webhooks::Heygen", type: :request, skip_tenant: true do
 
   describe "evento desconhecido" do
     it "retorna 200 sem efeito no banco" do
-      generated_media # materializa o registro
+      generated_media
 
       post_webhook({ event_type: "some_other_event", event_data: {} })
 
@@ -182,25 +169,19 @@ RSpec.describe "Webhooks::Heygen", type: :request, skip_tenant: true do
     end
   end
 
-  # ─── Secret não configurado ───────────────────────────────────────────────
+  # ─── Token não configurado ────────────────────────────────────────────────
 
-  describe "secret não configurado" do
+  describe "token não configurado" do
     around do |example|
-      original = ENV.delete("HEYGEN_WEBHOOK_SECRET")
+      original = ENV.delete("HEYGEN_WEBHOOK_TOKEN")
       example.run
-      ENV["HEYGEN_WEBHOOK_SECRET"] = original
+      ENV["HEYGEN_WEBHOOK_TOKEN"] = original
     end
 
     it "retorna 500 sem alterar o banco" do
       generated_media
 
-      body = completed_payload.to_json
-      post "/webhooks/heygen",
-        params: body,
-        headers: {
-          "Content-Type" => "application/json",
-          "X-Signature"  => "qualquer_coisa"
-        }
+      post_webhook(completed_payload)
 
       expect(response).to have_http_status(:internal_server_error)
       expect(generated_media.reload.status).to eq("processing")

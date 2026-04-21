@@ -37,6 +37,14 @@ RSpec.describe Account, type: :model do
       expect { account.llm_preferences_with_defaults }.not_to raise_error
       expect(account.llm_preferences_with_defaults["analysis_provider"]).to eq("openai")
     end
+
+    it "normalizes symbol keys to string keys" do
+      account.llm_preferences = { analysis_provider: "anthropic" }
+      prefs = account.llm_preferences_with_defaults
+
+      expect(prefs["analysis_provider"]).to eq("anthropic")
+      expect(prefs.key?(:analysis_provider)).to be(false)
+    end
   end
 
   describe "#api_credential_for" do
@@ -159,7 +167,7 @@ RSpec.describe Account, type: :model do
         create(:api_credential, account: account, provider: "openai")
         create(:api_credential, account: account, provider: "anthropic")
 
-        expect(account.missing_credentials_for_analysis).to eq([:assemblyai])
+        expect(account.missing_credentials_for_analysis).to eq([ :assemblyai ])
       end
     end
 
@@ -178,6 +186,18 @@ RSpec.describe Account, type: :model do
 
         expect(account.missing_credentials_for_analysis).to contain_exactly(:assemblyai, :anthropic)
         expect(account.missing_credentials_for_analysis.length).to eq(2)
+      end
+    end
+
+    it "ignores blank provider preferences" do
+      ActsAsTenant.with_tenant(account) do
+        account.update!(llm_preferences: {
+          "analysis_provider" => "",
+          "generation_provider" => "anthropic",
+          "transcription_provider" => "assemblyai"
+        })
+
+        expect(account.missing_credentials_for_analysis).to contain_exactly(:assemblyai, :anthropic)
       end
     end
   end

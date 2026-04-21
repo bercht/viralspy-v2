@@ -14,7 +14,9 @@ Rails.application.routes.draw do
     resources :analyses, only: [ :new, :create, :show ]
   end
 
-  resources :content_suggestions, only: [ :update ]
+  resources :content_suggestions, only: [ :update ] do
+    resources :generated_medias, only: [ :create ]
+  end
 
   resources :playbooks do
     resources :playbook_versions, only: [ :index, :show ], shallow: true
@@ -34,6 +36,10 @@ Rails.application.routes.draw do
       post   "providers/:provider", to: "api_keys#create",  as: :create_for
       patch  "providers/:provider", to: "api_keys#update",  as: :update_for
       delete "providers/:provider", to: "api_keys#destroy", as: :destroy_for
+    end
+    resource :llm_preferences, only: [ :edit, :update ]
+    resource :media_generation, only: [ :show, :update ], controller: "media_generation" do
+      post :validate_key, on: :collection
     end
   end
 

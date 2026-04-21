@@ -29,7 +29,9 @@ module RequiresApiCredentials
   end
 
   def api_credentials_redirect_target
-    if main_app.respond_to?(:settings_api_keys_path)
+    if main_app.respond_to?(:edit_settings_llm_preferences_path)
+      main_app.edit_settings_llm_preferences_path
+    elsif main_app.respond_to?(:settings_api_keys_path)
       main_app.settings_api_keys_path
     else
       main_app.root_path

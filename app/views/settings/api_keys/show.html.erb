@@ -4,6 +4,8 @@
     <p class="mt-2 text-body text-text-muted"><%= t("settings.api_keys.subtitle") %></p>
   </header>
 
+  <%= render "settings/navigation" %>
+
   <% if @credentials_by_provider.values.none?(&:present?) %>
     <section class="mb-6 rounded-feature border border-border-subtle bg-surface-canvas p-6 shadow-card">
       <h2 class="text-heading text-text-body"><%= t("settings.api_keys.empty.title") %></h2>

@@ -3,6 +3,7 @@ class ContentSuggestion < ApplicationRecord
 
   belongs_to :account
   belongs_to :analysis
+  has_many :generated_medias, dependent: :destroy
 
   enum :content_type, {
     reel: 0,

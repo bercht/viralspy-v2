@@ -6,9 +6,11 @@
 
 ## Status atual
 
-**Fase atual:** Fase 2 (próxima)
-**Última fase concluída:** Fase 1.6 (Interface Web) — concluída e mergeada em main
-**Próxima fase esperada:** Fase 2
+**Fase atual:** Fase 2.0 (Fix Anthropic) — pré-requisito, em andamento
+**Última fase concluída:** Fase 1.6 (Interface Web) — mergeada em main
+**Próxima fase esperada:** Fase 2.0 → 2.1 → 2.2 → 2.3 → 2.4
+
+**Contexto:** MVP funcional (signup → BYOK → competitor → análise → sugestões). 658 specs verdes. Fase 1.7 (polimento MVP original) e todo roadmap pós-MVP foi repriorizado para uso pessoal + 4-5 convidados. Sem beta pago, sem Stripe, sem landing pública no horizonte curto.
 
 ---
 
@@ -150,50 +152,73 @@ Criar esqueleto Rails, Docker, gems base, banco inicializado.
 
 ---
 
-## Fase 1.6a — BYOK: API Keys e Preferências de Provider ✅ CONCLUÍDA
+## Fase 1.6a — BYOK: API Keys e Preferências de Provider ⚠️ NOVA
 
-**Duração real:** ~5-7 dias (T0-T7 em ~10 commits ao todo)
-**Resultado:** 626+ specs verdes, BYOK funcional end-to-end, UI de API Keys em `/settings/api_keys`
+**Duração estimada:** 2-3 dias
+**Commits:** 2
 
-### Entregas
+### Objetivo
 
-- T0: Atualização de docs (ADR-008, ADR-013, 05_GLOSSARIO, 00_NORTE, 03_ROADMAP)
-- T1: Model `ApiCredential` + `llm_preferences` (JSONB) no Account, `Account#llm_preferences_with_defaults`, `Account#api_credential_for`
-- T2: `ApiCredentials::ValidateService` síncrono com tratamento de 401/429/timeout por provider
-- T3: Steps do pipeline (`AnalyzeStep`, `GenerateSuggestionsStep`, `TranscribeStep`) passam a resolver provider/chave via `account`, zero leitura de ENV
-- T4: `Account#ready_for_analysis?` + `Account#missing_credentials_for_analysis` + concern `RequiresApiCredentials` (dormente)
-- T5a: Design system (tokens Tailwind v4, Inter, layout três-superfícies, página `/design-system` dev-only)
-- T5b: UI de API Keys (`Settings::ApiKeysController`, 3 cards por provider, validação síncrona, Stimulus `api_key_form`, `ApiCredentialPolicy`)
-- T7: Limpeza de ENVs deprecated + rake task `viralspy:dev_setup_credentials`
+Implementar o sistema de chaves próprias do usuário (ADR-013) antes de qualquer UI de análise. Pré-requisito para o usuário conseguir rodar sua primeira análise.
 
-### Descobertas técnicas importantes
+### Escopo
 
-- Rails 7.1 bloqueia nomes `valid/invalid` em enum mesmo com `_prefix:` (conflito com `#valid?/#invalid?` de `ActiveRecord::Validations`). Enum real de `ApiCredential#last_validation_status`: `unknown/verified/failed/quota_exceeded`.
-- Projeto usa `tailwindcss-rails` v4 (Tailwind v4), não v3 — config vai no bloco `@theme {}` no CSS (`app/assets/tailwind/application.css`), não em `tailwind.config.js`.
-- Steps do pipeline carregam provider/model/api_key via métodos privados `provider_for`, `model_for`, `api_key_for` — duplicação entre `AnalyzeStep` e `GenerateSuggestionsStep` é intencional; refactor pra concern só quando aparecer terceiro consumidor.
-- Anthropic gem retorna objetos Ruby com métodos, não Hash — mocks em specs precisam usar `instance_double`.
-- `shoulda-matchers` não funciona em models com `acts_as_tenant` + `require_tenant = true` — escrever validações explícitas envolvendo em `ActsAsTenant.with_tenant(account) do ... end`.
+- Model `ApiCredential` com `encrypts :encrypted_api_key`
+- JSONB `llm_preferences` no `Account`
+- `ApiCredentials::ValidateService` — chamada de teste mínima ao provider
+- Atualizar `LLM::Gateway` para resolver provider/chave via `account` (não ENV)
+- Atualizar `Transcription::Factory` idem
+- Controller + views de configuração: tela "API Keys" + tela "Preferências de Provider"
+- Onboarding gate: antes da primeira análise, verifica chaves e redireciona se não configuradas
+- Tutorial inline com links para geração de chaves em cada provider
+
+### Critério de aceite
+
+- Usuário sem chaves configuradas não consegue iniciar análise — é redirecionado com mensagem clara
+- Usuário configura chave OpenAI → sistema valida → badge "válida" aparece
+- Usuário configura chave Anthropic → sistema valida → badge "válida" aparece
+- Chave inválida → badge "inválida" com mensagem específica
+- Quota esgotada → badge "quota esgotada" com link para dashboard do provider
+- Pipeline de análise usa chaves do usuário, não ENV
 
 ---
 
-## Fase 1.6 — Interface Web ✅ CONCLUÍDA
+## Fase 1.6 — Interface Web
 
-**Commits:** ~20
+**Duração estimada:** 5-7 dias
+**Commits:** 2-3
 
-### Entregas (T1–T5)
+### Objetivo
 
-- **T1** ✅ Controllers + Views: CompetitorsController, AnalysesController, ContentSuggestionsController
-- **T2** ✅ Design system: tokens Tailwind, layout com navbar, flash responsivo
-- **T3** ✅ Turbo Stream em tempo real: análise show com progresso via ActionCable
-- **T4** ✅ Visualização rica do resultado: profile metrics, top posts, sugestões com save/discard/copy
-- **T5** ✅ Polimento: 7 empty states, responsividade mobile, system spec end-to-end
+UI completa para criar competitor, disparar análise, ver progresso e resultado.
 
-### Resultado
+### Escopo
 
-- Fluxo end-to-end funcional: signup → configurar chaves → criar competitor → rodar análise → ver resultado → salvar sugestão
-- System spec verde (5 examples, 0 failures)
-- Suite completa: 658 examples, 0 failures
-- Zero CSS custom, zero `@apply`, zero `style=""`
+**Controllers:**
+- `CompetitorsController` (index, new, create, show, destroy)
+- `AnalysesController` (create, show) — seleção de Playbooks ao criar
+- `ContentSuggestionsController` (update — save/discard)
+
+**Views principais:**
+- Competitors index + competitor show
+- Analysis new: input de handle + seleção de playbooks que receberão a análise
+- Analysis show: status em tempo real, profile metrics, top posts rankeados, 5 sugestões
+
+**Components:**
+- `StatusBadgeComponent`, `SuggestionCardComponent`
+- `ProfileMetricsComponent`, `PostRankingComponent`, `ProgressStepsComponent`
+
+**Stimulus controllers:**
+- `analysis_status_controller`, `copy_to_clipboard_controller`
+- `confirm_controller`, `tab_controller`
+
+### Critério de aceite
+
+- Fluxo end-to-end: cadastro → configurar chaves → criar competitor → rodar análise → ver resultado
+- Seleção de playbooks ao disparar análise funcional
+- Sugestões com save/discard funcionais
+- Zero CSS custom, zero classes criadas, zero CSS inline
+- System spec crítico verde
 
 ---
 
@@ -229,133 +254,13 @@ Coleta de feedback por 4-6 semanas antes de abrir para qualquer pagante.
 
 ---
 
-## Fases 2+ (planejamento revisado pós-ADRs 011-012-013)
+**Fase atual:** Fase 2.0 (Fix Anthropic) — pré-requisito, em andamento
+**Última fase concluída:** Fase 1.6 (Interface Web) — mergeada em main
+**Próxima fase esperada:** Fase 2.0 → 2.1 → 2.2 → 2.3 → 2.4
 
-Essas fases dependem de validação do MVP. **Não devem ser iniciadas sem confirmação do Curt.**
+**Contexto:** MVP funcional (signup → BYOK → competitor → análise → sugestões). 658 specs verdes. Fase 1.7 (polimento MVP original) e todo roadmap pós-MVP foi repriorizado para uso pessoal + 4-5 convidados. Sem beta pago, sem Stripe, sem landing pública no horizonte curto.
 
----
 
-### Fase 2.1 — Playbooks: Base de Conhecimento Viva (ADR-011)
-
-**Depende de:** MVP validado com beta, mínimo 20-30 análises no banco para o playbook ter material relevante.
-
-#### Escopo
-
-- Models: `Playbook`, `PlaybookVersion`, `PlaybookFeedback`, `AnalysisPlaybook`
-- `Analyses::UpdatePlaybookStep` — roda ao final do pipeline para cada playbook selecionado
-- UI de Playbooks: criar, editar, ver versões, histórico de diff
-- UI de Feedbacks: registrar feedback manual, feedback do Claude Project
-- Botão "Exportar Playbook" — gera markdown pronto para upload no Claude Project
-- Seleção de playbooks ao disparar análise (ainda não implementada)
-
-#### Critério de aceite
-
-- Análise completa → `UpdatePlaybookStep` roda → nova `PlaybookVersion` gerada
-- Usuário registra feedback → próxima atualização incorpora → `diff_summary` menciona
-- Exportar Playbook gera markdown válido e legível
-- Histórico de versões navegável na UI
-
----
-
-### Fase 2.2 — Billing com Stripe
-
-- Integração Stripe (conta separada do Fifty)
-- Tabela de planos (Starter / Pro / Agência)
-- Webhook handlers
-- Portal do cliente
-- Limites por plano: número de análises, número de playbooks, acesso a OwnProfile
-
----
-
-### Fase 2.3 — Monitoramento Automático
-
-- Agendamento recorrente de análises (semanal/quinzenal por competitor)
-- Notificação de novos posts virais do concorrente
-- Diff entre análises (tema X cresceu Y%)
-
----
-
-### Fase 2.4 — Integração API com Fifty
-
-- `ApiToken` ativo (escopo, rate limit)
-- `/api/v1/competitors`, `/api/v1/analyses`, `/api/v1/content_suggestions` (read-only)
-- Webhooks saídos (Analysis completed → Fifty)
-- Documentação da API
-
----
-
-### Fase 2.5 — Embeddings e Busca Semântica
-
-- Usar pgvector (habilitado desde Fase 0) para indexar posts + transcripts + sugestões + playbook
-- Buscar "sugestões similares a X" dentro do playbook
-- Agrupar temas automaticamente entre análises
-- Base para busca contextual no agente
-
----
-
-### Fase 3.1 — Perfil Próprio: OwnProfile + Meta Graph API (ADR-012)
-
-**Depende de:** Fase 2.1 (Playbooks) estar funcionando — o loop de resultado precisa de um playbook pra alimentar.
-
-#### Escopo
-
-- Models: `OwnProfile`, `OwnPost`, `StoryObservation`
-- Integração Meta Graph API: configuração de token, fetch de posts, fetch de métricas
-- `OwnPosts::FetchMetricsWorker` — job em D+1, D+7, D+30 após `posted_at`
-- Transcrição dos próprios reels via `Transcription::Factory`
-- UI: cadastro de OwnProfile + configuração de token Meta
-- UI: registro de OwnPost (manual + importação via Graph API)
-- UI: formulário rápido de `performance_rating` + `performance_notes`
-- UI: formulário de `StoryObservation` — registro manual de stories de concorrentes
-- Alerta de token Meta expirando (7 dias antes)
-
-#### Critério de aceite
-
-- Usuário configura OwnProfile com token Meta → sistema valida e exibe posts recentes
-- Métricas privadas (alcance, saves, plays) visíveis por post
-- OwnPost vinculado a ContentSuggestion que o inspirou
-- Transcrição do próprio reel funcional
-- performance_rating registrado → aparece no próximo UpdatePlaybookStep
-- StoryObservation registrada → aparece no próximo UpdatePlaybookStep
-
----
-
-### Fase 3.2 — Dashboard de Evolução do Perfil
-
-- `Insights::ProfileEvolutionStep` — job semanal por OwnProfile
-- Dashboard visual: frequência de postagem, mix de tipos, engagement médio ao longo do tempo
-- Comparação sugestão gerada vs resultado real
-- Seção "Evolução do Meu Perfil" incorporada automaticamente no Playbook vinculado
-- Correlações: tipo de gancho × resultado, horário × alcance, frequência × crescimento
-
----
-
-### Fase 4+ — Agendamento de Publicação
-
-- Integração com Meta Graph API (publicação direta)
-- Agendamento de posts via ViralSpy
-- Calendário de conteúdo
-
----
-
-### Fase 5+ — Geração de Imagens
-
-- DALL-E 3 ou similar
-- Templates imobiliários
-- Composição automática (foto do imóvel + texto sugerido)
-
----
-
-### Fase N — Scraper próprio com proxies residenciais
-
-- Remover dependência de Apify
-- Proxies residenciais rotativos
-- Anti-bot evasion
-- Só vale com escala suficiente para justificar complexidade
-
----
-
-## Quando criar uma Fase nova
 
 Se o Curt sugerir feature que:
 - **Não está no roadmap** → avaliar se cabe em fase existente ou vira nova fase numerada
@@ -365,4 +270,4 @@ Se o Curt sugerir feature que:
 
 ---
 
-**Última atualização:** pós-ADRs 011-012-013. Fase 1.6a adicionada (BYOK antes da UI principal). Fases 2+ reorganizadas: Billing virou 2.2, Playbooks virou 2.1 (prioridade maior). Fase 3.1 (OwnProfile + Meta Graph API) e Fase 3.2 (dashboard de evolução) adicionadas. Não-objetivo "Analytics do próprio perfil" removido do NORTE — agora é objetivo, mas nas fases corretas.
+**Última atualização:** pós-Fase 1.6 mergeada. Roadmap pós-MVP completamente redesenhado para uso pessoal + 4-5 convidados (sem beta pago, sem Stripe, sem landing). Nova sequência: 2.0 Fix Anthropic → 2.1 Playbook integral → 2.2 MediaGen HeyGen enxuto → 2.3 OwnProfile + Meta Graph → 2.4 Loop Completo. Fases antigas 2.2-2.5 e todo o 06_ROADMAP_PERFORMANCE.md arquivados como referência — ver "Fases futuras" no fim do arquivo.

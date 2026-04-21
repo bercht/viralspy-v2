@@ -2,6 +2,7 @@
 :queues:
   - [critical, 2]
   - [analyses, 2]
+  - [media_generation, 1]
   - [default, 1]
 
 production:

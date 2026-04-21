@@ -1,0 +1,68 @@
+<div class="mx-auto max-w-2xl px-4 py-8">
+  <h1 class="mb-6 text-2xl font-bold">Geração de Vídeo — HeyGen</h1>
+
+  <div class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+    <h2 class="mb-2 text-sm font-semibold text-blue-800">Como configurar</h2>
+    <ol class="list-inside list-decimal space-y-1 text-sm text-blue-700">
+      <li>Crie conta em <a href="https://www.heygen.com" target="_blank" rel="noopener noreferrer" class="underline">heygen.com</a></li>
+      <li>Acesse Settings → API Keys e gere uma chave</li>
+      <li>Anote o Avatar ID e Voice ID (disponíveis na biblioteca HeyGen)</li>
+      <li>Cole as informações abaixo e salve</li>
+    </ol>
+  </div>
+
+  <%= form_with url: settings_media_generation_path, method: :patch do |f| %>
+    <div class="mb-6">
+      <label class="mb-1 block text-sm font-medium">API Key HeyGen</label>
+      <%= f.password_field :api_key,
+            name: "settings[api_key]",
+            placeholder: @heygen_credential.persisted? ? "••••••••••••" : "Cole sua API key aqui",
+            class: "block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" %>
+
+      <% if @heygen_credential.persisted? %>
+        <div class="mt-2 flex items-center gap-2" data-controller="media-validation">
+          <% case @heygen_credential.last_validation_status %>
+          <% when "verified" %>
+            <span class="rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">✓ Válida</span>
+          <% when "failed" %>
+            <span class="rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">✗ Inválida</span>
+          <% else %>
+            <span class="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">Não verificada</span>
+          <% end %>
+          <button type="button"
+                  data-action="click->media-validation#validate"
+                  data-media-validation-target="button"
+                  class="text-xs text-blue-600 underline hover:text-blue-800">
+            Testar agora
+          </button>
+          <span data-media-validation-target="message" class="text-xs text-gray-500"></span>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="mb-6">
+      <label class="mb-1 block text-sm font-medium">Avatar ID default</label>
+      <%= f.text_field :avatar_id,
+            name: "settings[avatar_id]",
+            value: @preferences["avatar_id"],
+            placeholder: "Ex: Elenor_public_3_20230614",
+            class: "block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" %>
+      <p class="mt-1 text-xs text-gray-500">Encontre na biblioteca de avatares do HeyGen.</p>
+    </div>
+
+    <div class="mb-6">
+      <label class="mb-1 block text-sm font-medium">Voice ID default (pt-BR)</label>
+      <%= f.text_field :voice_id,
+            name: "settings[voice_id]",
+            value: @preferences["voice_id"],
+            placeholder: "Ex: pt-BR-AntonioNeural",
+            class: "block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" %>
+      <p class="mt-1 text-xs text-gray-500">Use voz pt-BR. Lista disponível na documentação HeyGen.</p>
+    </div>
+
+    <div>
+      <%= f.submit "Salvar configurações",
+            class: "cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" %>
+    </div>
+  <% end %>
+</div>

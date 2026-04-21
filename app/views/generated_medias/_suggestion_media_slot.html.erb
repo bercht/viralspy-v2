@@ -1,0 +1,15 @@
+<div id="suggestion_<%= suggestion.id %>_media">
+  <% if last_media %>
+    <%= render "generated_medias/status", generated_media: last_media %>
+  <% end %>
+
+  <% unless last_media&.pending? || last_media&.processing? %>
+    <div id="suggestion_<%= suggestion.id %>_errors"></div>
+    <%= button_to "Gerar vídeo avatar",
+          content_suggestion_generated_medias_path(suggestion),
+          method: :post,
+          class: "mt-2 rounded-md border border-blue-600 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
+          aria: { label: "Gerar vídeo avatar para esta sugestão" },
+          data: { turbo_stream: true } %>
+  <% end %>
+</div>

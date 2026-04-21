@@ -1,4 +1,6 @@
 class PlaybookVersion < ApplicationRecord
+  acts_as_tenant :account
+  belongs_to :account
   belongs_to :playbook
   belongs_to :triggered_by_analysis, class_name: "Analysis", foreign_key: :triggered_by_analysis_id, optional: true
 

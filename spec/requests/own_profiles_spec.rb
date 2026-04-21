@@ -74,9 +74,8 @@ RSpec.describe "OwnProfiles", type: :request, skip_tenant: true do
       it "executa sync e redireciona com notice" do
         profile = ActsAsTenant.with_tenant(account) { create(:own_profile, :with_token, account: account) }
         result = instance_double(OwnProfiles::Result, success?: true, data: { synced: 5 })
-        allow(OwnProfiles::SyncPostsService).to receive(:new).and_return(
-          instance_double(OwnProfiles::SyncPostsService, call: result)
-        )
+        service_double = instance_double(OwnProfiles::SyncPostsService, call: result)
+        allow(OwnProfiles::SyncPostsService).to receive(:new).with(profile).and_return(service_double)
 
         post sync_own_profile_path(profile)
         expect(response).to redirect_to(own_profile_path(profile))

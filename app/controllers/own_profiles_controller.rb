@@ -1,5 +1,5 @@
 class OwnProfilesController < ApplicationController
-  before_action :set_own_profile, only: [:show, :edit, :update, :destroy, :sync]
+  before_action :set_own_profile, only: [ :show, :edit, :update, :destroy, :sync ]
 
   def index
     @own_profiles = current_tenant.own_profiles.order(created_at: :desc)
@@ -17,7 +17,7 @@ class OwnProfilesController < ApplicationController
   def create
     @own_profile = current_tenant.own_profiles.build(own_profile_params)
     if @own_profile.save
-      redirect_to @own_profile, notice: 'Perfil adicionado. Configure o token Meta para sincronizar posts.'
+      redirect_to @own_profile, notice: "Perfil adicionado. Configure o token Meta para sincronizar posts."
     else
       render :new, status: :unprocessable_entity
     end
@@ -27,7 +27,7 @@ class OwnProfilesController < ApplicationController
 
   def update
     if @own_profile.update(own_profile_params)
-      redirect_to @own_profile, notice: 'Perfil atualizado.'
+      redirect_to @own_profile, notice: "Perfil atualizado."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -35,13 +35,13 @@ class OwnProfilesController < ApplicationController
 
   def destroy
     @own_profile.destroy
-    redirect_to own_profiles_path, notice: 'Perfil removido.'
+    redirect_to own_profiles_path, notice: "Perfil removido."
   end
 
   def sync
     unless @own_profile.token_valid?
       redirect_to edit_own_profile_path(@own_profile),
-        alert: 'Token Meta inválido ou expirado. Atualize o token antes de sincronizar.'
+        alert: "Token Meta inválido ou expirado. Atualize o token antes de sincronizar."
       return
     end
 

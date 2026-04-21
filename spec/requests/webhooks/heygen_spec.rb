@@ -182,6 +182,31 @@ RSpec.describe "Webhooks::Heygen", type: :request, skip_tenant: true do
     end
   end
 
+  # ─── Secret não configurado ───────────────────────────────────────────────
+
+  describe "secret não configurado" do
+    around do |example|
+      original = ENV.delete("HEYGEN_WEBHOOK_SECRET")
+      example.run
+      ENV["HEYGEN_WEBHOOK_SECRET"] = original
+    end
+
+    it "retorna 500 sem alterar o banco" do
+      generated_media
+
+      body = completed_payload.to_json
+      post "/webhooks/heygen",
+        params: body,
+        headers: {
+          "Content-Type" => "application/json",
+          "X-Signature"  => "qualquer_coisa"
+        }
+
+      expect(response).to have_http_status(:internal_server_error)
+      expect(generated_media.reload.status).to eq("processing")
+    end
+  end
+
   # ─── Idempotência ─────────────────────────────────────────────────────────
 
   describe "idempotência" do

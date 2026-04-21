@@ -16,6 +16,8 @@ module Webhooks
         return head :ok
       end
 
+      return head :ok if video_id.blank?
+
       # Webhook não carrega tenant — busca global necessária para encontrar o registro
       generated_media = ActsAsTenant.without_tenant { GeneratedMedia.find_by(provider_job_id: video_id) }
 
@@ -87,7 +89,7 @@ module Webhooks
         account: generated_media.account,
         generated_media: generated_media,
         provider: "heygen",
-        duration_seconds: generated_media.duration_seconds,
+        duration_seconds: generated_media.duration_seconds || 0,
         cost_cents: 0
       )
     end

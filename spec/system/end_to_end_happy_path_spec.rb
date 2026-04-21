@@ -39,6 +39,14 @@ RSpec.describe "End-to-end — happy path do usuário", type: :system do
     end
   end
 
+  def setup_valid_api_credentials(account)
+    ActsAsTenant.with_tenant(account) do
+      create(:api_credential, :openai, :valid, account: account)
+      create(:api_credential, :anthropic, :valid, account: account)
+      create(:api_credential, :assemblyai, :valid, account: account)
+    end
+  end
+
   describe "gate de credentials" do
     it "redireciona pra /settings/llm_preferences/edit ao tentar criar análise sem credenciais" do
       user = create(:user)
@@ -128,6 +136,109 @@ RSpec.describe "End-to-end — happy path do usuário", type: :system do
       end
 
       expect(suggestion.reload.status).to eq("saved")
+    end
+  end
+
+  describe "fluxo de criação de análise" do
+    let(:user) { create(:user) }
+    let(:account) { user.account }
+    let(:competitor) do
+      ActsAsTenant.with_tenant(account) do
+        create(:competitor, account: account, instagram_handle: "concorrente_fluxo")
+      end
+    end
+
+    before do
+      login_as(user, scope: :user)
+      setup_valid_api_credentials(account)
+      allow(Analyses::RunAnalysisWorker).to receive(:perform_async)
+    end
+
+    it "navega da página do competitor para o form de nova análise pelo botão Nova análise" do
+      playbook = ActsAsTenant.with_tenant(account) do
+        create(:playbook, account: account, name: "Imobiliário")
+      end
+
+      visit competitor_path(competitor)
+      click_link I18n.t("competitors.show.new_analysis")
+
+      expect(page).to have_current_path(new_competitor_analysis_path(competitor), ignore_query: true)
+      expect(page).to have_field("analysis[max_posts]")
+      expect(page).to have_content(playbook.name)
+    end
+
+    it "pré-seleciona todos os playbooks por padrão no form de nova análise" do
+      playbook_a = ActsAsTenant.with_tenant(account) do
+        create(:playbook, account: account, name: "Imobiliário")
+      end
+      playbook_b = ActsAsTenant.with_tenant(account) do
+        create(:playbook, account: account, name: "IA")
+      end
+
+      visit new_competitor_analysis_path(competitor)
+
+      expect(find("input[name='analysis[playbook_ids][]'][value='#{playbook_a.id}']", visible: :all)).to be_checked
+      expect(find("input[name='analysis[playbook_ids][]'][value='#{playbook_b.id}']", visible: :all)).to be_checked
+    end
+
+    it "cria análise com todos os playbooks pré-selecionados por padrão" do
+      playbook_a = ActsAsTenant.with_tenant(account) do
+        create(:playbook, account: account)
+      end
+      playbook_b = ActsAsTenant.with_tenant(account) do
+        create(:playbook, account: account)
+      end
+
+      visit new_competitor_analysis_path(competitor)
+      click_button I18n.t("analyses.form.submit")
+
+      analysis = ActsAsTenant.with_tenant(account) do
+        competitor.analyses.order(created_at: :desc).first
+      end
+
+      expect(analysis).to be_present
+      expect(analysis.analysis_playbooks.pluck(:playbook_id)).to contain_exactly(playbook_a.id, playbook_b.id)
+    end
+
+    it "permite opt-out de playbook específico antes de submeter" do
+      playbook_a = ActsAsTenant.with_tenant(account) do
+        create(:playbook, account: account, name: "Imobiliário")
+      end
+      playbook_b = ActsAsTenant.with_tenant(account) do
+        create(:playbook, account: account, name: "IA")
+      end
+
+      visit new_competitor_analysis_path(competitor)
+      find("input[name='analysis[playbook_ids][]'][value='#{playbook_b.id}']", visible: :all).set(false)
+      click_button I18n.t("analyses.form.submit")
+
+      analysis = ActsAsTenant.with_tenant(account) do
+        competitor.analyses.order(created_at: :desc).first
+      end
+
+      expect(analysis).to be_present
+      expect(analysis.analysis_playbooks.pluck(:playbook_id)).to contain_exactly(playbook_a.id)
+    end
+
+    it "cria análise sem AnalysisPlaybook quando usuário desmarca todos" do
+      playbook_a = ActsAsTenant.with_tenant(account) do
+        create(:playbook, account: account, name: "Imobiliário")
+      end
+      playbook_b = ActsAsTenant.with_tenant(account) do
+        create(:playbook, account: account, name: "IA")
+      end
+
+      visit new_competitor_analysis_path(competitor)
+      find("input[name='analysis[playbook_ids][]'][value='#{playbook_a.id}']", visible: :all).set(false)
+      find("input[name='analysis[playbook_ids][]'][value='#{playbook_b.id}']", visible: :all).set(false)
+      click_button I18n.t("analyses.form.submit")
+
+      analysis = ActsAsTenant.with_tenant(account) do
+        competitor.analyses.order(created_at: :desc).first
+      end
+
+      expect(analysis).to be_present
+      expect(analysis.analysis_playbooks).to be_empty
     end
   end
 

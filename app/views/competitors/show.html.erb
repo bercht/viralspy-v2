@@ -18,10 +18,9 @@
       </div>
 
       <div class="flex flex-wrap shrink-0 items-center gap-2">
-        <%= button_to t("competitors.show.new_analysis"),
-            competitor_analyses_path(@competitor), method: :post,
-            class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong",
-            form: { class: "inline" } %>
+        <%= link_to t("competitors.show.new_analysis"),
+            new_competitor_analysis_path(@competitor),
+            class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
 
         <%= button_to t("competitors.show.delete"),
             competitor_path(@competitor), method: :delete,

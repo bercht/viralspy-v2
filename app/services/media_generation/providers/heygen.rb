@@ -27,8 +27,10 @@ module MediaGeneration
 
       def validate_api_key
         response = self.class.get(USER_INFO_ENDPOINT, headers: headers)
+        Rails.logger.info("[HeyGen#validate_api_key] code=#{response.code} body=#{response.body.to_s.truncate(200)}")
         response.code == 200
-      rescue StandardError
+      rescue StandardError => e
+        Rails.logger.error("[HeyGen#validate_api_key] error=#{e.class} message=#{e.message}")
         false
       end
 

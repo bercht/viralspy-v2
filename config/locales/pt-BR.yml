@@ -49,6 +49,7 @@ pt-BR:
   nav:
     dashboard: "Dashboard"
     competitors: "Concorrentes"
+    playbooks: "Playbooks"
     settings: "Configurações"
     logout: "Sair"
 

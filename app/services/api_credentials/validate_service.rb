@@ -36,6 +36,7 @@ module ApiCredentials
       when "openai"     then validate_openai
       when "anthropic"  then validate_anthropic
       when "assemblyai" then validate_assemblyai
+      when "heygen"     then validate_heygen
       else
         Result.failure(status: :unknown, message: "Unsupported provider: #{credential.provider}")
       end
@@ -100,6 +101,21 @@ module ApiCredentials
       Result.failure(status: :unknown, message: "Anthropic connection timed out: #{e.message}")
     rescue ::Anthropic::Errors::APIStatusError => e
       Result.failure(status: :unknown, message: "Anthropic error: #{e.message}")
+    end
+
+    # ----- HeyGen -----
+
+    def validate_heygen
+      provider = MediaGeneration::Providers::Heygen.new(api_key: credential.encrypted_api_key)
+      if provider.validate_api_key
+        Result.success
+      else
+        Result.failure(status: :failed, message: "HeyGen rejected the API key (invalid or revoked)")
+      end
+    rescue Net::OpenTimeout, Net::ReadTimeout
+      Result.failure(status: :unknown, message: "HeyGen timed out — try again")
+    rescue StandardError => e
+      Result.failure(status: :unknown, message: "HeyGen connection error: #{e.message}")
     end
 
     # ----- AssemblyAI -----

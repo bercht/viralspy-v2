@@ -79,6 +79,11 @@ pt-BR:
           description: "Usada para transcrição de reels. Tem free tier generoso (~US$ 50 no signup)."
           placeholder: "sua-chave-assemblyai"
           docs_url: "https://www.assemblyai.com/app/api-keys"
+        heygen:
+          name: "HeyGen"
+          description: "Usada para geração de vídeos com avatar de IA."
+          placeholder: "sua-chave-heygen"
+          docs_url: "https://app.heygen.com/settings?nav=API"
       status:
         unknown: "Ainda não validada"
         verified: "Chave válida"

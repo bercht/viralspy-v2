@@ -5,7 +5,7 @@ RSpec.describe MediaGeneration::Providers::Heygen do
   let(:provider) { described_class.new(api_key: api_key) }
   let(:generate_url) { "https://api.heygen.com/v2/video/generate" }
   let(:status_url) { "https://api.heygen.com/v1/video.status.get" }
-  let(:user_info_url) { "https://api.heygen.com/v1/user.info" }
+  let(:user_info_url) { "https://api.heygen.com/v2/voices" }
 
   describe "#start_generation" do
     subject(:result) do
@@ -193,6 +193,90 @@ RSpec.describe MediaGeneration::Providers::Heygen do
 
       it "retorna false" do
         expect(provider.validate_api_key).to be false
+      end
+    end
+  end
+
+  describe "#fetch_avatars" do
+    let(:avatars_url) { "https://api.heygen.com/v3/avatars/looks" }
+
+    context "quando API retorna 200 com lista" do
+      before do
+        stub_request(:get, avatars_url)
+          .with(query: { avatar_type: "digital_twin", ownership: "private" })
+          .to_return(
+            status: 200,
+            body: {
+              data: {
+                list: [
+                  { "id" => "avatar_1", "name" => "Avatar Um", "preview_image_url" => "https://example.com/1.jpg" },
+                  { "id" => "avatar_2", "name" => "Avatar Dois", "preview_image_url" => "https://example.com/2.jpg" }
+                ]
+              }
+            }.to_json,
+            headers: { "Content-Type" => "application/json" }
+          )
+      end
+
+      it "retorna lista mapeada de avatares" do
+        result = provider.fetch_avatars
+        expect(result[:avatars].length).to eq(2)
+        expect(result[:avatars].first).to include(id: "avatar_1", name: "Avatar Um")
+      end
+    end
+
+    context "quando API retorna erro" do
+      before do
+        stub_request(:get, avatars_url).to_return(status: 500, body: {}.to_json)
+      end
+
+      it "retorna avatars vazio" do
+        result = provider.fetch_avatars
+        expect(result[:avatars]).to eq([])
+      end
+    end
+  end
+
+  describe "#fetch_voices" do
+    let(:voices_url) { "https://api.heygen.com/v3/voices" }
+
+    context "quando API retorna 200 com vozes" do
+      before do
+        stub_request(:get, voices_url)
+          .to_return(
+            status: 200,
+            body: {
+              data: {
+                voices: [
+                  { "voice_id" => "voice_pt_1", "display_name" => "Voz PT 1", "language" => "pt-BR" },
+                  { "voice_id" => "voice_en_1", "display_name" => "Voice EN 1", "language" => "en-US" },
+                  { "voice_id" => "voice_pt_2", "display_name" => "Voz PT 2", "language" => "pt" }
+                ]
+              }
+            }.to_json,
+            headers: { "Content-Type" => "application/json" }
+          )
+      end
+
+      it "filtra apenas vozes pt-BR/pt" do
+        result = provider.fetch_voices
+        expect(result[:voices].map { |v| v[:id] }).to contain_exactly("voice_pt_1", "voice_pt_2")
+      end
+
+      it "mapeia voice_id para id" do
+        result = provider.fetch_voices
+        expect(result[:voices].first).to include(id: "voice_pt_1", name: "Voz PT 1")
+      end
+    end
+
+    context "quando API retorna erro" do
+      before do
+        stub_request(:get, voices_url).to_return(status: 500, body: {}.to_json)
+      end
+
+      it "retorna voices vazio" do
+        result = provider.fetch_voices
+        expect(result[:voices]).to eq([])
       end
     end
   end

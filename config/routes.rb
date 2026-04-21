@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   end
 
   resources :content_suggestions, only: [ :update ] do
+    resource :video, only: [ :new ], controller: "content_suggestions/video"
     resources :generated_medias, only: [ :create ]
   end
 
@@ -41,6 +42,8 @@ Rails.application.routes.draw do
     resource :llm_preferences, only: [ :edit, :update ]
     resource :media_generation, only: [ :show, :update ], controller: "media_generation" do
       post :validate_key, on: :collection
+      get :avatars
+      get :voices
     end
   end
 

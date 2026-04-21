@@ -6,7 +6,10 @@ class GeneratedMediasController < ApplicationController
 
     outcome = MediaGeneration::Start.call(
       content_suggestion: @content_suggestion,
-      account: current_tenant
+      account: current_tenant,
+      script: params.dig(:generated_media, :script),
+      avatar_id: params.dig(:generated_media, :avatar_id),
+      voice_id: params.dig(:generated_media, :voice_id)
     )
 
     if outcome.success?

@@ -1,0 +1,58 @@
+<div class="mx-auto max-w-lg px-4 py-6">
+  <div class="mb-4">
+    <%= link_to "← Voltar",
+          competitor_analysis_path(@content_suggestion.analysis.competitor, @content_suggestion.analysis),
+          class: "text-sm text-gray-500 hover:text-gray-700" %>
+  </div>
+
+  <h1 class="mb-6 text-xl font-bold text-gray-900">Configurar vídeo avatar</h1>
+
+  <% unless @has_heygen_key %>
+    <div class="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+      Você ainda não configurou sua API Key HeyGen.
+      <%= link_to "Configurar agora →", settings_media_generation_path,
+            class: "font-medium underline" %>
+    </div>
+  <% end %>
+
+  <%= form_with url: content_suggestion_generated_medias_path(@content_suggestion),
+                method: :post,
+                data: { turbo: false } do |f| %>
+
+    <div class="mb-5">
+      <label class="mb-1 block text-sm font-medium text-gray-700">Script do vídeo</label>
+      <%= f.text_area :script,
+            name: "generated_media[script]",
+            rows: 6,
+            value: @script,
+            class: "block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" %>
+      <p class="mt-1 text-xs text-gray-500">Edite o texto que o avatar vai falar.</p>
+    </div>
+
+    <div class="mb-5" data-controller="heygen-selector"
+         data-heygen-selector-type-value="avatars"
+         data-heygen-selector-url-value="<%= avatars_settings_media_generation_path %>">
+      <label class="mb-1 block text-sm font-medium text-gray-700">Avatar</label>
+      <select name="generated_media[avatar_id]"
+              data-heygen-selector-target="select"
+              class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+        <option value="">Carregando avatares...</option>
+      </select>
+    </div>
+
+    <div class="mb-6" data-controller="heygen-selector"
+         data-heygen-selector-type-value="voices"
+         data-heygen-selector-url-value="<%= voices_settings_media_generation_path %>">
+      <label class="mb-1 block text-sm font-medium text-gray-700">Voz (pt-BR)</label>
+      <select name="generated_media[voice_id]"
+              data-heygen-selector-target="select"
+              class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+        <option value="">Carregando vozes...</option>
+      </select>
+    </div>
+
+    <%= f.submit "Gerar vídeo",
+          disabled: !@has_heygen_key,
+          class: "w-full cursor-pointer rounded-md bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+  <% end %>
+</div>

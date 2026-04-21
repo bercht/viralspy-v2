@@ -18,6 +18,26 @@ module Settings
       end
     end
 
+    def avatars
+      credential = current_tenant.api_credentials.find_by(provider: "heygen", active: true)
+      if credential.nil?
+        return render json: { error: "API key não configurada" }, status: :unprocessable_entity
+      end
+
+      provider = MediaGeneration::Factory.build(provider: "heygen", api_key: credential.api_key)
+      render json: provider.fetch_avatars
+    end
+
+    def voices
+      credential = current_tenant.api_credentials.find_by(provider: "heygen", active: true)
+      if credential.nil?
+        return render json: { error: "API key não configurada" }, status: :unprocessable_entity
+      end
+
+      provider = MediaGeneration::Factory.build(provider: "heygen", api_key: credential.api_key)
+      render json: provider.fetch_voices
+    end
+
     def validate_key
       credential = current_tenant.api_credentials.find_by(provider: "heygen", active: true)
 

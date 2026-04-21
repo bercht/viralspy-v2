@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "Settings::MediaGeneration", type: :request, skip_tenant: true do
   let(:account) { create(:account) }
   let(:user) { create(:user, account: account) }
-  let(:user_info_url) { "https://api.heygen.com/v1/user.info" }
+  let(:user_info_url) { "https://api.heygen.com/v2/voices" }
 
   before { sign_in user }
 
@@ -94,6 +94,80 @@ RSpec.describe "Settings::MediaGeneration", type: :request, skip_tenant: true do
     it "redireciona para login" do
       get settings_media_generation_path
       expect(response).to redirect_to(new_user_session_path)
+    end
+  end
+
+  describe "GET /settings/media_generation/avatars" do
+    let(:avatars_url) { "https://api.heygen.com/v3/avatars/looks" }
+
+    context "sem credential configurada" do
+      it "retorna JSON com erro e status 422" do
+        get avatars_settings_media_generation_path
+        json = JSON.parse(response.body)
+        expect(json["error"]).to be_present
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+
+    context "com credential configurada" do
+      before do
+        ActsAsTenant.with_tenant(account) do
+          create(:api_credential, account: account, provider: "heygen",
+                 encrypted_api_key: "test_key", active: true)
+        end
+        stub_request(:get, avatars_url)
+          .to_return(
+            status: 200,
+            body: { data: { list: [
+              { "id" => "a1", "name" => "Avatar 1", "preview_image_url" => "https://example.com/a1.jpg" }
+            ] } }.to_json,
+            headers: { "Content-Type" => "application/json" }
+          )
+      end
+
+      it "retorna JSON com avatares e status 200" do
+        get avatars_settings_media_generation_path
+        json = JSON.parse(response.body)
+        expect(json["avatars"]).to be_an(Array)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
+
+  describe "GET /settings/media_generation/voices" do
+    let(:voices_url) { "https://api.heygen.com/v3/voices" }
+
+    context "sem credential configurada" do
+      it "retorna JSON com erro e status 422" do
+        get voices_settings_media_generation_path
+        json = JSON.parse(response.body)
+        expect(json["error"]).to be_present
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+
+    context "com credential configurada" do
+      before do
+        ActsAsTenant.with_tenant(account) do
+          create(:api_credential, account: account, provider: "heygen",
+                 encrypted_api_key: "test_key", active: true)
+        end
+        stub_request(:get, voices_url)
+          .to_return(
+            status: 200,
+            body: { data: { voices: [
+              { "voice_id" => "v1", "display_name" => "Voz 1", "language" => "pt-BR" }
+            ] } }.to_json,
+            headers: { "Content-Type" => "application/json" }
+          )
+      end
+
+      it "retorna JSON com vozes e status 200" do
+        get voices_settings_media_generation_path
+        json = JSON.parse(response.body)
+        expect(json["voices"]).to be_an(Array)
+        expect(response).to have_http_status(:ok)
+      end
     end
   end
 end

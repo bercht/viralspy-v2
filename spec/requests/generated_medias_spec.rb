@@ -47,6 +47,24 @@ RSpec.describe "GeneratedMedias", type: :request, skip_tenant: true do
       end
     end
 
+    context "com avatar_id, voice_id e script nos parâmetros do form" do
+      before do
+        stub_request(:post, generate_url)
+          .to_return(
+            status: 202,
+            body: { code: 100, data: { video_id: "job_form_params" }, message: "success" }.to_json,
+            headers: { "Content-Type" => "application/json" }
+          )
+      end
+
+      it "cria GeneratedMedia com o script do form" do
+        post content_suggestion_generated_medias_path(suggestion),
+             params: { generated_media: { script: "Script do form", avatar_id: "av_1", voice_id: "vc_1" } },
+             headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(GeneratedMedia.unscoped.last.prompt_sent).to eq("Script do form")
+      end
+    end
+
     context "sem autenticação" do
       before { sign_out user }
 

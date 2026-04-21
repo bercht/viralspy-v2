@@ -7,6 +7,8 @@ module MediaGeneration
       GENERATE_ENDPOINT  = "/v2/video/generate"
       STATUS_ENDPOINT    = "/v1/video.status.get"
       VALIDATE_ENDPOINT  = "/v2/voices"
+      AVATARS_ENDPOINT   = "/v3/avatars/looks"
+      VOICES_ENDPOINT    = "/v3/voices"
       DIMENSION          = { width: 720, height: 1280 }.freeze
 
       def start_generation(script:, avatar_id:, voice_id:, title:)
@@ -32,6 +34,30 @@ module MediaGeneration
       rescue StandardError => e
         Rails.logger.error("[HeyGen#validate_api_key] error=#{e.class} message=#{e.message}")
         false
+      end
+
+      def fetch_avatars
+        response = self.class.get(AVATARS_ENDPOINT, headers: headers,
+                                  query: { avatar_type: "digital_twin", ownership: "private" })
+        return { avatars: [] } unless response.code == 200
+
+        list = response.parsed_response.dig("data", "list") || []
+        { avatars: list.map { |a| { id: a["id"], name: a["name"], preview_url: a["preview_image_url"] } } }
+      rescue StandardError => e
+        Rails.logger.error("[HeyGen#fetch_avatars] #{e.message}")
+        { avatars: [] }
+      end
+
+      def fetch_voices
+        response = self.class.get(VOICES_ENDPOINT, headers: headers)
+        return { voices: [] } unless response.code == 200
+
+        voices = response.parsed_response.dig("data", "voices") || []
+        pt_voices = voices.select { |v| v["language"]&.start_with?("pt") }
+        { voices: pt_voices.map { |v| { id: v["voice_id"], name: v["display_name"] } } }
+      rescue StandardError => e
+        Rails.logger.error("[HeyGen#fetch_voices] #{e.message}")
+        { voices: [] }
       end
 
       private

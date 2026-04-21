@@ -78,6 +78,65 @@ RSpec.describe MediaGeneration::Start do
     end
   end
 
+  context "quando avatar_id e voice_id são passados como parâmetro" do
+    before do
+      create(:api_credential, account: account, provider: "heygen",
+             encrypted_api_key: "test_key", active: true)
+      account.update!(media_generation_preferences: {})
+
+      stub_request(:post, generate_url)
+        .to_return(
+          status: 202,
+          body: { code: 100, data: { video_id: "job_override" }, message: "success" }.to_json,
+          headers: { "Content-Type" => "application/json" }
+        )
+    end
+
+    subject(:outcome) do
+      described_class.call(
+        content_suggestion: suggestion,
+        account: account,
+        avatar_id: "avatar_override",
+        voice_id: "voice_override"
+      )
+    end
+
+    it "usa os valores passados e retorna success" do
+      expect(outcome.success?).to be true
+    end
+
+    it "não falha por ausência de preferences quando params fornecidos" do
+      expect(outcome.error_code).to be_nil
+    end
+  end
+
+  context "quando script é passado como parâmetro" do
+    before do
+      create(:api_credential, account: account, provider: "heygen",
+             encrypted_api_key: "test_key", active: true)
+
+      stub_request(:post, generate_url)
+        .to_return(
+          status: 202,
+          body: { code: 100, data: { video_id: "job_custom_script" }, message: "success" }.to_json,
+          headers: { "Content-Type" => "application/json" }
+        )
+    end
+
+    subject(:outcome) do
+      described_class.call(
+        content_suggestion: suggestion,
+        account: account,
+        script: "Script customizado para o vídeo"
+      )
+    end
+
+    it "persiste o script passado como parâmetro" do
+      outcome
+      expect(GeneratedMedia.last.prompt_sent).to eq("Script customizado para o vídeo")
+    end
+  end
+
   context "quando HeyGen API retorna falha" do
     before do
       create(:api_credential, account: account, provider: "heygen",

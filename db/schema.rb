@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_21_170040) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_21_201437) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -161,6 +161,48 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_21_170040) do
     t.index ["generated_media_id"], name: "index_media_generation_usage_logs_on_generated_media_id"
   end
 
+  create_table "own_posts", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "own_profile_id", null: false
+    t.string "instagram_post_id"
+    t.string "post_type", null: false
+    t.string "permalink"
+    t.text "caption"
+    t.text "transcript"
+    t.integer "transcript_status", default: 0, null: false
+    t.datetime "posted_at"
+    t.bigint "inspired_by_suggestion_id"
+    t.text "execution_notes"
+    t.jsonb "metrics", default: {}, null: false
+    t.datetime "metrics_last_fetched_at"
+    t.jsonb "metrics_history", default: [], null: false
+    t.integer "performance_rating"
+    t.text "performance_notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "posted_at"], name: "index_own_posts_on_account_id_and_posted_at"
+    t.index ["account_id"], name: "index_own_posts_on_account_id"
+    t.index ["inspired_by_suggestion_id"], name: "index_own_posts_on_inspired_by_suggestion_id"
+    t.index ["instagram_post_id"], name: "index_own_posts_on_instagram_post_id"
+    t.index ["own_profile_id", "posted_at"], name: "index_own_posts_on_own_profile_id_and_posted_at"
+    t.index ["own_profile_id"], name: "index_own_posts_on_own_profile_id"
+  end
+
+  create_table "own_profiles", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "instagram_handle", null: false
+    t.string "full_name"
+    t.text "bio"
+    t.text "voice_notes"
+    t.text "meta_access_token"
+    t.datetime "meta_token_expires_at"
+    t.datetime "meta_token_last_refreshed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "instagram_handle"], name: "index_own_profiles_on_account_id_and_instagram_handle", unique: true
+    t.index ["account_id"], name: "index_own_profiles_on_account_id"
+  end
+
   create_table "playbook_feedbacks", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "playbook_id", null: false
@@ -261,6 +303,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_21_170040) do
     t.index ["instagram_post_id"], name: "index_posts_on_instagram_post_id"
   end
 
+  create_table "story_observations", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "competitor_id", null: false
+    t.date "observed_on", null: false
+    t.string "format"
+    t.string "theme"
+    t.text "description"
+    t.string "perceived_engagement"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_story_observations_on_account_id"
+    t.index ["competitor_id", "observed_on"], name: "index_story_observations_on_competitor_id_and_observed_on"
+    t.index ["competitor_id"], name: "index_story_observations_on_competitor_id"
+  end
+
   create_table "transcription_usage_logs", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "post_id"
@@ -307,6 +365,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_21_170040) do
   add_foreign_key "llm_usage_logs", "analyses"
   add_foreign_key "media_generation_usage_logs", "accounts"
   add_foreign_key "media_generation_usage_logs", "generated_medias"
+  add_foreign_key "own_posts", "accounts"
+  add_foreign_key "own_posts", "content_suggestions", column: "inspired_by_suggestion_id"
+  add_foreign_key "own_posts", "own_profiles"
+  add_foreign_key "own_profiles", "accounts"
   add_foreign_key "playbook_feedbacks", "accounts"
   add_foreign_key "playbook_feedbacks", "analyses", column: "related_analysis_id"
   add_foreign_key "playbook_feedbacks", "playbook_versions", column: "incorporated_in_version_id"
@@ -321,6 +383,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_21_170040) do
   add_foreign_key "posts", "accounts"
   add_foreign_key "posts", "analyses"
   add_foreign_key "posts", "competitors"
+  add_foreign_key "story_observations", "accounts"
+  add_foreign_key "story_observations", "competitors"
   add_foreign_key "transcription_usage_logs", "accounts"
   add_foreign_key "transcription_usage_logs", "analyses"
   add_foreign_key "transcription_usage_logs", "posts"

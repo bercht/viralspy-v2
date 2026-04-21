@@ -13,6 +13,10 @@ RSpec.describe "PlaybookFeedbacks", type: :request, skip_tenant: true do
         post playbook_playbook_feedbacks_path(playbook),
           params: { playbook_feedback: { content: "Aprendi algo novo." } }
       }.to change { PlaybookFeedback.unscoped.count }.by(1)
+
+      feedback = PlaybookFeedback.unscoped.order(:created_at).last
+
+      expect(feedback.source).to eq("manual")
       expect(response).to redirect_to(playbook_path(playbook))
     end
 

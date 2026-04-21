@@ -13,8 +13,8 @@ class PlaybookFeedback < ApplicationRecord
   }, prefix: :status
 
   enum :source, {
-    manual: 0,
-    auto: 1
+    manual: "manual",
+    auto: "auto"
   }, prefix: :source
 
   scope :status_pending_scope, -> { where(status: :pending) }

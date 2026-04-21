@@ -4,8 +4,10 @@ class PlaybookFeedbacksController < ApplicationController
 
   def create
     @feedback = @playbook.playbook_feedbacks.build(
-      feedback_params.merge(account: current_tenant, source: :manual)
+      feedback_params.merge(account: current_tenant)
     )
+    @feedback.source = :manual
+
     if @feedback.save
       redirect_to @playbook, notice: "Feedback registrado."
     else

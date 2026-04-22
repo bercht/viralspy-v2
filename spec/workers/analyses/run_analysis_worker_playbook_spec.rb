@@ -19,11 +19,6 @@ RSpec.describe Analyses::RunAnalysisWorker, "com playbooks selecionados" do
     stub_step(Analyses::ScoreAndSelectStep)
     stub_step(Analyses::TranscribeStep)
     stub_step(Analyses::AnalyzeStep)
-    stub_step(Analyses::GenerateSuggestionsStep) do
-      ActsAsTenant.without_tenant { Analysis.find(analysis.id) }.tap do |a|
-        a.update_columns(status: 7, finished_at: Time.current)
-      end
-    end
   end
 
   def stub_step(step_class, &block)

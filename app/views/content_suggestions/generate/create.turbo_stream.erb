@@ -1,0 +1,10 @@
+<%= turbo_stream.prepend "suggestions-section" do %>
+  <%= render "analyses/playbook_suggestions_batch",
+             suggestions: @suggestions,
+             playbook: @playbook,
+             content_type: @content_type %>
+<% end %>
+
+<%= turbo_stream.replace "suggestions-generate-error" do %>
+  <div id="suggestions-generate-error"></div>
+<% end %>

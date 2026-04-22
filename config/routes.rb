@@ -29,6 +29,10 @@ Rails.application.routes.draw do
 
   resources :generated_medias, only: [ :index, :show ]
 
+  namespace :content_suggestions do
+    resources :generate, only: [ :create ]
+  end
+
   resources :content_suggestions, only: [ :update ] do
     resource :video, only: [ :new ], controller: "content_suggestions/video"
     resources :generated_medias, only: [ :create ]

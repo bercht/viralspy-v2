@@ -1,6 +1,6 @@
 <%= tag.div id: dom_id(analysis) do %>
   <% if analysis.completed? %>
-    <%= render "analyses/completed", **completed_locals(analysis) %>
+    <%= render "analyses/completed", analysis: analysis, **completed_locals(analysis) %>
   <% elsif analysis.failed? %>
     <%= render "analyses/failed", analysis: analysis, competitor: analysis.competitor %>
   <% else %>

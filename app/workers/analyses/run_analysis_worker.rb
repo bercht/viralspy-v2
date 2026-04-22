@@ -10,9 +10,10 @@ module Analyses
       Analyses::ProfileMetricsStep,
       Analyses::ScoreAndSelectStep,
       Analyses::TranscribeStep,
-      Analyses::AnalyzeStep,
-      Analyses::GenerateSuggestionsStep
+      Analyses::AnalyzeStep
     ].freeze
+    # GenerateSuggestionsStep removido do pipeline automático — sugestões agora
+    # são geradas on-demand via ContentSuggestions::GenerateController.
 
     def perform(analysis_id)
       analysis = ActsAsTenant.without_tenant { Analysis.find(analysis_id) }
@@ -47,6 +48,7 @@ module Analyses
       end
 
       Rails.logger.info("[Analysis##{analysis.id}] Pipeline completed successfully")
+      analysis.update!(status: :completed, finished_at: Time.current)
       run_playbook_updates(analysis)
     rescue => e
       Rails.logger.error(

@@ -134,64 +134,6 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
     )
   end
 
-  let(:suggestions_json) do
-    JSON.generate(
-      suggestions: [
-        {
-          position: 1, content_type: "reel",
-          hook: "Por que seu imóvel não vende?",
-          caption_draft: "Você já se perguntou por que o imóvel está parado há meses? Aqui estão os 3 principais motivos...",
-          format_details: { duration_seconds: 30, structure: %w[hook problema solucao cta] },
-          suggested_hashtags: %w[imoveisbh corretordeimoveis vendadeimoveis],
-          rationale: "Aproveita o padrão educacional com foco em conversão rápida."
-        },
-        {
-          position: 2, content_type: "reel",
-          hook: "3 sinais de imóvel supervalorizado",
-          caption_draft: "Antes de fechar negócio, fique atento a esses sinais que indicam precificação errada...",
-          format_details: { duration_seconds: 45, structure: %w[hook lista cta] },
-          suggested_hashtags: %w[imoveisbh avaliacaodeimoveis],
-          rationale: "Formato de lista tem alto engajamento no nicho imobiliário."
-        },
-        {
-          position: 3, content_type: "carousel",
-          hook: "Guia do primeiro imóvel",
-          caption_draft: "Comprando o primeiro imóvel? Salva esse carrossel com o passo a passo completo...",
-          format_details: {
-            slides: [
-              { title: "Passo 1", body: "Defina seu orçamento real" },
-              { title: "Passo 2", body: "Pesquise a região com calma" },
-              { title: "Passo 3", body: "Visite pelo menos 5 opções" }
-            ]
-          },
-          suggested_hashtags: %w[primeiroimovel corretor],
-          rationale: "Conteúdo educacional alinhado ao padrão do concorrente, alta taxa de salvamento."
-        },
-        {
-          position: 4, content_type: "carousel",
-          hook: "Checklist antes de assinar",
-          caption_draft: "Antes da próxima visita, salva esse checklist para não esquecer nada importante...",
-          format_details: {
-            slides: [
-              { title: "Documentação", body: "Certidão de ônus reais em dia?" },
-              { title: "Estrutura", body: "Verificar infiltrações e rachaduras" }
-            ]
-          },
-          suggested_hashtags: %w[compradeimovel checklist],
-          rationale: "Checklist funciona muito bem como conteúdo salvo e compartilhado."
-        },
-        {
-          position: 5, content_type: "image",
-          hook: "Apto 2 dorm com vista panorâmica",
-          caption_draft: "Disponível agora. 2 dormitórios, 68m², varanda com vista livre. Me chama pra mais detalhes.",
-          format_details: { composition_tips: "foto ampla da varanda ao entardecer", text_overlay: "R$ 450k - 2 dorm" },
-          suggested_hashtags: %w[apartamento imoveisbh],
-          rationale: "Formato comercial direto complementa o conteúdo educacional do feed."
-        }
-      ]
-    )
-  end
-
   before do
     # Mock scraper
     mock_scraper = instance_double(Scraping::ApifyProvider)
@@ -211,20 +153,15 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
 
     # Stub LLM::Gateway.build_provider so the real constructor (which requires API keys) is bypassed.
     # AnalyzeStep (3 calls) uses :openai (analysis_provider default)
-    # GenerateSuggestionsStep (1 call) uses :anthropic (generation_provider default)
+    # GenerateSuggestionsStep removido do pipeline automático — sugestões on-demand via controller.
     reel_resp     = build_llm_response(reel_insights_json, model: "gpt-4o-mini", provider: :openai)
     carousel_resp = build_llm_response(carousel_insights_json, model: "gpt-4o-mini", provider: :openai)
     image_resp    = build_llm_response(image_insights_json, model: "gpt-4o-mini", provider: :openai)
-    gen_resp      = build_llm_response(suggestions_json, model: "claude-sonnet-4-6", provider: :anthropic)
 
     openai_stub = instance_double(LLM::Providers::OpenAI)
     allow(openai_stub).to receive(:complete)
       .and_return(reel_resp, carousel_resp, image_resp)
     allow(LLM::Gateway).to receive(:build_provider).with(:openai, api_key: instance_of(String)).and_return(openai_stub)
-
-    anthropic_stub = instance_double(LLM::Providers::Anthropic)
-    allow(anthropic_stub).to receive(:complete).and_return(gen_resp)
-    allow(LLM::Gateway).to receive(:build_provider).with(:anthropic, api_key: instance_of(String)).and_return(anthropic_stub)
   end
 
   # Helper: run pipeline and assertions inside tenant context
@@ -287,18 +224,18 @@ RSpec.describe "Analyses::RunAnalysisWorker integration" do
     end
   end
 
-  it "creates 5 ContentSuggestions" do
+  it "does not create ContentSuggestions (geradas on-demand, não mais pelo pipeline)" do
     ActsAsTenant.with_tenant(account) do
       Analyses::RunAnalysisWorker.new.perform(analysis.id)
-      expect(analysis.reload.content_suggestions.count).to eq(5)
+      expect(analysis.reload.content_suggestions.count).to eq(0)
     end
   end
 
   it "creates LLMUsageLog for each LLM call" do
     ActsAsTenant.with_tenant(account) do
       Analyses::RunAnalysisWorker.new.perform(analysis.id)
-      # 3 analyze calls (openai) + 1 generate_suggestions (anthropic) = 4 logs
-      expect(LLMUsageLog.where(analysis: analysis).count).to eq(4)
+      # 3 analyze calls (openai) — GenerateSuggestionsStep removido do pipeline
+      expect(LLMUsageLog.where(analysis: analysis).count).to eq(3)
     end
   end
 

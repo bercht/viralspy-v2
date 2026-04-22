@@ -22,21 +22,21 @@ RSpec.describe Analyses::RunAnalysisWorker do
     stub_step(Analyses::ScoreAndSelectStep)
     stub_step(Analyses::TranscribeStep)
     stub_step(Analyses::AnalyzeStep)
-    allow(Analyses::GenerateSuggestionsStep).to receive(:call) do
-      analysis.update!(status: :completed, finished_at: Time.current)
-      Analyses::Result.success
-    end
   end
 
   describe "#perform" do
     context "happy path — all steps succeed" do
       before { stub_all_steps_success }
 
-      it "calls all 6 steps in order" do
+      it "não inclui GenerateSuggestionsStep no pipeline automático" do
+        expect(described_class::STEPS).not_to include(Analyses::GenerateSuggestionsStep)
+      end
+
+      it "calls all 5 steps in order" do
         described_class.new.perform(analysis.id)
 
         [Analyses::ScrapeStep, Analyses::ProfileMetricsStep, Analyses::ScoreAndSelectStep,
-         Analyses::TranscribeStep, Analyses::AnalyzeStep, Analyses::GenerateSuggestionsStep].each do |step|
+         Analyses::TranscribeStep, Analyses::AnalyzeStep].each do |step|
           expect(step).to have_received(:call)
         end
       end
@@ -54,7 +54,6 @@ RSpec.describe Analyses::RunAnalysisWorker do
         stub_step(Analyses::ScoreAndSelectStep)
         stub_step(Analyses::TranscribeStep)
         stub_step(Analyses::AnalyzeStep)
-        stub_step(Analyses::GenerateSuggestionsStep)
       end
 
       it "stops pipeline after ScrapeStep and does not call subsequent steps" do
@@ -73,7 +72,6 @@ RSpec.describe Analyses::RunAnalysisWorker do
         stub_step(Analyses::ScoreAndSelectStep)
         stub_step(Analyses::TranscribeStep, outcome: :failure)
         stub_step(Analyses::AnalyzeStep)
-        stub_step(Analyses::GenerateSuggestionsStep)
       end
 
       it "stops pipeline after TranscribeStep" do
@@ -81,22 +79,6 @@ RSpec.describe Analyses::RunAnalysisWorker do
 
         expect(Analyses::TranscribeStep).to have_received(:call)
         expect(Analyses::AnalyzeStep).not_to have_received(:call)
-        expect(analysis.reload.status).to eq("failed")
-      end
-    end
-
-    context "GenerateSuggestionsStep fails" do
-      before do
-        stub_step(Analyses::ScrapeStep)
-        stub_step(Analyses::ProfileMetricsStep)
-        stub_step(Analyses::ScoreAndSelectStep)
-        stub_step(Analyses::TranscribeStep)
-        stub_step(Analyses::AnalyzeStep)
-        stub_step(Analyses::GenerateSuggestionsStep, outcome: :failure)
-      end
-
-      it "marks analysis as failed" do
-        described_class.new.perform(analysis.id)
         expect(analysis.reload.status).to eq("failed")
       end
     end

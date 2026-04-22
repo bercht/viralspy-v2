@@ -66,15 +66,51 @@
 
 <section>
   <h2 class="mb-4 text-heading text-text-body"><%= t("analyses.show.suggestions.title") %></h2>
-  <% if suggestions.any? %>
-    <div class="space-y-4">
-      <% suggestions.each do |suggestion| %>
-        <%= render "analyses/suggestion_card", suggestion: suggestion %>
-      <% end %>
-    </div>
-  <% else %>
-    <div class="rounded-feature border border-border-subtle bg-surface-canvas p-6 text-center text-body-sm text-text-muted shadow-card">
-      <%= t("analyses.show.suggestions.empty") %>
-    </div>
-  <% end %>
+
+  <div class="mb-6 rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+    <%= form_with url: content_suggestions_generate_index_path(
+                         competitor_id: analysis.competitor_id,
+                         analysis_id: analysis.id),
+                  method: :post,
+                  data: { turbo: true } do |f| %>
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <div class="flex flex-col gap-1">
+          <%= f.label :content_type, "Tipo de conteúdo",
+                      class: "text-caption font-medium text-text-muted" %>
+          <%= f.select :content_type,
+                       [["Reel", "reel"], ["Carrossel", "carousel"], ["Story", "story"]],
+                       {},
+                       class: "rounded-input border border-border-default bg-surface-canvas px-3 py-2 text-body text-text-body focus:border-brand-primary focus:outline-none focus:shadow-focus" %>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <%= f.label :quantity, "Quantidade",
+                      class: "text-caption font-medium text-text-muted" %>
+          <%= f.select :quantity,
+                       [[1, 1], [2, 2], [3, 3]],
+                       { selected: 2 },
+                       class: "rounded-input border border-border-default bg-surface-canvas px-3 py-2 text-body text-text-body focus:border-brand-primary focus:outline-none focus:shadow-focus" %>
+        </div>
+
+        <%= f.submit "Gerar sugestões",
+                     class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div id="suggestions-generate-error"></div>
+
+  <div id="suggestions-section">
+    <% if suggestions.any? %>
+      <div class="space-y-4">
+        <% suggestions.each do |suggestion| %>
+          <%= render "analyses/suggestion_card", suggestion: suggestion %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="rounded-feature border border-border-subtle bg-surface-canvas p-6 text-center text-body-sm text-text-muted shadow-card">
+        <%= t("analyses.show.suggestions.empty") %>
+      </div>
+    <% end %>
+  </div>
 </section>

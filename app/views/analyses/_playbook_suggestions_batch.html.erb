@@ -1,0 +1,13 @@
+<div class="mb-6 rounded-card border border-brand-primary/20 bg-brand-primary/5 p-4">
+  <p class="mb-3 text-caption font-medium text-brand-primary">
+    <%= suggestions.count %> sugestão(ões) gerada(s)
+    <% if content_type.present? %>
+      · <%= content_type %>
+    <% end %>
+  </p>
+  <div class="space-y-4">
+    <% suggestions.each do |suggestion| %>
+      <%= render "playbook_suggestions/suggestion", suggestion: suggestion, playbook: playbook %>
+    <% end %>
+  </div>
+</div>

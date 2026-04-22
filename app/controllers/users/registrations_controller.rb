@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Users::RegistrationsController < Devise::RegistrationsController
+  layout "marketing"
+
   skip_before_action :authenticate_user!, only: [ :new, :create ]
   skip_before_action :set_current_tenant, only: [ :new, :create ]
 

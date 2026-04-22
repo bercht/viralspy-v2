@@ -6,7 +6,7 @@ class AnalysesController < ApplicationController
   before_action :require_competitor_niche!, only: [ :new, :create ]
   before_action :require_playbook!, only: [ :new, :create ]
   before_action :require_api_credentials_configured!, only: [ :new, :create ]
-  before_action :set_analysis, only: [ :show ]
+  before_action :set_analysis, only: [ :show, :export_top_posts ]
 
   def new
     @analysis = @competitor.analyses.build(
@@ -34,6 +34,18 @@ class AnalysesController < ApplicationController
 
   def show
     authorize @analysis
+  end
+
+  def export_top_posts
+    authorize @analysis, :show?
+
+    content = Analyses::TopPostsExporter.new(@analysis).call
+    filename = "viralspy_top_posts_#{@analysis.competitor.instagram_handle}_#{@analysis.id}.txt"
+
+    send_data content,
+              filename:,
+              type: "text/plain; charset=utf-8",
+              disposition: "attachment"
   end
 
   private

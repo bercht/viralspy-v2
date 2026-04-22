@@ -11,7 +11,11 @@ Rails.application.routes.draw do
   get "dashboard", to: "dashboard#index", as: :dashboard
 
   resources :competitors, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
-    resources :analyses, only: [ :new, :create, :show ]
+    resources :analyses, only: [ :new, :create, :show ] do
+      member do
+        get :export_top_posts
+      end
+    end
     resources :story_observations, only: [ :new, :create, :index, :destroy ]
   end
 

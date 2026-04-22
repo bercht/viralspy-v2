@@ -218,4 +218,38 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
       end
     end
   end
+
+  describe "GET /competitors/:competitor_id/analyses/:id/export_top_posts" do
+    let!(:analysis) { ActsAsTenant.with_tenant(account) { create(:analysis, :completed, account: account, competitor: competitor) } }
+
+    it "retorna 200 com Content-Type text/plain" do
+      get export_top_posts_competitor_analysis_path(competitor, analysis)
+      expect(response).to have_http_status(:ok)
+      expect(response.content_type).to include("text/plain")
+    end
+
+    it "inclui Content-Disposition attachment com filename correto" do
+      get export_top_posts_competitor_analysis_path(competitor, analysis)
+      disposition = response.headers["Content-Disposition"]
+      expect(disposition).to include("attachment")
+      expect(disposition).to include("viralspy_top_posts_#{competitor.instagram_handle}_#{analysis.id}.txt")
+    end
+
+    it "retorna 404 para analysis de outra account" do
+      other_analysis = ActsAsTenant.with_tenant(other_account) do
+        create(:analysis, :completed, account: other_account, competitor: other_competitor)
+      end
+      get export_top_posts_competitor_analysis_path(other_competitor, other_analysis)
+      expect(response).to have_http_status(:not_found)
+    end
+
+    context "sem login" do
+      before { sign_out user }
+
+      it "redireciona para sign_in" do
+        get export_top_posts_competitor_analysis_path(competitor, analysis)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
 end

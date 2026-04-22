@@ -4,21 +4,43 @@
   </h3>
   <div class="space-y-3">
     <% posts.each_with_index do |post, idx| %>
-      <div class="flex gap-4 border-t border-border-subtle pt-3 first:border-t-0 first:pt-0">
-        <div class="flex-shrink-0 text-body-sm font-medium text-text-muted">#<%= idx + 1 %></div>
-        <div class="min-w-0 flex-1">
-          <p class="line-clamp-2 text-body-sm text-text-body">
-            <%= post.caption.presence || t("analyses.show.top_posts.no_caption") %>
-          </p>
-          <div class="mt-2 flex items-center gap-4 text-xs text-text-muted">
-            <span><%= number_with_delimiter(post.likes_count) %> <%= t("analyses.show.top_posts.likes") %></span>
-            <span><%= number_with_delimiter(post.comments_count) %> <%= t("analyses.show.top_posts.comments") %></span>
-            <% if post.video_view_count.present? %>
-              <span><%= number_with_delimiter(post.video_view_count) %> <%= t("analyses.show.top_posts.views") %></span>
-            <% end %>
-            <span class="ml-auto font-medium text-text-body">
-              <%= t("analyses.show.top_posts.score") %>: <%= post.quality_score&.round(2) || "—" %>
-            </span>
+      <div class="border-t border-border-subtle pt-3 first:border-t-0 first:pt-0" data-controller="post-expand">
+        <div class="flex gap-4">
+          <div class="flex-shrink-0 text-body-sm font-medium text-text-muted">#<%= idx + 1 %></div>
+          <div class="min-w-0 flex-1">
+            <p class="line-clamp-2 text-body-sm text-text-body">
+              <%= post.caption.presence || t("analyses.show.top_posts.no_caption") %>
+            </p>
+            <div class="mt-2 flex items-center gap-4 text-xs text-text-muted">
+              <span><%= number_with_delimiter(post.likes_count) %> <%= t("analyses.show.top_posts.likes") %></span>
+              <span><%= number_with_delimiter(post.comments_count) %> <%= t("analyses.show.top_posts.comments") %></span>
+              <% if post.video_view_count.present? %>
+                <span><%= number_with_delimiter(post.video_view_count) %> <%= t("analyses.show.top_posts.views") %></span>
+              <% end %>
+              <span class="ml-auto font-medium text-text-body">
+                <%= t("analyses.show.top_posts.score") %>: <%= post.quality_score&.round(2) || "—" %>
+              </span>
+            </div>
+
+            <button type="button"
+                    class="mt-3 text-xs font-semibold uppercase tracking-wide text-text-body hover:text-text-muted"
+                    data-action="click->post-expand#toggle"
+                    data-post-expand-target="toggleBtn">
+              Ver mais
+            </button>
+
+            <div class="mt-4 hidden border-t border-gray-200 pt-4 text-sm text-gray-700"
+                 data-post-expand-target="content">
+              <% if post.reel? && post.transcript.present? %>
+                <p class="text-xs font-semibold uppercase text-gray-500">Transcrição:</p>
+                <p class="mt-1 whitespace-pre-wrap"><%= post.transcript %></p>
+              <% end %>
+
+              <p class="mt-4 text-xs font-semibold uppercase text-gray-500">Legenda:</p>
+              <p class="mt-1 whitespace-pre-wrap">
+                <%= post.caption.presence || t("analyses.show.top_posts.no_caption") %>
+              </p>
+            </div>
           </div>
         </div>
       </div>

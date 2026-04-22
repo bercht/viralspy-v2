@@ -1,13 +1,17 @@
-<% flash.each do |type, message| %>
-  <% classes = case type.to_sym
-     when :notice
-       "border-semantic-success/30 bg-semantic-success-bg text-semantic-success"
-     when :alert, :error
-       "border-semantic-danger/30 bg-semantic-danger-bg text-semantic-danger"
-     else
-       "border-semantic-neutral/30 bg-semantic-neutral-bg text-semantic-neutral"
-     end %>
-  <div class="mb-6 rounded-card border px-4 py-3 text-body-sm <%= classes %>">
-    <%= message %>
+<% if flash.any? %>
+  <div class="fixed top-0 left-0 right-0 z-50 space-y-1 pointer-events-none">
+    <% flash.each do |type, message| %>
+      <% classes = case type.to_sym
+         when :notice, :success
+           "border-l-4 border-[#0070cc] bg-[#f5f7fa] text-[#1f1f1f]"
+         when :alert, :error
+           "border-l-4 border-[#c81b3a] bg-[#fff5f5] text-[#1f1f1f]"
+         else
+           "border-l-4 border-[#0070cc] bg-[#f5f7fa] text-[#1f1f1f]"
+         end %>
+      <div class="pointer-events-auto px-4 py-3 text-sm font-medium w-full transition-opacity duration-500 <%= classes %>" data-controller="flash">
+        <%= message %>
+      </div>
+    <% end %>
   </div>
 <% end %>

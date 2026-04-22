@@ -1,5 +1,5 @@
 class PlaybooksController < ApplicationController
-  before_action :set_playbook, only: [ :show, :edit, :update, :destroy, :export ]
+  before_action :set_playbook, only: [ :show, :edit, :update, :destroy, :export, :export_top_posts ]
 
   def index
     @playbooks = current_tenant.playbooks.recent.includes(:playbook_versions)
@@ -40,6 +40,16 @@ class PlaybooksController < ApplicationController
   def destroy
     @playbook.destroy
     redirect_to playbooks_path, notice: "Playbook removido."
+  end
+
+  def export_top_posts
+    content  = Playbooks::TopPostsExporter.new(@playbook).call
+    filename = "viralspy_posts_#{@playbook.name.parameterize}_#{Date.today.iso8601}.txt"
+
+    send_data content,
+              filename:,
+              type:        "text/plain; charset=utf-8",
+              disposition: "attachment"
   end
 
   def export

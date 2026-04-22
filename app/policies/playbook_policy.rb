@@ -6,5 +6,6 @@ class PlaybookPolicy < ApplicationPolicy
   def edit?    = record.account_id == user.account_id
   def update?  = record.account_id == user.account_id
   def destroy? = record.account_id == user.account_id
-  def export?  = record.account_id == user.account_id
+  def export?           = record.account_id == user.account_id
+  def export_top_posts? = record.account_id == user.account_id
 end

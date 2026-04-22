@@ -121,4 +121,36 @@ RSpec.describe "Playbooks", type: :request, skip_tenant: true do
       expect(response).to redirect_to(playbook_path(pb))
     end
   end
+
+  describe "GET /playbooks/:id/export_top_posts" do
+    let!(:playbook) { ActsAsTenant.with_tenant(account) { create(:playbook, account: account) } }
+
+    it "retorna 200 com Content-Type text/plain" do
+      get export_top_posts_playbook_path(playbook)
+      expect(response).to have_http_status(:ok)
+      expect(response.content_type).to include("text/plain")
+    end
+
+    it "inclui Content-Disposition attachment com filename parametrizado" do
+      get export_top_posts_playbook_path(playbook)
+      disposition = response.headers["Content-Disposition"]
+      expect(disposition).to include("attachment")
+      expect(disposition).to include(playbook.name.parameterize)
+    end
+
+    it "retorna 404 para playbook de outro tenant" do
+      other = ActsAsTenant.with_tenant(other_account) { create(:playbook, account: other_account) }
+      get export_top_posts_playbook_path(other)
+      expect(response).to have_http_status(:not_found)
+    end
+
+    context "sem login" do
+      before { sign_out user }
+
+      it "redireciona para sign_in" do
+        get export_top_posts_playbook_path(playbook)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
 end

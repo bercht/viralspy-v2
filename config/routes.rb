@@ -44,6 +44,7 @@ Rails.application.routes.draw do
     resources :playbook_suggestions, only: [ :create, :update ]
     member do
       get :export
+      get :export_top_posts
     end
   end
 

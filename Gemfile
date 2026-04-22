@@ -41,6 +41,7 @@ gem "acts_as_tenant"
 
 # Background jobs
 gem "sidekiq", "~> 7.0"
+gem "connection_pool", "~> 2.5"
 gem "redis", "~> 5.0"
 
 # IA

@@ -8,6 +8,8 @@ module MediaGeneration
     POLL_INTERVAL = 10
 
     def perform(generated_media_id, attempt = 1)
+      Rails.logger.info("[PollWorker] start gm_id=#{generated_media_id} attempt=#{attempt}")
+
       generated_media = ActsAsTenant.without_tenant { GeneratedMedia.find(generated_media_id) }
 
       ActsAsTenant.with_tenant(generated_media.account) do
@@ -19,6 +21,7 @@ module MediaGeneration
             error_message: "Polling timeout — vídeo não foi gerado em 10 minutos",
             finished_at: Time.current
           )
+          Rails.logger.warn("[PollWorker] timeout gm_id=#{generated_media_id}")
           broadcast_update(generated_media)
           return
         end
@@ -30,6 +33,7 @@ module MediaGeneration
           generated_media.update!(
             status: :failed, error_message: "HeyGen API key not found", finished_at: Time.current
           )
+          Rails.logger.error("[PollWorker] missing api_key gm_id=#{generated_media_id} account_id=#{generated_media.account_id}")
           broadcast_update(generated_media)
           return
         end
@@ -37,10 +41,13 @@ module MediaGeneration
         provider = MediaGeneration::Factory.build(provider: "heygen", api_key: api_key)
         result = provider.check_status(job_id: generated_media.provider_job_id)
 
+        Rails.logger.info("[PollWorker] check_status gm_id=#{generated_media_id} success=#{result.success?} status=#{result.status} error_code=#{result.error_code}")
+
         if result.failure? && result.error_code != :timeout
           generated_media.update!(
             status: :failed, error_message: result.error, finished_at: Time.current
           )
+          Rails.logger.error("[PollWorker] provider error gm_id=#{generated_media_id} error=#{result.error}")
           broadcast_update(generated_media)
           return
         end
@@ -50,6 +57,7 @@ module MediaGeneration
           generated_media.update!(
             status: :completed, output_url: result.output_url, finished_at: Time.current
           )
+          Rails.logger.info("[PollWorker] completed gm_id=#{generated_media_id} output_url=#{result.output_url}")
           log_usage(generated_media)
           broadcast_update(generated_media)
         when "failed"
@@ -58,11 +66,16 @@ module MediaGeneration
             error_message: result.error || "HeyGen generation failed",
             finished_at: Time.current
           )
+          Rails.logger.error("[PollWorker] heygen failed gm_id=#{generated_media_id} error=#{result.error}")
           broadcast_update(generated_media)
         else
+          Rails.logger.info("[PollWorker] still processing gm_id=#{generated_media_id} heygen_status=#{result.status} next_attempt=#{attempt + 1}")
           self.class.perform_in(POLL_INTERVAL.seconds, generated_media_id, attempt + 1)
         end
       end
+    rescue StandardError => e
+      Rails.logger.error("[PollWorker] exception gm_id=#{generated_media_id} attempt=#{attempt} error=#{e.class}: #{e.message}\n#{e.backtrace.first(5).join("\n")}")
+      raise
     end
 
     private

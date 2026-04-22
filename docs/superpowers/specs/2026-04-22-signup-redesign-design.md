@@ -55,7 +55,7 @@ Estrutura raiz:
 
   <%# Painel direito — Paper White %>
   <div class="w-full md:w-1/2 bg-white flex flex-col justify-center px-6 py-10 md:px-10 lg:px-16">
-    <%# Logo mobile-only %>
+    <%# Logo mobile-only: md:hidden (visível por padrão, oculto em md+ onde painel esquerdo já tem logo) %>
     <div class="w-full max-w-sm mx-auto">
       <%# Headline "Criar conta" %>
       <%# Subtítulo %>
@@ -90,9 +90,11 @@ Estrutura raiz:
 
 **Bloco de erros:**
 
+`bg-[#fef2f2]` (Tailwind red-50) não pertence ao design system. Usar opacidade sobre o token Warning Red (`#c81b3a`) — mesma aparência, paleta fechada.
+
 ```erb
 <% if resource.errors.any? %>
-  <div class="mb-6 rounded-xl bg-[#fef2f2] border border-[#c81b3a]/20 p-4">
+  <div class="mb-6 rounded-xl bg-[#c81b3a]/10 border border-[#c81b3a]/30 p-4">
     <ul class="space-y-1">
       <% resource.errors.full_messages.each do |msg| %>
         <li class="text-sm text-[#c81b3a] font-light"><%= msg %></li>

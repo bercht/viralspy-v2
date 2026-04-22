@@ -1,0 +1,55 @@
+<% failure_mode = failed_step_status.present? %>
+<% current_step_status = failure_mode ? failed_step_status : current_status %>
+
+<div class="overflow-x-auto">
+  <div class="mx-auto flex min-w-[760px] items-center py-1">
+    <% ANALYSIS_STEPS.each_with_index do |step, index| %>
+      <% state = analysis_step_state(step[:status], current_step_status) %>
+      <% failed_active = failure_mode && step[:status] == failed_step_status %>
+      <% label = failed_active ? "Falhou" : step[:label] %>
+
+      <div class="flex min-w-[120px] flex-col items-center px-1 text-center">
+        <% if state == :done %>
+          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white">
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M16.704 5.29a1 1 0 010 1.42l-7.45 7.45a1 1 0 01-1.415 0l-3.54-3.54a1 1 0 111.414-1.414l2.833 2.833 6.743-6.748a1 1 0 011.415 0z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        <% elsif state == :active %>
+          <% if failed_active %>
+            <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-red-600 bg-red-50 text-red-600">
+              <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M5.22 5.22a.75.75 0 011.06 0L10 8.94l3.72-3.72a.75.75 0 111.06 1.06L11.06 10l3.72 3.72a.75.75 0 11-1.06 1.06L10 11.06l-3.72 3.72a.75.75 0 11-1.06-1.06L8.94 10 5.22 6.28a.75.75 0 010-1.06z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          <% else %>
+            <div class="relative flex h-8 w-8 items-center justify-center">
+              <span class="absolute inset-0 animate-pulse rounded-full border-2 border-blue-300"></span>
+              <span class="relative flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white">
+                <span class="h-2 w-2 rounded-full bg-white"></span>
+              </span>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="h-8 w-8 rounded-full border-2 border-gray-300 bg-white"></div>
+        <% end %>
+
+        <% label_class =
+          if failed_active
+            "mt-2 text-xs font-semibold text-red-600"
+          elsif state == :active
+            "mt-2 text-xs font-semibold text-blue-700"
+          elsif state == :done
+            "mt-2 text-xs font-medium text-gray-700"
+          else
+            "mt-2 text-xs font-medium text-gray-400"
+          end %>
+
+        <p class="<%= label_class %>"><%= label %></p>
+      </div>
+
+      <% next if index == ANALYSIS_STEPS.size - 1 %>
+      <div class="h-0.5 flex-1 <%= state == :done ? "bg-blue-600" : "bg-gray-200" %>"></div>
+    <% end %>
+  </div>
+</div>

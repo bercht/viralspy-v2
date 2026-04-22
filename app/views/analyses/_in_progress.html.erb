@@ -1,6 +1,8 @@
-<article class="rounded-feature border border-border-subtle bg-surface-canvas p-12 text-center shadow-card">
-  <div class="mx-auto mb-4 h-12 w-12 animate-spin rounded-pill border-4 border-border-subtle border-t-brand-primary"></div>
+<article class="rounded-feature border border-border-subtle bg-surface-canvas p-6 shadow-card md:p-8">
+  <%= render "analyses/status_stepper", current_status: analysis.status.to_sym, failed_step_status: nil %>
 
-  <h2 class="text-heading text-text-body"><%= t("analyses.status.#{analysis.status}") %></h2>
-  <p class="mt-2 text-body text-text-muted"><%= t("analyses.show.in_progress.realtime_hint") %></p>
+  <div class="mt-6 text-center">
+    <h2 class="text-heading text-text-body"><%= t("analyses.status.#{analysis.status}") %></h2>
+    <p class="mt-2 text-body text-text-muted"><%= t("analyses.show.in_progress.realtime_hint") %></p>
+  </div>
 </article>

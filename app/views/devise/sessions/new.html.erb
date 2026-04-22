@@ -1,38 +1,114 @@
-<div class="min-h-screen flex items-center justify-center px-4 py-12">
-  <div class="w-full max-w-md">
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-      <h1 class="text-2xl font-semibold text-gray-900 mb-6"><%= t('devise.sessions.new.title') %></h1>
+<div class="min-h-screen flex flex-col md:flex-row">
 
-      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-4" }) do |f| %>
-        <div>
-          <%= f.label :email, t('devise.registrations.email_label'), class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true,
-                class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
-        </div>
+  <%# ===== PAINEL ESQUERDO — Console Black ===== %>
+  <div class="hidden md:flex md:w-1/2 bg-black flex-col justify-between p-12 lg:p-16">
 
-        <div>
-          <%= f.label :password, t('devise.registrations.password_label'), class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.password_field :password, autocomplete: "current-password", required: true,
-                class: "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" %>
-        </div>
+    <%# Logo -%>
+    <%= link_to root_path, class: "text-white font-semibold text-lg tracking-tight" do %>
+      ViralSpy
+    <% end %>
 
-        <div class="flex items-center justify-between">
-          <% if devise_mapping.rememberable? %>
-            <label class="flex items-center gap-2 text-sm text-gray-600">
-              <%= f.check_box :remember_me, class: "rounded border-gray-300 text-indigo-600" %>
-              Lembrar de mim
-            </label>
-          <% end %>
-          <%= link_to t('devise.sessions.new.forgot_password'), new_password_path(resource_name), class: "text-sm text-indigo-600 hover:text-indigo-700" %>
-        </div>
+    <%# Copy central -%>
+    <div>
+      <h1 class="text-4xl lg:text-[2.75rem] font-light text-white leading-tight tracking-tight mb-4">
+        Bem-vindo<br>de volta.
+      </h1>
+      <p class="text-base text-white/50 font-light leading-relaxed max-w-sm">
+        Seus concorrentes não pararam de postar.<br>
+        Continue de onde parou.
+      </p>
+    </div>
 
-        <%= f.submit t('devise.sessions.new.submit'),
-              class: "w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer" %>
-      <% end %>
-
-      <div class="mt-6 text-center text-sm text-gray-600">
-        <%= link_to t('devise.sessions.new.no_account'), new_registration_path(resource_name), class: "text-indigo-600 hover:text-indigo-700" %>
+    <%# Destaque -%>
+    <div class="border border-[#0070cc]/40 rounded-xl p-5 bg-[#0070cc]/5 max-w-sm">
+      <div class="flex items-center gap-3">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="absolute inline-flex h-full w-full rounded-full bg-[#0070cc] opacity-75 animate-ping"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#0070cc]"></span>
+        </span>
+        <span class="text-sm text-white/60 font-light">Última análise pronta para você.</span>
       </div>
     </div>
+
   </div>
+
+  <%# ===== PAINEL DIREITO — Paper White ===== %>
+  <div class="flex-1 md:w-1/2 bg-white flex flex-col justify-center px-6 py-12 md:px-12 lg:px-16">
+
+    <%# Mobile logo -%>
+    <div class="md:hidden mb-8">
+      <%= link_to root_path, class: "text-[#0070cc] font-semibold text-lg tracking-tight" do %>
+        ViralSpy
+      <% end %>
+    </div>
+
+    <div class="w-full max-w-sm mx-auto">
+
+      <h2 class="text-2xl font-light text-[#000000] tracking-tight mb-8">
+        Entrar na sua conta
+      </h2>
+
+      <%# Erros Devise -%>
+      <% if resource.errors.any? %>
+        <div class="mb-6 rounded-xl bg-[#fef2f2] border border-[#c81b3a]/20 p-4">
+          <ul class="space-y-1">
+            <% resource.errors.full_messages.each do |msg| %>
+              <li class="text-sm text-[#c81b3a] font-light"><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <%# Flash alerts -%>
+      <% flash.each do |type, msg| %>
+        <% next if msg.blank? %>
+        <div class="mb-6 rounded-xl p-4 text-sm font-light <%= type.to_s == 'alert' ? 'bg-[#fef2f2] text-[#c81b3a] border border-[#c81b3a]/20' : 'bg-[#eff6ff] text-[#0070cc] border border-[#0070cc]/20' %>">
+          <%= msg %>
+        </div>
+      <% end %>
+
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-5" }) do |f| %>
+
+        <div>
+          <%= f.label :email, "E-mail",
+              class: "block text-xs font-medium text-[#6b6b6b] tracking-wide uppercase mb-2" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true,
+              class: "w-full border border-[#cccccc] rounded-xl px-4 py-3 text-sm text-[#1f1f1f] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#0070cc] focus:border-transparent transition-shadow duration-150" %>
+        </div>
+
+        <div>
+          <%= f.label :password, "Senha",
+              class: "block text-xs font-medium text-[#6b6b6b] tracking-wide uppercase mb-2" %>
+          <%= f.password_field :password, autocomplete: "current-password", required: true,
+              class: "w-full border border-[#cccccc] rounded-xl px-4 py-3 text-sm text-[#1f1f1f] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#0070cc] focus:border-transparent transition-shadow duration-150" %>
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <% if devise_mapping.rememberable? %>
+            <label class="flex items-center gap-2 text-sm text-[#6b6b6b] font-light cursor-pointer">
+              <%= f.check_box :remember_me,
+                  class: "rounded border-[#cccccc] text-[#0070cc] focus:ring-[#0070cc]" %>
+              Lembrar de mim
+            </label>
+          <% else %>
+            <span></span>
+          <% end %>
+          <%= link_to "Esqueci minha senha", new_password_path(resource_name),
+              class: "text-sm text-[#0070cc] hover:text-[#1eaedb] font-light transition-colors duration-150" %>
+        </div>
+
+        <%= f.submit "Entrar",
+            class: "w-full bg-[#0070cc] text-white rounded-full py-3.5 text-sm font-medium tracking-wide hover:bg-[#1eaedb] hover:scale-[1.02] hover:ring-2 hover:ring-[#0070cc] hover:ring-offset-2 transition-all duration-150 ease-in-out cursor-pointer mt-2" %>
+
+      <% end %>
+
+      <p class="mt-6 text-center text-sm text-[#6b6b6b] font-light">
+        Não tem conta?
+        <%= link_to "Criar conta grátis", new_registration_path(resource_name),
+            class: "text-[#0070cc] hover:text-[#1eaedb] font-medium transition-colors duration-150" %>
+      </p>
+
+    </div>
+  </div>
+
 </div>

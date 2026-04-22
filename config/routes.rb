@@ -1,12 +1,13 @@
 Rails.application.routes.draw do
   devise_for :users, controllers: {
-    registrations: "users/registrations"
+    registrations: "users/registrations",
+    sessions: "users/sessions"
   }
 
   authenticated :user do
     root to: "dashboard#index", as: :authenticated_root
   end
-  root to: redirect("/users/sign_in")
+  root to: "pages#home"
 
   get "dashboard", to: "dashboard#index", as: :dashboard
 

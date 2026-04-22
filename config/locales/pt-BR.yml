@@ -19,8 +19,56 @@ pt-BR:
     signup:
       account_invalid: "Não foi possível criar a conta da empresa. Tente novamente."
   devise:
+    confirmations:
+      confirmed: "Seu e-mail foi confirmado com sucesso."
+      send_instructions: "Você receberá um e-mail com instruções para confirmar sua conta em alguns minutos."
+      send_paranoid_instructions: "Se seu e-mail existir em nossa base, você receberá instruções para confirmação."
+    failure:
+      already_authenticated: "Você já está conectado."
+      inactive: "Sua conta ainda não está ativada."
+      invalid: "E-mail ou senha inválidos."
+      locked: "Sua conta está bloqueada."
+      last_attempt: "Você tem mais uma tentativa antes de a conta ser bloqueada."
+      not_found_in_database: "E-mail ou senha inválidos."
+      timeout: "Sua sessão expirou. Faça login novamente para continuar."
+      unauthenticated: "Você precisa fazer login ou se cadastrar antes de continuar."
+      unconfirmed: "Você precisa confirmar seu e-mail antes de continuar."
+    mailer:
+      confirmation_instructions:
+        subject: "Instruções de confirmação"
+      reset_password_instructions:
+        subject: "Instruções para redefinir senha"
+      unlock_instructions:
+        subject: "Instruções para desbloquear conta"
+      email_changed:
+        subject: "E-mail alterado"
+      password_change:
+        subject: "Senha alterada"
+    omniauth_callbacks:
+      failure: "Não foi possível autenticar com %{kind} porque \"%{reason}\"."
+      success: "Autenticado com sucesso via %{kind}."
+    passwords:
+      no_token: "Você não pode acessar esta página sem vir de um e-mail de redefinição de senha."
+      send_instructions: "Você receberá um e-mail com instruções para redefinir sua senha em alguns minutos."
+      send_paranoid_instructions: "Se seu e-mail existir em nossa base, você receberá um link para recuperar a senha."
+      updated: "Sua senha foi alterada com sucesso. Você já está conectado."
+      updated_not_active: "Sua senha foi alterada com sucesso."
+      new:
+        title: "Recuperar senha"
+        submit: "Enviar instruções"
+        back_to_login: "Voltar para o login"
+      edit:
+        title: "Definir nova senha"
+        submit: "Atualizar senha"
     registrations:
+      destroyed: "Conta cancelada com sucesso. Esperamos te ver de volta em breve."
       signed_up: "Bem-vindo! Sua conta foi criada com sucesso."
+      signed_up_but_inactive: "Cadastro realizado. Porém não foi possível conectar porque sua conta ainda não está ativada."
+      signed_up_but_locked: "Cadastro realizado. Porém não foi possível conectar porque sua conta está bloqueada."
+      signed_up_but_unconfirmed: "Um e-mail com link de confirmação foi enviado. Siga o link para ativar sua conta."
+      update_needs_confirmation: "Conta atualizada. Verifique seu novo e-mail para confirmar a alteração."
+      updated: "Conta atualizada com sucesso."
+      updated_but_not_signed_in: "Conta atualizada. Como sua senha foi alterada, faça login novamente."
       new:
         title: "Criar conta"
         submit: "Criar conta"
@@ -32,19 +80,18 @@ pt-BR:
       password_confirmation_label: "Confirme a senha"
       already_registered: "Já tenho conta"
     sessions:
+      signed_in: "Login realizado com sucesso."
+      signed_out: "Sessão encerrada."
+      already_signed_out: "Sessão encerrada."
       new:
         title: "Entrar"
         submit: "Entrar"
         forgot_password: "Esqueci minha senha"
         no_account: "Ainda não tenho conta"
-    passwords:
-      new:
-        title: "Recuperar senha"
-        submit: "Enviar instruções"
-        back_to_login: "Voltar para o login"
-      edit:
-        title: "Definir nova senha"
-        submit: "Atualizar senha"
+    unlocks:
+      send_instructions: "Você receberá um e-mail com instruções para desbloquear sua conta em alguns minutos."
+      send_paranoid_instructions: "Se sua conta existir, você receberá um e-mail para desbloqueá-la."
+      unlocked: "Sua conta foi desbloqueada. Faça login para continuar."
 
   nav:
     dashboard: "Dashboard"

@@ -51,8 +51,8 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['Inter', ...defaultTheme.fontFamily.sans],
-        display: ['Inter', ...defaultTheme.fontFamily.sans]
+        sans: ['Outfit', ...defaultTheme.fontFamily.sans],
+        display: ['Outfit', ...defaultTheme.fontFamily.sans]
       },
       fontSize: {
         'display-xl': ['3rem', { lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '300' }],

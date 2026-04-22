@@ -1,0 +1,144 @@
+<%# ===== SEÇÃO 1: HERO — Console Black ===== %>
+<section class="bg-black min-h-screen flex flex-col">
+
+  <%# Nav -%>
+  <nav class="flex items-center justify-between px-6 py-5 md:px-12 lg:px-16">
+    <span class="text-white text-xl font-semibold tracking-tight">ViralSpy</span>
+    <%= link_to "Entrar", new_user_session_path,
+        class: "text-sm font-medium text-white border border-white/30 rounded-full px-5 py-2 hover:bg-white hover:text-black transition-all duration-150 ease-in-out" %>
+  </nav>
+
+  <%# Hero content -%>
+  <div class="flex-1 flex flex-col items-center justify-center px-6 py-20 md:px-12 lg:px-16 text-center">
+    <p class="text-xs font-medium tracking-[0.25em] text-[#0070cc] uppercase mb-6">
+      Para criadores de conteúdo
+    </p>
+
+    <h1 class="text-4xl md:text-5xl lg:text-[3.5rem] font-light text-white leading-tight tracking-tight max-w-3xl mb-6">
+      Pare de inventar.<br>
+      Publique o que já funciona.
+    </h1>
+
+    <p class="text-base md:text-lg text-white/60 font-light max-w-2xl mb-10 leading-relaxed">
+      ViralSpy analisa os concorrentes do seu nicho no Instagram, identifica o que está viralizando
+      e entrega sugestões prontas — gancho, legenda e formato definidos. Para criadores de qualquer
+      nicho que querem crescer de forma sistemática.
+    </p>
+
+    <div class="flex flex-col sm:flex-row items-center gap-4">
+      <%= link_to new_user_registration_path,
+          class: "bg-[#0070cc] text-white rounded-full px-8 py-3.5 text-base font-medium tracking-wide hover:bg-[#1eaedb] hover:scale-[1.05] hover:ring-2 hover:ring-white hover:ring-offset-2 hover:ring-offset-black transition-all duration-150 ease-in-out" do %>
+        Analisar meu primeiro concorrente &rarr;
+      <% end %>
+
+      <a href="#como-funciona"
+         class="text-sm font-medium text-[#53b1ff] hover:text-white transition-colors duration-150">
+        Ver como funciona &darr;
+      </a>
+    </div>
+  </div>
+
+  <%# Scroll indicator -%>
+  <div class="flex justify-center pb-8">
+    <div class="w-px h-12 bg-gradient-to-b from-white/20 to-transparent"></div>
+  </div>
+</section>
+
+<%# ===== SEÇÃO 2: COMO FUNCIONA — Paper White ===== %>
+<section id="como-funciona" class="bg-white py-24 px-6 md:px-12 lg:px-16">
+  <div class="max-w-5xl mx-auto">
+
+    <%# Label -%>
+    <p class="text-xs font-medium tracking-[0.25em] text-[#0070cc] uppercase mb-4">
+      Como funciona
+    </p>
+
+    <h2 class="text-3xl md:text-[2.25rem] font-light text-black leading-tight tracking-tight mb-3">
+      Do concorrente à sugestão, em minutos.
+    </h2>
+    <p class="text-base text-[#6b6b6b] font-light mb-14">
+      Você aponta. A IA investiga. Você posta.
+    </p>
+
+    <%# 3 cards -%>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div class="bg-white rounded-2xl shadow-[0_5px_9px_0_rgba(0,0,0,0.08)] p-8 border border-[#f0f0f0]">
+        <span class="text-5xl font-light text-[#0070cc]/20 leading-none block mb-5">01</span>
+        <h3 class="text-base font-semibold text-[#1f1f1f] mb-3">
+          Aponte seus concorrentes
+        </h3>
+        <p class="text-sm text-[#6b6b6b] leading-relaxed font-light">
+          Cadastre os perfis que você referencia. Qualquer conta do seu nicho que está indo bem.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-[0_5px_9px_0_rgba(0,0,0,0.08)] p-8 border border-[#f0f0f0]">
+        <span class="text-5xl font-light text-[#0070cc]/20 leading-none block mb-5">02</span>
+        <h3 class="text-base font-semibold text-[#1f1f1f] mb-3">
+          A IA analisa o que funciona
+        </h3>
+        <p class="text-sm text-[#6b6b6b] leading-relaxed font-light">
+          ViralSpy varre os posts, extrai os hooks com mais engajamento, identifica padrões de caption, formato e tema.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-[0_5px_9px_0_rgba(0,0,0,0.08)] p-8 border border-[#f0f0f0]">
+        <span class="text-5xl font-light text-[#0070cc]/20 leading-none block mb-5">03</span>
+        <h3 class="text-base font-semibold text-[#1f1f1f] mb-3">
+          Receba sugestões prontas
+        </h3>
+        <p class="text-sm text-[#6b6b6b] leading-relaxed font-light">
+          Gancho, legenda e formato definidos — baseados no que já provou funcionar. Sem tela em branco.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<%# ===== SEÇÃO 3: CTA FINAL — Console Black ===== %>
+<section class="bg-black py-24 px-6 md:px-12 lg:px-16">
+  <div class="max-w-3xl mx-auto text-center">
+
+    <h2 class="text-3xl md:text-[2.75rem] font-light text-white leading-tight tracking-tight mb-5">
+      Chega de olhar o concorrente sem reagir.
+    </h2>
+
+    <p class="text-base md:text-lg text-white/60 font-light mb-12 leading-relaxed">
+      Em menos de 5 minutos você já tem um relatório do que está funcionando no seu nicho
+      e sugestões prontas para hoje mesmo.
+    </p>
+
+    <%# Pricing card -%>
+    <div class="inline-block bg-white/5 border border-white/10 rounded-2xl px-10 py-8 mb-10 text-left w-full max-w-sm">
+      <span class="text-xs font-medium tracking-[0.2em] text-[#0070cc] uppercase block mb-4">
+        Plano único — traga suas próprias chaves de IA
+      </span>
+      <div class="flex items-baseline gap-1 mb-2">
+        <span class="text-4xl font-light text-[#d53b00]">R$ 44,90</span>
+        <span class="text-sm text-white/40 font-light">/mês</span>
+      </div>
+      <p class="text-sm text-white/50 font-light leading-relaxed">
+        Você usa suas próprias chaves OpenAI ou Anthropic. Zero markup em chamadas de IA.
+      </p>
+    </div>
+
+    <div class="flex flex-col items-center gap-4">
+      <%= link_to "Criar minha conta", new_user_registration_path,
+          class: "bg-[#0070cc] text-white rounded-full px-10 py-3.5 text-base font-medium tracking-wide hover:bg-[#1eaedb] hover:scale-[1.05] hover:ring-2 hover:ring-white hover:ring-offset-2 hover:ring-offset-black transition-all duration-150 ease-in-out" %>
+      <p class="text-xs text-white/30 font-light">
+        Primeira análise gratuita. Sem cartão para começar.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<%# ===== FOOTER — PlayStation Blue ===== %>
+<footer class="bg-[#0070cc] px-6 py-6 md:px-12 lg:px-16">
+  <div class="max-w-5xl mx-auto flex items-center justify-between">
+    <span class="text-white font-semibold text-base">ViralSpy</span>
+    <span class="text-white/70 text-sm font-light">&copy; 2026</span>
+  </div>
+</footer>

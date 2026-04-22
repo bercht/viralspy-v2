@@ -72,7 +72,7 @@ pt-BR:
       new:
         title: "Criar conta"
         submit: "Criar conta"
-      account_name_label: "Nome da empresa / imobiliária"
+      account_name_label: "Nome do seu negócio"
       first_name_label: "Nome"
       last_name_label: "Sobrenome"
       email_label: "Email"
@@ -98,6 +98,7 @@ pt-BR:
     competitors: "Concorrentes"
     playbooks: "Playbooks"
     own_profiles: "Meu Perfil"
+    medias: "Mídias"
     settings: "Configurações"
     logout: "Sair"
 
@@ -283,7 +284,7 @@ pt-BR:
       subtitle: "Atualize os dados do perfil monitorado"
     form:
       handle: "Nome de usuário no Instagram"
-      handle_hint: "Sem @. Exemplo: imobiliariaxyz"
+      handle_hint: "Sem @. Exemplo: marketingdigitalxyz"
       niche: "Nicho / Área de atuação"
       niche_hint: "Ex: Nutrição funcional, Marketing digital, Fitness. Ajuda o sistema a gerar sugestões contextualizadas."
       cancel: "Cancelar"

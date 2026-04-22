@@ -12,6 +12,7 @@ AllCops:
     - "log/**/*"
     - "vendor/**/*"
     - "node_modules/**/*"
+    - "config/locales/**/*"
 
 Style/Documentation:
   Enabled: false

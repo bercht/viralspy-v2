@@ -115,7 +115,9 @@
         <div>
           <%= f.label :password, t("devise.registrations.password_label"),
               class: "block text-xs font-medium text-[#6b6b6b] tracking-wide uppercase mb-2" %>
-          <div class="relative" data-controller="password-toggle">
+          <div class="relative" data-controller="password-toggle"
+               data-password-toggle-show-label-value="Mostrar senha"
+               data-password-toggle-hide-label-value="Ocultar senha">
             <%= f.password_field :password,
                 required: true,
                 autocomplete: "new-password",
@@ -123,6 +125,7 @@
                 class: "w-full border border-[#cccccc] rounded-xl px-4 py-3 pr-12 text-sm text-[#1f1f1f] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#0070cc] focus:border-transparent transition-shadow duration-150" %>
             <button type="button"
                     data-action="click->password-toggle#toggle"
+                    data-password-toggle-target="button"
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b6b6b] hover:text-[#1f1f1f] transition-colors duration-150"
                     aria-label="Mostrar senha">
               <svg data-password-toggle-target="iconShow" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -143,7 +146,9 @@
         <div>
           <%= f.label :password_confirmation, t("devise.registrations.password_confirmation_label"),
               class: "block text-xs font-medium text-[#6b6b6b] tracking-wide uppercase mb-2" %>
-          <div class="relative" data-controller="password-toggle">
+          <div class="relative" data-controller="password-toggle"
+               data-password-toggle-show-label-value="Mostrar confirmação de senha"
+               data-password-toggle-hide-label-value="Ocultar confirmação de senha">
             <%= f.password_field :password_confirmation,
                 required: true,
                 autocomplete: "new-password",
@@ -151,6 +156,7 @@
                 class: "w-full border border-[#cccccc] rounded-xl px-4 py-3 pr-12 text-sm text-[#1f1f1f] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#0070cc] focus:border-transparent transition-shadow duration-150" %>
             <button type="button"
                     data-action="click->password-toggle#toggle"
+                    data-password-toggle-target="button"
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b6b6b] hover:text-[#1f1f1f] transition-colors duration-150"
                     aria-label="Mostrar confirmação de senha">
               <svg data-password-toggle-target="iconShow" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

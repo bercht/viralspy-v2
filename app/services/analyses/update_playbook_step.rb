@@ -1,6 +1,7 @@
 module Analyses
   class UpdatePlaybookStep
-    MAX_TOKENS = 4000
+    MAX_TOKENS = 4500
+    PLAYBOOK_CONTENT_BUDGET = 3500 # tokens máximos para o conteúdo do playbook (excluindo DIFF_SUMMARY)
     SEPARATOR = "---DIFF_SUMMARY---"
 
     def self.call(analysis_playbook)
@@ -62,7 +63,8 @@ module Analyses
         profile_metrics: @analysis.profile_metrics || {},
         insights: @analysis.insights || {},
         author_role: @playbook.author_role,
-        target_audience: @playbook.target_audience
+        target_audience: @playbook.target_audience,
+        playbook_content_budget: PLAYBOOK_CONTENT_BUDGET
       }
 
       user_prompt = PromptRenderer.render(step: "update_playbook", kind: :user, locals: locals)

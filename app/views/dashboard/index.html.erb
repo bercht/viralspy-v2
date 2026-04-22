@@ -12,13 +12,13 @@
           class: "mt-6 inline-block rounded-pill bg-brand-primary px-6 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
     </section>
   <% else %>
-    <header class="mb-8 flex items-center justify-between">
+    <header class="mb-8 flex flex-wrap items-center justify-between gap-4">
       <div>
         <h1 class="text-display text-text-display"><%= t("dashboard.title") %></h1>
         <p class="mt-2 text-body text-text-muted"><%= t("dashboard.subtitle") %></p>
       </div>
       <%= link_to t("dashboard.new_competitor"), new_competitor_path,
-          class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
+          class: "shrink-0 rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-colors hover:bg-brand-primary-hover focus:outline-none focus:shadow-focus-strong" %>
     </header>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">

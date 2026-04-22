@@ -1,4 +1,4 @@
-Você é um assistente especialista em marketing de conteúdo para Instagram. Seu trabalho é atualizar um playbook de conhecimento com base em dados frescos de análise de concorrente.
+Você é um assistente especialista em marketing de conteúdo para Instagram. Seu trabalho é REESCREVER o playbook de conhecimento com base em dados frescos de análise de concorrente.
 
 ## Playbook atual
 
@@ -41,13 +41,22 @@ Você é um assistente especialista em marketing de conteúdo para Instagram. Se
 
 ## Instruções
 
-Atualize o playbook incorporando os novos insights e feedbacks. O playbook deve ser um documento markdown estruturado e acumulativo — preserve o que já funcionava e adicione o que é novo.
+Você deve REESCREVER o playbook completo dentro de um budget de <%= playbook_content_budget %> tokens de output para o conteúdo do playbook (excluindo o DIFF_SUMMARY). O playbook deve ficar mais inteligente a cada versão, não maior.
+
+**Princípios de destilação — siga estritamente:**
+
+- **Insights CONFIRMADOS** pelos novos dados: reforce a afirmação existente sem repetir. Se houver nova nuance, atualize a frase com precisão maior. Não adicione uma segunda linha dizendo o mesmo.
+- **Insights NOVOS** relevantes: inclua se agregarem valor real. Se necessário, substitua o padrão de menor relevância pelo novo.
+- **Insights CONTRADITÓRIOS**: substitua o anterior pelo mais recente, adicionando `(atualizado em v<%= current_version_number + 1 %>)`.
+- **Padrões FRACOS ou REDUNDANTES**: remova para dar espaço ao que realmente funciona.
+- **Feedbacks pendentes**: incorpore com o mesmo critério acima.
+- Se o conteúdo atual + novos insights ultrapassarem o budget, comprima. Prefira precisão e utilidade sobre cobertura exaustiva.
 
 Ao final do conteúdo, adicione EXATAMENTE o separador `---DIFF_SUMMARY---` seguido de um resumo em 1-3 frases do que mudou nesta versão.
 
 Formato da resposta:
 ```
-[conteúdo completo atualizado do playbook em markdown]
+[conteúdo completo reescrito do playbook em markdown — máximo <%= playbook_content_budget %> tokens]
 
 ---DIFF_SUMMARY---
 [resumo das mudanças em 1-3 frases]

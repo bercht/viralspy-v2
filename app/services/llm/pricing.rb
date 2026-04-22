@@ -25,7 +25,7 @@ module LLM
       }
     }.freeze
 
-    USD_TO_BRL = 5.50
+    USD_TO_BRL = 5.00
 
     def self.cost_cents(provider:, model:, prompt_tokens:, completion_tokens:)
       rate = RATES.dig(provider, model)

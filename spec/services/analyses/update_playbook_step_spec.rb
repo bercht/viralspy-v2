@@ -41,6 +41,16 @@ RSpec.describe Analyses::UpdatePlaybookStep do
     allow(LLM::UsageLogger).to receive(:log)
   end
 
+  describe "constants" do
+    it "define MAX_TOKENS como 4500" do
+      expect(described_class::MAX_TOKENS).to eq(4500)
+    end
+
+    it "define PLAYBOOK_CONTENT_BUDGET como 3500" do
+      expect(described_class::PLAYBOOK_CONTENT_BUDGET).to eq(3500)
+    end
+  end
+
   describe ".call" do
     it "cria nova PlaybookVersion" do
       ActsAsTenant.with_tenant(account) do
@@ -222,6 +232,20 @@ RSpec.describe Analyses::UpdatePlaybookStep do
           described_class.call(analysis_playbook)
           expect(analysis_playbook.reload.playbook_update_failed?).to be true
         end
+      end
+    end
+
+    context "token budget" do
+      it "passa playbook_content_budget como local para o prompt renderer" do
+        captured_locals = []
+        allow(Analyses::PromptRenderer).to receive(:render) do |**kwargs|
+          captured_locals << kwargs[:locals]
+          "mocked prompt"
+        end
+
+        ActsAsTenant.with_tenant(account) { described_class.call(analysis_playbook) }
+
+        expect(captured_locals).to all(include(playbook_content_budget: 3500))
       end
     end
 

@@ -1,7 +1,7 @@
 <div class="min-h-screen flex flex-col md:flex-row">
 
   <%# ===== PAINEL ESQUERDO — Console Black ===== %>
-  <div class="hidden md:flex md:w-1/2 bg-black flex-col justify-between p-12 lg:p-16">
+  <div class="hidden md:flex w-1/2 bg-black flex-col justify-center p-12 lg:p-16">
 
     <%# Logo -%>
     <%= link_to root_path, class: "text-white font-semibold text-lg tracking-tight" do %>
@@ -33,10 +33,10 @@
   </div>
 
   <%# ===== PAINEL DIREITO — Paper White ===== %>
-  <div class="flex-1 md:w-1/2 bg-white flex flex-col justify-center px-6 py-12 md:px-12 lg:px-16">
+  <div class="w-full md:w-1/2 bg-white flex flex-col justify-center px-6 py-10 md:px-10 lg:px-16">
 
     <%# Mobile logo -%>
-    <div class="md:hidden mb-8">
+    <div class="block md:hidden mb-6">
       <%= link_to root_path, class: "text-[#0070cc] font-semibold text-lg tracking-tight" do %>
         ViralSpy
       <% end %>
@@ -98,7 +98,7 @@
         </div>
 
         <%= f.submit "Entrar",
-            class: "w-full bg-[#0070cc] text-white rounded-full py-3.5 text-sm font-medium tracking-wide hover:bg-[#1eaedb] hover:scale-[1.02] hover:ring-2 hover:ring-[#0070cc] hover:ring-offset-2 transition-all duration-150 ease-in-out cursor-pointer mt-2" %>
+            class: "w-full bg-[#0070cc] text-white rounded-full py-3 text-sm font-medium tracking-wide hover:bg-[#1eaedb] hover:scale-[1.02] hover:ring-2 hover:ring-[#0070cc] hover:ring-offset-2 transition-all duration-150 ease-in-out cursor-pointer mt-2" %>
 
       <% end %>
 

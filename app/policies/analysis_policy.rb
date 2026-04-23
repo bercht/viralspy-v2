@@ -11,6 +11,10 @@ class AnalysisPolicy < ApplicationPolicy
     record.account_id == user.account_id
   end
 
+  def update?
+    record.account_id == user.account_id
+  end
+
   def destroy?
     record.account_id == user.account_id
   end

@@ -266,4 +266,156 @@ RSpec.describe Analysis, type: :model do
       end
     end
   end
+
+  describe "expiry" do
+    describe "#expired?" do
+      it "retorna true quando expires_at é passado e status completed" do
+        ActsAsTenant.with_tenant(account) do
+          analysis = build(:analysis, :completed, account: account, competitor: competitor,
+                           expires_at: 1.day.ago)
+          expect(analysis.expired?).to be true
+        end
+      end
+
+      it "retorna false quando expires_at é futuro" do
+        ActsAsTenant.with_tenant(account) do
+          analysis = build(:analysis, :completed, account: account, competitor: competitor,
+                           expires_at: 1.day.from_now)
+          expect(analysis.expired?).to be false
+        end
+      end
+
+      it "retorna false quando status não é completed" do
+        ActsAsTenant.with_tenant(account) do
+          analysis = build(:analysis, account: account, competitor: competitor,
+                           status: :pending, expires_at: 1.day.ago)
+          expect(analysis.expired?).to be false
+        end
+      end
+
+      it "retorna false quando expires_at é nil" do
+        ActsAsTenant.with_tenant(account) do
+          analysis = build(:analysis, :completed, account: account, competitor: competitor,
+                           expires_at: nil)
+          expect(analysis.expired?).to be false
+        end
+      end
+    end
+
+    describe "#expiring_soon?" do
+      it "retorna true quando expires_at está em menos de 7 dias" do
+        ActsAsTenant.with_tenant(account) do
+          analysis = build(:analysis, :completed, account: account, competitor: competitor,
+                           expires_at: 3.days.from_now)
+          expect(analysis.expiring_soon?).to be true
+        end
+      end
+
+      it "retorna false quando expires_at está em mais de 7 dias" do
+        ActsAsTenant.with_tenant(account) do
+          analysis = build(:analysis, :completed, account: account, competitor: competitor,
+                           expires_at: 10.days.from_now)
+          expect(analysis.expiring_soon?).to be false
+        end
+      end
+
+      it "retorna false quando já expirou" do
+        ActsAsTenant.with_tenant(account) do
+          analysis = build(:analysis, :completed, account: account, competitor: competitor,
+                           expires_at: 1.day.ago)
+          expect(analysis.expiring_soon?).to be false
+        end
+      end
+    end
+
+    describe "#extend_expiry!" do
+      it "soma 30 dias a expires_at atual quando no futuro" do
+        ActsAsTenant.with_tenant(account) do
+          future = 10.days.from_now
+          analysis = create(:analysis, :completed, account: account, competitor: competitor,
+                            expires_at: future)
+          analysis.extend_expiry!
+          expect(analysis.reload.expires_at).to be_within(1.second).of(future + 30.days)
+        end
+      end
+
+      it "usa Time.current como base quando expires_at já expirou" do
+        ActsAsTenant.with_tenant(account) do
+          analysis = create(:analysis, :completed, account: account, competitor: competitor,
+                            expires_at: 5.days.ago)
+          analysis.extend_expiry!
+          expect(analysis.reload.expires_at).to be_within(5.seconds).of(30.days.from_now)
+        end
+      end
+    end
+
+    describe "callback set_expiry_on_completion" do
+      it "define expires_at em 30 dias ao mudar status para completed" do
+        ActsAsTenant.with_tenant(account) do
+          analysis = create(:analysis, account: account, competitor: competitor, status: :analyzing)
+          expect(analysis.expires_at).to be_nil
+          analysis.update!(status: :completed, finished_at: Time.current)
+          expect(analysis.reload.expires_at).to be_within(5.seconds).of(30.days.from_now)
+        end
+      end
+
+      it "não sobrescreve expires_at se já existir" do
+        ActsAsTenant.with_tenant(account) do
+          fixed = 60.days.from_now
+          analysis = create(:analysis, account: account, competitor: competitor,
+                            status: :analyzing, expires_at: fixed)
+          analysis.update!(status: :completed, finished_at: Time.current)
+          expect(analysis.reload.expires_at).to be_within(1.second).of(fixed)
+        end
+      end
+    end
+
+    describe "scopes" do
+      describe ".expired" do
+        it "retorna apenas análises completed com expires_at no passado" do
+          ActsAsTenant.with_tenant(account) do
+            expired = create(:analysis, :completed, account: account, competitor: competitor,
+                             expires_at: 1.day.ago)
+            active = create(:analysis, :completed, account: account, competitor: competitor,
+                            expires_at: 1.day.from_now)
+            pending = create(:analysis, account: account, competitor: competitor,
+                             expires_at: 1.day.ago)
+
+            expect(Analysis.expired).to include(expired)
+            expect(Analysis.expired).not_to include(active, pending)
+          end
+        end
+      end
+
+      describe ".active" do
+        it "retorna análises completed com expires_at futuro" do
+          ActsAsTenant.with_tenant(account) do
+            active = create(:analysis, :completed, account: account, competitor: competitor,
+                            expires_at: 1.day.from_now)
+            expired = create(:analysis, :completed, account: account, competitor: competitor,
+                             expires_at: 1.day.ago)
+
+            expect(Analysis.active).to include(active)
+            expect(Analysis.active).not_to include(expired)
+          end
+        end
+      end
+
+      describe ".expiring_soon" do
+        it "retorna análises completed expirando nos próximos 7 dias" do
+          ActsAsTenant.with_tenant(account) do
+            soon = create(:analysis, :completed, account: account, competitor: competitor,
+                          expires_at: 3.days.from_now)
+            later = create(:analysis, :completed, account: account, competitor: competitor,
+                           expires_at: 10.days.from_now)
+            expired = create(:analysis, :completed, account: account, competitor: competitor,
+                             expires_at: 1.day.ago)
+
+            expect(Analysis.expiring_soon).to include(soon)
+            expect(Analysis.expiring_soon).not_to include(later, expired)
+          end
+        end
+      end
+    end
+  end
 end

@@ -328,6 +328,7 @@ pt-BR:
     flash:
       started: "Análise iniciada. Você será notificado quando estiver pronta."
       create_failed: "Não foi possível iniciar a análise. Tente novamente."
+      discarded: "Análise descartada."
     errors:
       competitor_niche_missing: "Preencha o nicho deste perfil antes de iniciar uma análise."
       no_playbook: "Crie ao menos um playbook antes de iniciar uma análise."

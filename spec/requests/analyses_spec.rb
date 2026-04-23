@@ -252,4 +252,92 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
       end
     end
   end
+
+  describe "POST /competitors/:competitor_id/analyses/:id/extend_expiry" do
+    let!(:analysis) do
+      ActsAsTenant.with_tenant(account) do
+        create(:analysis, :completed, account: account, competitor: competitor,
+               expires_at: 5.days.from_now)
+      end
+    end
+
+    it "estende expires_at em 30 dias e retorna turbo_stream" do
+      original_expiry = analysis.expires_at
+      post extend_expiry_competitor_analysis_path(competitor, analysis),
+           headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      expect(analysis.reload.expires_at).to be_within(5.seconds).of(original_expiry + 30.days)
+    end
+
+    it "retorna 404 para analysis de outro tenant" do
+      other_analysis = ActsAsTenant.with_tenant(other_account) do
+        create(:analysis, :completed, account: other_account, competitor: other_competitor,
+               expires_at: 5.days.from_now)
+      end
+      post extend_expiry_competitor_analysis_path(other_competitor, other_analysis),
+           headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:not_found)
+    end
+
+    context "sem login" do
+      before { sign_out user }
+
+      it "redireciona para sign_in" do
+        post extend_expiry_competitor_analysis_path(competitor, analysis)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
+
+  describe "DELETE /competitors/:competitor_id/analyses/:id/discard" do
+    let!(:analysis) do
+      ActsAsTenant.with_tenant(account) do
+        create(:analysis, :completed, account: account, competitor: competitor,
+               expires_at: 1.day.ago)
+      end
+    end
+
+    it "destrói a análise e retorna turbo_stream" do
+      expect {
+        delete discard_competitor_analysis_path(competitor, analysis),
+               headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      }.to change { Analysis.unscoped.count }.by(-1)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "destrói os posts associados" do
+      ActsAsTenant.with_tenant(account) do
+        create(:post, analysis: analysis, account: account)
+        expect {
+          delete discard_competitor_analysis_path(competitor, analysis),
+                 headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        }.to change { Post.unscoped.count }.by(-1)
+      end
+    end
+
+    it "NÃO destrói o playbook associado" do
+      delete discard_competitor_analysis_path(competitor, analysis),
+             headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(Playbook.unscoped.find_by(id: playbook.id)).to be_present
+    end
+
+    it "retorna 404 para analysis de outro tenant" do
+      other_analysis = ActsAsTenant.with_tenant(other_account) do
+        create(:analysis, :completed, account: other_account, competitor: other_competitor,
+               expires_at: 1.day.ago)
+      end
+      delete discard_competitor_analysis_path(other_competitor, other_analysis),
+             headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:not_found)
+    end
+
+    context "sem login" do
+      before { sign_out user }
+
+      it "redireciona para sign_in" do
+        delete discard_competitor_analysis_path(competitor, analysis)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+    end
+  end
 end

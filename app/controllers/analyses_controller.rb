@@ -6,7 +6,7 @@ class AnalysesController < ApplicationController
   before_action :require_competitor_niche!, only: [ :new, :create ]
   before_action :require_playbook!, only: [ :new, :create ]
   before_action :require_api_credentials_configured!, only: [ :new, :create ]
-  before_action :set_analysis, only: [ :show, :export_top_posts ]
+  before_action :set_analysis, only: [ :show, :export_top_posts, :extend_expiry, :discard ]
 
   def new
     @analysis = @competitor.analyses.build(
@@ -34,6 +34,36 @@ class AnalysesController < ApplicationController
 
   def show
     authorize @analysis
+  end
+
+  def extend_expiry
+    authorize @analysis, :update?
+
+    @analysis.extend_expiry!(30)
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(
+          "analysis-expiry-#{@analysis.id}",
+          partial: "analyses/expiry_banner",
+          locals: { analysis: @analysis }
+        )
+      end
+      format.html { redirect_back fallback_location: competitor_path(@competitor) }
+    end
+  end
+
+  def discard
+    authorize @analysis, :destroy?
+
+    @analysis.destroy
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.remove("analysis-row-#{@analysis.id}")
+      end
+      format.html { redirect_to competitor_path(@competitor), notice: t("analyses.flash.discarded") }
+    end
   end
 
   def export_top_posts

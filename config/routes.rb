@@ -15,6 +15,8 @@ Rails.application.routes.draw do
     resources :analyses, only: [ :new, :create, :show ] do
       member do
         get :export_top_posts
+        post :extend_expiry
+        delete :discard
       end
     end
     resources :story_observations, only: [ :new, :create, :index, :destroy ]

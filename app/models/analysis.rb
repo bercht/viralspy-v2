@@ -29,10 +29,14 @@ class Analysis < ApplicationRecord
     less_than_or_equal_to: 100
   }
 
-  scope :recent, -> { order(created_at: :desc) }
-  scope :in_progress, -> { where(status: %i[pending scraping scoring transcribing analyzing generating_suggestions]) }
+  scope :recent,         -> { order(created_at: :desc) }
+  scope :in_progress,    -> { where(status: %i[pending scraping scoring transcribing analyzing generating_suggestions]) }
+  scope :expired,        -> { completed.where(expires_at: ..Time.current) }
+  scope :expiring_soon,  -> { completed.where(expires_at: Time.current..(Time.current + 7.days)) }
+  scope :active,         -> { completed.where("expires_at > ?", Time.current) }
 
   after_update_commit :broadcast_status_change, if: :saved_change_to_status?
+  after_update_commit :set_expiry_on_completion, if: :saved_change_to_status?
 
   def duration_seconds
     return nil unless started_at && finished_at
@@ -40,7 +44,28 @@ class Analysis < ApplicationRecord
     (finished_at - started_at).to_i
   end
 
+  def expired?
+    completed? && expires_at.present? && expires_at < Time.current
+  end
+
+  def expiring_soon?
+    completed? && expires_at.present? &&
+      expires_at > Time.current &&
+      expires_at < 7.days.from_now
+  end
+
+  def extend_expiry!(days = 30)
+    update!(expires_at: [ expires_at, Time.current ].max + days.days)
+  end
+
   private
+
+  def set_expiry_on_completion
+    return unless completed?
+    return if expires_at.present?
+
+    update_column(:expires_at, (finished_at || Time.current) + 30.days)
+  end
 
   def broadcast_status_change
     broadcast_replace_to(

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_21_201437) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_23_003212) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -41,9 +41,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_21_201437) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "max_posts", default: 50, null: false
+    t.datetime "expires_at"
     t.index ["account_id", "created_at"], name: "index_analyses_on_account_id_and_created_at"
     t.index ["account_id"], name: "index_analyses_on_account_id"
     t.index ["competitor_id"], name: "index_analyses_on_competitor_id"
+    t.index ["expires_at"], name: "index_analyses_on_expires_at"
     t.index ["status"], name: "index_analyses_on_status"
   end
 

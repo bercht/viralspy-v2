@@ -114,7 +114,9 @@ module Analyses
       account.llm_preferences_with_defaults["analysis_provider"].to_sym
     end
 
-    def model_for(_use_case)
+    def model_for(use_case)
+      return "claude-haiku-4-5-20251001" if use_case == "carousel_analysis"
+
       account.llm_preferences_with_defaults["analysis_model"]
     end
 

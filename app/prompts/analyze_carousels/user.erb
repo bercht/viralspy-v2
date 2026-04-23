@@ -1,14 +1,17 @@
 Analise os seguintes <%= posts.size %> carrosséis do perfil @<%= handle %> (<%= followers %> seguidores).
 
-Métricas:
+Métricas do perfil:
 - Posts por semana: <%= profile_metrics[:posts_per_week] || profile_metrics["posts_per_week"] %>
 - Engagement médio: <%= (profile_metrics[:avg_engagement_rate] || profile_metrics["avg_engagement_rate"] || 0) * 100 %>%
 
-Carrosséis (ordenados por quality_score):
+IMPORTANTE: Os carrosséis estão ordenados por quality_score (maior = melhor performance relativa).
+Trate os 3 primeiros como fonte primária de padrões. Os demais são confirmação ou contraste.
+
+Carrosséis (ordenados por quality_score — maior primeiro):
 
 <% posts.each_with_index do |post, i| %>
 ---
-CARROSSEL <%= i + 1 %>
+CARROSSEL <%= i + 1 %><%= i == 0 ? " ★ MAIOR QUALITY_SCORE" : "" %><%= i < 3 ? " [TOP]" : "" %>
 Caption: <%= post.caption.to_s[0, 1200] %>
 Engajamento: <%= post.likes_count %> curtidas, <%= post.comments_count %> comentários
 Hashtags: <%= (post.hashtags || []).first(10).join(", ") %>
@@ -16,4 +19,4 @@ Postado há <%= ((Time.current - post.posted_at) / 1.day).to_i %> dias
 ---
 <% end %>
 
-Retorne o JSON conforme especificado.
+Retorne o JSON conforme especificado no system prompt.

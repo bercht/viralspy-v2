@@ -5,18 +5,24 @@ Métricas do perfil:
 - Engagement médio: <%= (profile_metrics[:avg_engagement_rate] || profile_metrics["avg_engagement_rate"] || 0) * 100 %>%
 - Mix de conteúdo: <%= profile_metrics[:content_mix] || profile_metrics["content_mix"] %>
 
-Reels (ordenados por quality_score):
+IMPORTANTE: Os reels estão ordenados por quality_score (maior = melhor performance relativa).
+Trate os 3 primeiros como fonte primária de padrões. Os demais são confirmação ou contraste.
+
+Reels (ordenados por quality_score — maior primeiro):
 
 <% posts.each_with_index do |post, i| %>
 ---
-REEL <%= i + 1 %>
+REEL <%= i + 1 %><%= i == 0 ? " ★ MAIOR QUALITY_SCORE" : "" %><%= i < 3 ? " [TOP]" : "" %>
 Caption: <%= post.caption.to_s[0, 800] %>
-Transcript: <%= post.transcript.to_s[0, 1500] %>
+Transcript (o que foi dito no vídeo): <%= post.transcript.present? ? post.transcript.to_s[0, 1500] : "(sem transcrição disponível)" %>
 Engajamento: <%= post.likes_count %> curtidas, <%= post.comments_count %> comentários
 Views: <%= post.video_view_count || "n/d" %>
 Hashtags: <%= (post.hashtags || []).first(10).join(", ") %>
 Postado há <%= ((Time.current - post.posted_at) / 1.day).to_i %> dias
 ---
 <% end %>
+
+Ao analisar hooks: priorize o que aparece no transcript (primeiros 10 segundos falados)
+sobre a caption. O gancho falado é o que retém o espectador — é o dado mais valioso.
 
 Retorne o JSON conforme especificado no system prompt.

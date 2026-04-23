@@ -44,8 +44,8 @@ module ContentSuggestions
           format.turbo_stream do
             render turbo_stream: turbo_stream.replace(
               "suggestions-generate-error",
-              html: tag.div(result.error, id: "suggestions-generate-error",
-                            class: "rounded-card border border-semantic-danger/30 bg-semantic-danger-bg px-4 py-3 text-body-sm text-semantic-danger")
+              html: helpers.tag.div(result.error, id: "suggestions-generate-error",
+                                    class: "rounded-card border border-semantic-danger/30 bg-semantic-danger-bg px-4 py-3 text-body-sm text-semantic-danger")
             )
           end
           format.html { redirect_back(fallback_location: root_path, alert: result.error) }

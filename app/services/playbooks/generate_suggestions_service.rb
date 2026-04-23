@@ -85,9 +85,9 @@ module Playbooks
     end
 
     def parse_suggestions(raw)
-      data = JSON.parse(raw)
+      cleaned = raw.gsub(/\A```(?:json)?\s*/i, "").gsub(/\s*```\z/, "").strip
+      data = JSON.parse(cleaned)
       data["suggestions"] || []
-      # SEM rescue aqui — deixar JSON::ParserError subir para o rescue no call
     end
 
     def persist_suggestions(items)

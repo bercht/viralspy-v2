@@ -3,15 +3,20 @@
 @theme {
   /* ── Brand ── */
   --color-brand-primary: #0070cc;
-  --color-brand-primary-hover: #005fa8;
+  --color-brand-primary-hover: #1eaedb;   /* PS Cyan — hover signature */
+  --color-brand-primary-active: #005fa8;  /* PS Blue deep — pressed state */
   --color-brand-accent: #1eaedb;
+
+  /* ── Commerce ── */
+  --color-commerce-primary: #d53b00;  /* Commerce Orange */
+  --color-commerce-active: #aa2f00;   /* pressed state */
 
   /* ── Surface ── */
   --color-surface-canvas: #ffffff;
-  --color-surface-base: #f5f7fa;
+  --color-surface-base: #f5f7fa;     /* Ice Mist */
   --color-surface-raised: #ffffff;
-  --color-surface-dark: #0a0a0b;
-  --color-surface-dark-raised: #1a1a1d;
+  --color-surface-dark: #000000;         /* Console Black */
+  --color-surface-dark-raised: #121314;  /* PS dark gradient top */
 
   /* ── Border ── */
   --color-border-subtle: #e5e7eb;
@@ -26,21 +31,26 @@
   --color-text-on-dark: #ffffff;
   --color-text-on-dark-muted: #cccccc;
 
-  /* ── Semantic ── */
+  /* Semantic colors: reserved for FUNCTIONAL status only
+     (status badges, flash messages, form validation icons).
+     NEVER use as CTA fills, hover backgrounds, or section accents —
+     those must use brand-primary or commerce-primary (PS rule: no green
+     pills, no yellow highlights as chrome).
+  */
   --color-semantic-success: #059669;
   --color-semantic-success-bg: #ecfdf5;
-  --color-semantic-danger: #c81b3a;
-  --color-semantic-danger-bg: #fef2f2;
   --color-semantic-warning: #d97706;
   --color-semantic-warning-bg: #fffbeb;
+  --color-semantic-danger: #c81b3a;
+  --color-semantic-danger-bg: #fef2f2;
   --color-semantic-info: #0070cc;
   --color-semantic-info-bg: #eff6ff;
   --color-semantic-neutral: #6b6b6b;
   --color-semantic-neutral-bg: #f3f4f6;
 
   /* ── Font family ── */
-  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
-  --font-display: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-sans: Outfit, ui-sans-serif, system-ui, sans-serif;
+  --font-display: Outfit, ui-sans-serif, system-ui, sans-serif;
 
   /* ── Font sizes ── */
   --text-display-xl: 3rem;
@@ -87,10 +97,11 @@
   --radius-feature: 24px;
   --radius-pill: 999px;
 
-  /* ── Shadows ── */
-  --shadow-feather: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-  --shadow-raised: 0 5px 9px 0 rgba(0, 0, 0, 0.08);
-  --shadow-focus: 0 0 0 2px rgba(0, 112, 204, 0.25);
-  --shadow-focus-strong: 0 0 0 3px rgba(0, 112, 204, 0.35);
+  /* ── Shadows (PS scale: 0.06 / 0.08 / 0.16 / 0.8) ── */
+  --shadow-feather: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 5px 9px 0 rgba(0, 0, 0, 0.08);
+  --shadow-raised: 0 5px 9px 0 rgba(0, 0, 0, 0.16);
+  --shadow-hero: 0 5px 9px 0 rgba(0, 0, 0, 0.8);  /* PS hero drop — cards sobre foto */
+  --shadow-focus: 0 0 0 2px #0070cc;
+  --shadow-focus-strong: 0 0 0 3px #0070cc;
 }

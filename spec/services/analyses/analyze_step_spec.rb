@@ -98,13 +98,16 @@ RSpec.describe Analyses::AnalyzeStep do
         end
       end
 
-      it "calls LLM with openai provider and gpt-4o-mini model" do
+      it "calls LLM with openai provider and gpt-4o-mini model for reels and images" do
         ActsAsTenant.with_tenant(account) do
           described_class.call(analysis)
 
           expect(LLM::Gateway).to have_received(:complete)
             .with(hash_including(provider: :openai, model: "gpt-4o-mini", json_mode: true))
-            .at_least(3).times
+            .exactly(2).times
+          expect(LLM::Gateway).to have_received(:complete)
+            .with(hash_including(model: "claude-haiku-4-5-20251001", json_mode: true))
+            .exactly(1).times
         end
       end
 

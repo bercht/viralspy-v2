@@ -1,39 +1,36 @@
 <div class="space-y-6">
   <%# BREADCRUMB %>
-  <div class="flex items-center gap-2 text-sm text-slate-500">
-    <%= link_to "Meus Perfis", own_profiles_path, class: "hover:text-slate-700" %>
+  <div class="flex items-center gap-2 text-body-sm text-text-muted">
+    <%= link_to "Meus Perfis", own_profiles_path, class: "hover:text-text-body" %>
     <span>/</span>
-    <%= link_to "@#{@own_profile.instagram_handle}", own_profile_path(@own_profile), class: "hover:text-slate-700" %>
+    <%= link_to "@#{@own_profile.instagram_handle}", own_profile_path(@own_profile), class: "hover:text-text-body" %>
     <span>/</span>
-    <%= link_to "Posts", own_profile_own_posts_path(@own_profile), class: "hover:text-slate-700" %>
+    <%= link_to "Posts", own_profile_own_posts_path(@own_profile), class: "hover:text-text-body" %>
     <span>/</span>
-    <span class="text-slate-900">Detalhe</span>
+    <span class="text-text-body">Detalhe</span>
   </div>
 
   <div class="flex items-start justify-between">
     <div class="flex items-center gap-3">
-      <span class="rounded-full text-xs px-2 py-0.5 font-medium
-        <%= @own_post.reel? ? 'bg-purple-100 text-purple-700' :
-            @own_post.carousel? ? 'bg-blue-100 text-blue-700' :
-            'bg-slate-100 text-slate-600' %>">
+      <span class="rounded-pill px-2 py-0.5 text-caption font-medium bg-semantic-neutral-bg text-semantic-neutral">
         <%= @own_post.post_type.capitalize %>
       </span>
       <% if @own_post.posted_at %>
-        <span class="text-sm text-slate-500"><%= @own_post.posted_at.strftime("%d/%m/%Y") %></span>
+        <span class="text-body-sm text-text-muted"><%= @own_post.posted_at.strftime("%d/%m/%Y") %></span>
       <% end %>
     </div>
     <%= link_to "Avaliar", edit_own_profile_own_post_path(@own_profile, @own_post),
-        class: "bg-blue-600 hover:bg-sky-400 text-white rounded-full px-5 py-2 text-sm font-medium transition-all" %>
+        class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-all duration-[180ms] ease-out hover:bg-brand-primary-hover hover:scale-[1.02] focus:outline-none focus:shadow-focus-strong" %>
   </div>
 
   <%# CAPTION %>
   <% if @own_post.caption.present? %>
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-      <h2 class="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">Caption</h2>
-      <p class="text-slate-700 text-sm whitespace-pre-wrap"><%= @own_post.caption %></p>
+    <div class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+      <h2 class="text-caption font-medium text-text-muted mb-3">Caption</h2>
+      <p class="text-body-sm text-text-body whitespace-pre-wrap"><%= @own_post.caption %></p>
       <% if @own_post.permalink.present? %>
         <a href="<%= @own_post.permalink %>" target="_blank" rel="noopener noreferrer"
-           class="inline-block mt-3 text-xs text-blue-600 hover:text-sky-400">
+           class="inline-block mt-3 text-caption text-brand-primary hover:text-brand-primary-hover">
           Ver no Instagram ↗
         </a>
       <% end %>
@@ -43,13 +40,13 @@
   <%# MÉTRICAS ATUAIS %>
   <% if @own_post.metrics.present? %>
     <div>
-      <h2 class="text-lg font-medium text-slate-900 mb-4">Métricas atuais</h2>
+      <h2 class="text-heading text-text-body mb-4">Métricas atuais</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <% { "Alcance" => "reach", "Plays" => "plays", "Curtidas" => "likes", "Saves" => "saves", "Comentários" => "comments", "Compartilhamentos" => "shares" }.each do |label, key| %>
           <% if @own_post.metrics[key].present? %>
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-              <p class="text-2xl font-semibold text-slate-900"><%= number_with_delimiter(@own_post.metrics[key]) %></p>
-              <p class="text-xs text-slate-500 mt-1"><%= label %></p>
+            <div class="rounded-card border border-border-subtle bg-surface-canvas p-4 shadow-card">
+              <p class="text-display text-text-body"><%= number_with_delimiter(@own_post.metrics[key]) %></p>
+              <p class="text-caption text-text-muted mt-1"><%= label %></p>
             </div>
           <% end %>
         <% end %>
@@ -60,26 +57,26 @@
   <%# HISTÓRICO DE MÉTRICAS %>
   <% if @own_post.metrics_history.present? && @own_post.metrics_history.length > 1 %>
     <div>
-      <h2 class="text-lg font-medium text-slate-900 mb-4">Evolução das métricas</h2>
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <h2 class="text-heading text-text-body mb-4">Evolução das métricas</h2>
+      <div class="rounded-card border border-border-subtle bg-surface-canvas shadow-card overflow-hidden">
         <table class="w-full text-sm">
-          <thead class="bg-slate-50 border-b border-slate-200">
+          <thead class="bg-surface-base border-b border-border-subtle">
             <tr>
-              <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Data</th>
-              <th class="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Alcance</th>
-              <th class="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide hidden md:table-cell">Plays</th>
-              <th class="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide hidden md:table-cell">Saves</th>
+              <th class="text-left px-4 py-3 text-caption font-medium text-text-muted">Data</th>
+              <th class="text-right px-4 py-3 text-caption font-medium text-text-muted">Alcance</th>
+              <th class="text-right px-4 py-3 text-caption font-medium text-text-muted hidden md:table-cell">Plays</th>
+              <th class="text-right px-4 py-3 text-caption font-medium text-text-muted hidden md:table-cell">Saves</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-border-subtle">
             <% @own_post.metrics_history.each do |snapshot| %>
               <tr>
-                <td class="px-4 py-3 text-slate-500">
+                <td class="px-4 py-3 text-text-muted">
                   <%= snapshot["captured_at"] ? Time.zone.parse(snapshot["captured_at"]).strftime("%d/%m/%Y") : "—" %>
                 </td>
-                <td class="px-4 py-3 text-right text-slate-700"><%= number_with_delimiter(snapshot["reach"]) %></td>
-                <td class="px-4 py-3 text-right text-slate-500 hidden md:table-cell"><%= number_with_delimiter(snapshot["plays"]) %></td>
-                <td class="px-4 py-3 text-right text-slate-500 hidden md:table-cell"><%= number_with_delimiter(snapshot["saves"]) %></td>
+                <td class="px-4 py-3 text-right text-text-body"><%= number_with_delimiter(snapshot["reach"]) %></td>
+                <td class="px-4 py-3 text-right text-text-muted hidden md:table-cell"><%= number_with_delimiter(snapshot["plays"]) %></td>
+                <td class="px-4 py-3 text-right text-text-muted hidden md:table-cell"><%= number_with_delimiter(snapshot["saves"]) %></td>
               </tr>
             <% end %>
           </tbody>
@@ -90,17 +87,17 @@
 
   <%# AVALIAÇÃO %>
   <% if @own_post.performance_rating %>
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-      <h2 class="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">Avaliação</h2>
-      <span class="rounded-full text-sm px-3 py-1 font-medium
-        <%= @own_post.rating_breakthrough? ? 'bg-green-100 text-green-700' :
-            @own_post.rating_good? ? 'bg-blue-100 text-blue-700' :
-            @own_post.rating_average? ? 'bg-yellow-100 text-yellow-700' :
-            'bg-red-100 text-red-700' %>">
+    <div class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+      <h2 class="text-caption font-medium text-text-muted mb-3">Avaliação</h2>
+      <span class="rounded-pill px-3 py-1 text-body-sm font-medium
+        <%= @own_post.rating_breakthrough? ? 'bg-semantic-success-bg text-semantic-success' :
+            @own_post.rating_good?         ? 'bg-semantic-neutral-bg text-semantic-neutral' :
+            @own_post.rating_average?      ? 'bg-semantic-warning-bg text-semantic-warning' :
+                                             'bg-semantic-danger-bg text-semantic-danger' %>">
         <%= @own_post.performance_rating.capitalize %>
       </span>
       <% if @own_post.performance_notes.present? %>
-        <p class="text-sm text-slate-700 mt-3"><%= @own_post.performance_notes %></p>
+        <p class="text-body-sm text-text-body mt-3"><%= @own_post.performance_notes %></p>
       <% end %>
     </div>
   <% end %>

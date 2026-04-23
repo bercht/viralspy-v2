@@ -1,83 +1,80 @@
 <div class="space-y-6">
   <%# BREADCRUMB %>
-  <div class="flex items-center gap-2 text-sm text-slate-500">
-    <%= link_to "Meus Perfis", own_profiles_path, class: "hover:text-slate-700" %>
+  <div class="flex items-center gap-2 text-body-sm text-text-muted">
+    <%= link_to "Meus Perfis", own_profiles_path, class: "hover:text-text-body" %>
     <span>/</span>
-    <%= link_to "@#{@own_profile.instagram_handle}", own_profile_path(@own_profile), class: "hover:text-slate-700" %>
+    <%= link_to "@#{@own_profile.instagram_handle}", own_profile_path(@own_profile), class: "hover:text-text-body" %>
     <span>/</span>
-    <span class="text-slate-900">Posts</span>
+    <span class="text-text-body">Posts</span>
   </div>
 
   <div class="flex items-center justify-between">
-    <h1 class="text-2xl font-light text-slate-900">Posts de @<%= @own_profile.instagram_handle %></h1>
+    <h1 class="text-display text-text-body">Posts de @<%= @own_profile.instagram_handle %></h1>
   </div>
 
   <%# TYPE FILTER %>
   <div class="flex gap-2 flex-wrap">
     <%= link_to "Todos", own_profile_own_posts_path(@own_profile),
-        class: "rounded-full px-4 py-1.5 text-sm font-medium transition-all #{params[:type].blank? ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'}" %>
+        class: "rounded-pill px-4 py-1.5 text-button transition-all #{params[:type].blank? ? 'bg-brand-primary text-text-on-dark duration-[180ms] ease-out hover:bg-brand-primary-hover' : 'bg-surface-canvas border border-border-subtle text-text-muted hover:border-border-default duration-[180ms]'}" %>
     <% %w[reel carousel image].each do |type| %>
       <%= link_to type.capitalize, own_profile_own_posts_path(@own_profile, type: type),
-          class: "rounded-full px-4 py-1.5 text-sm font-medium transition-all #{params[:type] == type ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'}" %>
+          class: "rounded-pill px-4 py-1.5 text-button transition-all #{params[:type] == type ? 'bg-brand-primary text-text-on-dark duration-[180ms] ease-out hover:bg-brand-primary-hover' : 'bg-surface-canvas border border-border-subtle text-text-muted hover:border-border-default duration-[180ms]'}" %>
     <% end %>
   </div>
 
   <% if @own_posts.empty? %>
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center">
-      <p class="text-slate-500">Nenhum post encontrado.</p>
+    <div class="rounded-card border border-border-subtle bg-surface-canvas shadow-card p-8 text-center">
+      <p class="text-body-sm text-text-muted">Nenhum post encontrado.</p>
     </div>
   <% else %>
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="rounded-card border border-border-subtle bg-surface-canvas shadow-card overflow-hidden">
       <table class="w-full text-sm">
-        <thead class="bg-slate-50 border-b border-slate-200">
+        <thead class="bg-surface-base border-b border-border-subtle">
           <tr>
-            <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Post</th>
-            <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide hidden md:table-cell">Data</th>
-            <th class="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Alcance</th>
-            <th class="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide hidden md:table-cell">Plays</th>
-            <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide hidden md:table-cell">Avaliação</th>
+            <th class="text-left px-4 py-3 text-caption font-medium text-text-muted">Post</th>
+            <th class="text-left px-4 py-3 text-caption font-medium text-text-muted hidden md:table-cell">Data</th>
+            <th class="text-right px-4 py-3 text-caption font-medium text-text-muted">Alcance</th>
+            <th class="text-right px-4 py-3 text-caption font-medium text-text-muted hidden md:table-cell">Plays</th>
+            <th class="text-left px-4 py-3 text-caption font-medium text-text-muted hidden md:table-cell">Avaliação</th>
             <th class="px-4 py-3"></th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
+        <tbody class="divide-y divide-border-subtle">
           <% @own_posts.each do |post| %>
-            <tr class="hover:bg-slate-50 transition-colors">
+            <tr class="hover:bg-surface-base transition-colors">
               <td class="px-4 py-3">
                 <div class="flex items-center gap-2">
-                  <span class="rounded-full text-xs px-2 py-0.5 font-medium
-                    <%= post.reel? ? 'bg-purple-100 text-purple-700' :
-                        post.carousel? ? 'bg-blue-100 text-blue-700' :
-                        'bg-slate-100 text-slate-600' %>">
+                  <span class="rounded-pill px-2 py-0.5 text-caption font-medium bg-semantic-neutral-bg text-semantic-neutral">
                     <%= post.post_type.capitalize %>
                   </span>
-                  <span class="text-slate-700 truncate max-w-xs"><%= truncate(post.caption.to_s, length: 60) %></span>
+                  <span class="text-text-body truncate max-w-xs"><%= truncate(post.caption.to_s, length: 60) %></span>
                 </div>
               </td>
-              <td class="px-4 py-3 text-slate-500 hidden md:table-cell">
+              <td class="px-4 py-3 text-text-muted hidden md:table-cell">
                 <%= post.posted_at&.strftime("%d/%m/%Y") %>
               </td>
-              <td class="px-4 py-3 text-right text-slate-700">
+              <td class="px-4 py-3 text-right text-text-body">
                 <%= number_with_delimiter(post.metrics["reach"]) %>
               </td>
-              <td class="px-4 py-3 text-right text-slate-500 hidden md:table-cell">
+              <td class="px-4 py-3 text-right text-text-muted hidden md:table-cell">
                 <%= number_with_delimiter(post.metrics["plays"]) %>
               </td>
               <td class="px-4 py-3 hidden md:table-cell">
                 <% if post.performance_rating %>
-                  <span class="rounded-full text-xs px-2 py-0.5 font-medium
-                    <%= post.rating_breakthrough? ? 'bg-green-100 text-green-700' :
-                        post.rating_good? ? 'bg-blue-100 text-blue-700' :
-                        post.rating_average? ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-red-100 text-red-700' %>">
+                  <span class="rounded-pill px-2 py-0.5 text-caption font-medium
+                    <%= post.rating_breakthrough? ? 'bg-semantic-success-bg text-semantic-success' :
+                        post.rating_good?         ? 'bg-semantic-neutral-bg text-semantic-neutral' :
+                        post.rating_average?      ? 'bg-semantic-warning-bg text-semantic-warning' :
+                                                    'bg-semantic-danger-bg text-semantic-danger' %>">
                     <%= post.performance_rating.capitalize %>
                   </span>
                 <% end %>
               </td>
               <td class="px-4 py-3 text-right">
                 <%= link_to "Ver", own_profile_own_post_path(@own_profile, post),
-                    class: "text-xs text-blue-600 hover:text-sky-400 mr-2" %>
+                    class: "text-caption text-brand-primary hover:text-brand-primary-hover mr-2" %>
                 <%= link_to "Avaliar", edit_own_profile_own_post_path(@own_profile, post),
-                    class: "text-xs text-slate-500 hover:text-slate-700" %>
+                    class: "text-caption text-text-muted hover:text-text-body" %>
               </td>
             </tr>
           <% end %>

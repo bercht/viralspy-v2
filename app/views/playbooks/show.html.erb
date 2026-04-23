@@ -2,69 +2,69 @@
   <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
     <div>
       <div class="flex items-center gap-3 mb-1">
-        <%= link_to "← Playbooks", playbooks_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
+        <%= link_to "← Playbooks", playbooks_path, class: "text-body-sm text-text-muted hover:text-text-body" %>
       </div>
-      <h1 class="text-2xl font-bold text-gray-900"><%= @playbook.name %></h1>
+      <h1 class="text-display text-text-body"><%= @playbook.name %></h1>
       <% if @playbook.niche.present? %>
-        <p class="text-gray-500 text-sm mt-1"><%= @playbook.niche %></p>
+        <p class="text-body-sm text-text-muted mt-1"><%= @playbook.niche %></p>
       <% end %>
       <% if @playbook.author_role.present? || @playbook.target_audience.present? %>
         <div class="flex flex-wrap gap-3 mt-2">
           <% if @playbook.author_role.present? %>
-            <span class="text-xs text-gray-500"><span class="font-medium text-gray-700">Autor:</span> <%= @playbook.author_role %></span>
+            <span class="text-caption text-text-muted"><span class="font-medium text-text-body">Autor:</span> <%= @playbook.author_role %></span>
           <% end %>
           <% if @playbook.target_audience.present? %>
-            <span class="text-xs text-gray-500"><span class="font-medium text-gray-700">Audiência:</span> <%= @playbook.target_audience %></span>
+            <span class="text-caption text-text-muted"><span class="font-medium text-text-body">Audiência:</span> <%= @playbook.target_audience %></span>
           <% end %>
         </div>
       <% end %>
     </div>
     <div class="flex flex-wrap items-center gap-2 sm:shrink-0">
       <%= link_to "Exportar .md", export_playbook_path(@playbook),
-          class: "inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50" %>
+          class: "inline-flex items-center rounded-pill border border-border-default px-3 py-2 text-button text-text-body bg-surface-canvas hover:bg-surface-base transition-colors" %>
       <%= link_to "⬇ Exportar top posts", export_top_posts_playbook_path(@playbook),
-          class: "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors" %>
+          class: "inline-flex items-center gap-2 rounded-pill bg-brand-primary px-4 py-2 text-button text-text-on-dark transition-all duration-[180ms] ease-out hover:bg-brand-primary-hover hover:scale-[1.02] focus:outline-none focus:shadow-focus-strong" %>
       <%= link_to "Editar", edit_playbook_path(@playbook),
-          class: "inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50" %>
+          class: "inline-flex items-center rounded-pill border border-border-default px-3 py-2 text-button text-text-body bg-surface-canvas hover:bg-surface-base transition-colors" %>
       <%= button_to "Excluir", @playbook, method: :delete,
-          class: "inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg text-red-600 bg-white border border-red-200 hover:bg-red-50",
+          class: "inline-flex items-center rounded-pill border border-semantic-danger/30 px-3 py-2 text-button text-semantic-danger bg-surface-canvas hover:bg-semantic-danger-bg transition-colors",
           data: { turbo_confirm: "Tem certeza?" } %>
     </div>
   </div>
 
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
     <div class="lg:col-span-2 space-y-6">
-      <div class="bg-white border border-gray-200 rounded-lg p-6">
+      <div class="bg-surface-canvas border border-border-subtle rounded-card p-6 shadow-card">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">
+          <h2 class="text-heading text-text-body">
             Versão atual
             <% if @playbook.current_version_number > 0 %>
-              <span class="ml-2 text-sm font-normal text-gray-500">v<%= @playbook.current_version_number %></span>
+              <span class="ml-2 text-body-sm font-normal text-text-muted">v<%= @playbook.current_version_number %></span>
             <% end %>
           </h2>
           <% if @current_version %>
-            <span class="text-xs text-gray-400">
+            <span class="text-caption text-text-subtle">
               Atualizado <%= @current_version.created_at.strftime("%d/%m/%Y às %H:%M") %>
             </span>
           <% end %>
         </div>
-        <div class="prose prose-sm max-w-none text-gray-700">
+        <div class="prose prose-sm max-w-none text-text-body">
           <%= simple_format(@playbook.current_content) %>
         </div>
       </div>
 
       <% if @recent_versions.any? %>
-        <div class="bg-white border border-gray-200 rounded-lg p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Histórico</h2>
+        <div class="bg-surface-canvas border border-border-subtle rounded-card p-6 shadow-card">
+          <h2 class="text-heading text-text-body mb-4">Histórico</h2>
           <div class="space-y-3">
             <% @recent_versions.each do |version| %>
-              <div class="flex items-start gap-3 py-3 border-b border-gray-100 last:border-0">
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 shrink-0">
+              <div class="flex items-start gap-3 py-3 border-b border-border-subtle last:border-0">
+                <span class="inline-flex items-center rounded-pill px-2 py-0.5 text-caption font-medium bg-brand-primary/10 text-brand-primary shrink-0">
                   v<%= version.version_number %>
                 </span>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm text-gray-700"><%= version.diff_summary %></p>
-                  <p class="text-xs text-gray-400 mt-1">
+                  <p class="text-body-sm text-text-body"><%= version.diff_summary %></p>
+                  <p class="text-caption text-text-subtle mt-1">
                     <%= version.created_at.strftime("%d/%m/%Y às %H:%M") %>
                     <% if version.triggered_by_analysis %>
                       · gerado a partir de análise de @<%= version.triggered_by_analysis.competitor.instagram_handle %>
@@ -75,20 +75,20 @@
                   </p>
                 </div>
                 <%= link_to "Ver", playbook_version_path(version),
-                    class: "text-xs text-indigo-600 hover:text-indigo-800 shrink-0" %>
+                    class: "text-caption text-brand-primary hover:text-brand-primary-hover shrink-0" %>
               </div>
             <% end %>
           </div>
           <% if @playbook.playbook_versions.count > 10 %>
             <%= link_to "Ver todas as versões →", playbook_playbook_versions_path(@playbook),
-                class: "text-sm text-indigo-600 hover:text-indigo-800 mt-3 inline-block" %>
+                class: "text-body-sm text-brand-primary hover:text-brand-primary-hover mt-3 inline-block" %>
           <% end %>
         </div>
       <% end %>
 
       <%# Geração sob demanda %>
-      <div class="bg-white border border-gray-200 rounded-lg p-6" data-controller="playbook-suggestion-form">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Gerar conteúdo</h2>
+      <div class="bg-surface-canvas border border-border-subtle rounded-card p-6 shadow-card" data-controller="playbook-suggestion-form">
+        <h2 class="text-heading text-text-body mb-4">Gerar conteúdo</h2>
 
         <div id="playbook_suggestions_error"></div>
 
@@ -96,22 +96,22 @@
             data: { action: "submit->playbook-suggestion-form#submit", turbo_stream: true } do |f| %>
           <div class="flex flex-col gap-3 mb-4 sm:flex-row sm:items-end">
             <div class="flex-1">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+              <label class="block text-body-sm font-medium text-text-body mb-1">Tipo</label>
               <%= f.select :content_type,
                   [["Reel", "reel"], ["Carrossel", "carousel"], ["Imagem", "image"], ["Story", "story"]],
                   {},
-                  class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500" %>
+                  class: "w-full rounded-input border border-border-default bg-surface-canvas px-3 py-2 text-body-sm text-text-body focus:border-brand-primary focus:outline-none focus:shadow-focus" %>
             </div>
             <div class="sm:w-28">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+              <label class="block text-body-sm font-medium text-text-body mb-1">Quantidade</label>
               <%= f.select :quantity,
                   [["1", 1], ["3", 3], ["5", 5]],
                   { selected: 3 },
-                  class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500" %>
+                  class: "w-full rounded-input border border-border-default bg-surface-canvas px-3 py-2 text-body-sm text-text-body focus:border-brand-primary focus:outline-none focus:shadow-focus" %>
             </div>
             <button type="submit"
                 data-playbook-suggestion-form-target="button"
-                class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                class="inline-flex items-center justify-center rounded-pill bg-brand-primary px-4 py-2 text-button text-text-on-dark transition-all duration-[180ms] ease-out hover:bg-brand-primary-hover hover:scale-[1.02] focus:outline-none focus:shadow-focus-strong disabled:opacity-50 disabled:cursor-not-allowed">
               <span data-playbook-suggestion-form-target="label">Gerar</span>
               <span data-playbook-suggestion-form-target="spinner" class="hidden ml-2">...</span>
             </button>
@@ -123,38 +123,38 @@
     </div>
 
     <div class="space-y-6">
-      <div class="bg-white border border-gray-200 rounded-lg p-5">
-        <h3 class="text-sm font-semibold text-gray-900 mb-3">Registrar feedback</h3>
+      <div class="bg-surface-canvas border border-border-subtle rounded-card p-5 shadow-card">
+        <h3 class="text-body-sm font-semibold text-text-body mb-3">Registrar feedback</h3>
         <%= form_with(model: [ @playbook, PlaybookFeedback.new ], local: true) do |f| %>
           <%= f.text_area :content,
               placeholder: "O que você aprendeu? O que funcionou ou não funcionou?",
               rows: 4,
-              class: "w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none" %>
+              class: "w-full rounded-input border border-border-default bg-surface-canvas px-3 py-2 text-body-sm text-text-body focus:border-brand-primary focus:outline-none focus:shadow-focus resize-none" %>
           <%= f.submit "Registrar",
-              class: "mt-2 w-full inline-flex justify-center items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 cursor-pointer" %>
+              class: "mt-2 w-full inline-flex justify-center items-center rounded-pill bg-brand-primary px-4 py-2 text-button text-text-on-dark transition-all duration-[180ms] ease-out hover:bg-brand-primary-hover cursor-pointer focus:outline-none focus:shadow-focus-strong" %>
         <% end %>
       </div>
 
       <% if @pending_feedbacks.any? %>
-        <div class="bg-white border border-gray-200 rounded-lg p-5">
-          <h3 class="text-sm font-semibold text-gray-900 mb-3">
+        <div class="bg-surface-canvas border border-border-subtle rounded-card p-5 shadow-card">
+          <h3 class="text-body-sm font-semibold text-text-body mb-3">
             Feedbacks pendentes
-            <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+            <span class="ml-1 inline-flex items-center rounded-pill px-1.5 py-0.5 text-caption font-medium bg-semantic-warning-bg text-semantic-warning">
               <%= @pending_feedbacks.count %>
             </span>
           </h3>
-          <p class="text-xs text-gray-500 mb-3">Serão incorporados na próxima atualização via análise.</p>
+          <p class="text-caption text-text-muted mb-3">Serão incorporados na próxima atualização via análise.</p>
           <div class="space-y-3">
             <% @pending_feedbacks.each do |feedback| %>
-              <div class="border border-gray-100 rounded p-3">
-                <p class="text-xs text-gray-700 mb-2"><%= feedback.content.truncate(120) %></p>
+              <div class="border border-border-subtle rounded-input p-3">
+                <p class="text-caption text-text-body mb-2"><%= feedback.content.truncate(120) %></p>
                 <div class="flex items-center gap-2">
-                  <span class="text-xs text-gray-400"><%= feedback.source %></span>
+                  <span class="text-caption text-text-subtle"><%= feedback.source %></span>
                   <div class="flex gap-1 ml-auto">
                     <%= button_to "Incorporar", incorporate_playbook_feedback_path(feedback), method: :patch,
-                        class: "text-xs text-green-600 hover:text-green-800" %>
+                        class: "text-caption text-brand-primary hover:text-brand-primary-hover font-medium" %>
                     <%= button_to "Descartar", dismiss_playbook_feedback_path(feedback), method: :patch,
-                        class: "text-xs text-red-500 hover:text-red-700" %>
+                        class: "text-caption text-semantic-danger hover:text-semantic-danger/80" %>
                   </div>
                 </div>
               </div>
@@ -164,13 +164,13 @@
       <% end %>
 
       <% if @recent_analyses.any? %>
-        <div class="bg-white border border-gray-200 rounded-lg p-5">
-          <h3 class="text-sm font-semibold text-gray-900 mb-3">Análises que alimentaram</h3>
+        <div class="bg-surface-canvas border border-border-subtle rounded-card p-5 shadow-card">
+          <h3 class="text-body-sm font-semibold text-text-body mb-3">Análises que alimentaram</h3>
           <div class="space-y-2">
             <% @recent_analyses.each do |analysis| %>
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-gray-700">@<%= analysis.competitor.instagram_handle %></span>
-                <span class="text-gray-400"><%= analysis.created_at.strftime("%d/%m") %></span>
+              <div class="flex items-center justify-between">
+                <span class="text-caption text-text-body">@<%= analysis.competitor.instagram_handle %></span>
+                <span class="text-caption text-text-subtle"><%= analysis.created_at.strftime("%d/%m") %></span>
               </div>
             <% end %>
           </div>

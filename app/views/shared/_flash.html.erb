@@ -2,9 +2,9 @@
   <div class="max-w-3xl mx-auto mb-8 space-y-3">
     <% flash.each do |type, message| %>
       <% bg_classes = case type.to_sym
-         when :notice, :success then "bg-[#0070cc] text-white"
-         when :alert, :error    then "bg-[#c81b3a] text-white"
-         else                        "bg-[#f5f7fa] text-[#1f1f1f] border border-[#e5e7eb]"
+         when :notice, :success then "bg-brand-primary text-text-on-dark"
+         when :alert, :error    then "bg-semantic-danger text-text-on-dark"
+         else                        "bg-surface-base text-text-body border border-border-subtle"
          end %>
 
       <div class="rounded-xl px-4 py-3 shadow-[0_5px_9px_0_rgba(0,0,0,0.08)] flex items-start gap-3 <%= bg_classes %>"

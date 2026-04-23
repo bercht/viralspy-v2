@@ -3,7 +3,7 @@
 
 <div class="overflow-x-auto">
   <div class="mx-auto flex min-w-[760px] items-center py-1">
-    <% ANALYSIS_STEPS.each_with_index do |step, index| %>
+    <% analysis_steps.each_with_index do |step, index| %>
       <% state = analysis_step_state(step[:status], current_step_status) %>
       <% failed_active = failure_mode && step[:status] == failed_step_status %>
       <% label = failed_active ? "Falhou" : step[:label] %>
@@ -48,7 +48,7 @@
         <p class="<%= label_class %>"><%= label %></p>
       </div>
 
-      <% next if index == ANALYSIS_STEPS.size - 1 %>
+      <% next if index == analysis_steps.size - 1 %>
       <div class="h-0.5 flex-1 <%= state == :done ? "bg-blue-600" : "bg-gray-200" %>"></div>
     <% end %>
   </div>

@@ -1,11 +1,11 @@
 <%# TOKEN EXPIRY BANNER %>
 <% if @own_profile.token_expiring_soon? && @own_profile.token_valid? %>
-  <div class="mb-6 rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3 flex items-center justify-between">
-    <span class="text-sm text-yellow-800">
+  <div class="mb-6 rounded-card border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3 flex items-center justify-between">
+    <span class="text-body-sm text-semantic-warning">
       &#x26A0;&#xFE0F; Token Meta expira em <%= @own_profile.meta_token_expires_at&.strftime("%d/%m/%Y") %>.
     </span>
     <%= link_to "Atualizar token", edit_own_profile_path(@own_profile),
-        class: "text-sm font-medium text-yellow-800 underline hover:text-yellow-900" %>
+        class: "text-body-sm font-medium text-semantic-warning underline hover:text-semantic-warning/80" %>
   </div>
 <% end %>
 
@@ -14,52 +14,52 @@
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
       <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-light text-slate-900">@<%= @own_profile.instagram_handle %></h1>
+        <h1 class="text-display text-text-body">@<%= @own_profile.instagram_handle %></h1>
         <% if @own_profile.token_valid? %>
           <% if @own_profile.token_expiring_soon? %>
-            <span class="rounded-full text-xs px-2 py-0.5 font-medium bg-yellow-100 text-yellow-800">Token expira em breve</span>
+            <span class="inline-flex items-center gap-1.5 rounded-pill px-2 py-0.5 text-caption font-medium bg-semantic-warning-bg text-semantic-warning">Token expira em breve</span>
           <% else %>
-            <span class="rounded-full text-xs px-2 py-0.5 font-medium bg-green-100 text-green-800">Token ativo</span>
+            <span class="inline-flex items-center gap-1.5 rounded-pill px-2 py-0.5 text-caption font-medium bg-semantic-success-bg text-semantic-success">Token ativo</span>
           <% end %>
         <% else %>
-          <span class="rounded-full text-xs px-2 py-0.5 font-medium bg-red-100 text-red-800">Token inválido</span>
+          <span class="inline-flex items-center gap-1.5 rounded-pill px-2 py-0.5 text-caption font-medium bg-semantic-danger-bg text-semantic-danger">Token inválido</span>
         <% end %>
       </div>
       <% if @own_profile.full_name.present? %>
-        <p class="text-slate-500 mt-1"><%= @own_profile.full_name %></p>
+        <p class="text-text-muted mt-1"><%= @own_profile.full_name %></p>
       <% end %>
     </div>
     <div class="flex gap-3">
       <%= button_to "Sincronizar posts", sync_own_profile_path(@own_profile),
-          class: "bg-blue-600 hover:bg-sky-400 text-white rounded-full px-5 py-2 text-sm font-medium transition-all" %>
+          class: "rounded-pill bg-brand-primary px-5 py-2 text-button text-text-on-dark transition-all duration-[180ms] ease-out hover:bg-brand-primary-hover hover:scale-[1.02] focus:outline-none focus:shadow-focus-strong" %>
       <%= link_to "Editar perfil", edit_own_profile_path(@own_profile),
-          class: "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-full px-5 py-2 text-sm font-medium transition-all" %>
+          class: "rounded-pill bg-surface-canvas text-text-body border border-border-subtle px-5 py-2 text-button transition-colors hover:bg-surface-base" %>
     </div>
   </div>
 
   <%# MÉTRICAS AGREGADAS %>
   <% if @metrics_summary.any? %>
     <div>
-      <h2 class="text-lg font-medium text-slate-900 mb-4">Métricas</h2>
+      <h2 class="text-heading text-text-body mb-4">Métricas</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-          <p class="text-3xl font-semibold text-slate-900"><%= @metrics_summary[:total_posts] %></p>
-          <p class="text-sm text-slate-500 mt-1">Posts totais</p>
+        <div class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+          <p class="text-display text-text-body"><%= @metrics_summary[:total_posts] %></p>
+          <p class="text-body-sm text-text-muted mt-1">Posts totais</p>
         </div>
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-          <p class="text-3xl font-semibold text-slate-900"><%= number_with_delimiter(@metrics_summary[:avg_reach]) %></p>
-          <p class="text-sm text-slate-500 mt-1">Alcance médio</p>
+        <div class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+          <p class="text-display text-text-body"><%= number_with_delimiter(@metrics_summary[:avg_reach]) %></p>
+          <p class="text-body-sm text-text-muted mt-1">Alcance médio</p>
         </div>
         <% if @metrics_summary[:avg_plays] %>
-          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <p class="text-3xl font-semibold text-slate-900"><%= number_with_delimiter(@metrics_summary[:avg_plays]) %></p>
-            <p class="text-sm text-slate-500 mt-1">Plays médios (reels)</p>
+          <div class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+            <p class="text-display text-text-body"><%= number_with_delimiter(@metrics_summary[:avg_plays]) %></p>
+            <p class="text-body-sm text-text-muted mt-1">Plays médios (reels)</p>
           </div>
         <% end %>
         <% if @metrics_summary[:avg_engagement] %>
-          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <p class="text-3xl font-semibold text-slate-900"><%= number_to_percentage(@metrics_summary[:avg_engagement] * 100, precision: 1) %></p>
-            <p class="text-sm text-slate-500 mt-1">Engajamento médio</p>
+          <div class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card">
+            <p class="text-display text-text-body"><%= number_to_percentage(@metrics_summary[:avg_engagement] * 100, precision: 1) %></p>
+            <p class="text-body-sm text-text-muted mt-1">Engajamento médio</p>
           </div>
         <% end %>
       </div>
@@ -68,21 +68,21 @@
 
   <%# TOP POST %>
   <% if (top = @metrics_summary[:top_post]) %>
-    <div class="bg-white rounded-xl border border-blue-200 shadow-sm p-6">
-      <h3 class="text-sm font-medium text-blue-600 uppercase tracking-wide mb-3">Melhor post por alcance</h3>
-      <p class="text-slate-700 text-sm mb-4"><%= truncate(top.caption.to_s, length: 120) %></p>
+    <div class="rounded-card border border-brand-primary/30 bg-surface-canvas p-6 shadow-card">
+      <h3 class="text-caption font-medium text-brand-primary mb-3">Melhor post por alcance</h3>
+      <p class="text-body-sm text-text-body mb-4"><%= truncate(top.caption.to_s, length: 120) %></p>
       <div class="grid grid-cols-3 gap-4">
         <div>
-          <p class="text-2xl font-semibold text-slate-900"><%= number_with_delimiter(top.metrics["reach"]) %></p>
-          <p class="text-xs text-slate-500">Alcance</p>
+          <p class="text-heading text-text-body"><%= number_with_delimiter(top.metrics["reach"]) %></p>
+          <p class="text-caption text-text-muted">Alcance</p>
         </div>
         <div>
-          <p class="text-2xl font-semibold text-slate-900"><%= number_with_delimiter(top.metrics["plays"]) %></p>
-          <p class="text-xs text-slate-500">Plays</p>
+          <p class="text-heading text-text-body"><%= number_with_delimiter(top.metrics["plays"]) %></p>
+          <p class="text-caption text-text-muted">Plays</p>
         </div>
         <div>
-          <p class="text-2xl font-semibold text-slate-900"><%= number_with_delimiter(top.metrics["saves"]) %></p>
-          <p class="text-xs text-slate-500">Saves</p>
+          <p class="text-heading text-text-body"><%= number_with_delimiter(top.metrics["saves"]) %></p>
+          <p class="text-caption text-text-muted">Saves</p>
         </div>
       </div>
     </div>
@@ -91,55 +91,55 @@
   <%# POSTS RECENTES %>
   <div>
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-lg font-medium text-slate-900">Posts recentes</h2>
+      <h2 class="text-heading text-text-body">Posts recentes</h2>
       <%= link_to "Ver todos", own_profile_own_posts_path(@own_profile),
-          class: "text-sm text-blue-600 hover:text-sky-400" %>
+          class: "text-body-sm text-brand-primary hover:text-brand-primary-hover" %>
     </div>
 
     <% if @own_posts.empty? %>
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-8 text-center">
-        <p class="text-slate-500 text-sm">Nenhum post sincronizado ainda.</p>
-        <p class="text-slate-400 text-xs mt-1">Clique em "Sincronizar posts" para importar seus posts do Instagram.</p>
+      <div class="rounded-card border border-border-subtle bg-surface-canvas p-8 text-center shadow-card">
+        <p class="text-body-sm text-text-muted">Nenhum post sincronizado ainda.</p>
+        <p class="text-caption text-text-subtle mt-1">Clique em "Sincronizar posts" para importar seus posts do Instagram.</p>
       </div>
     <% else %>
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="rounded-card border border-border-subtle bg-surface-canvas shadow-card overflow-hidden">
         <table class="w-full text-sm">
-          <thead class="bg-slate-50 border-b border-slate-200">
+          <thead class="bg-surface-base border-b border-border-subtle">
             <tr>
-              <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Post</th>
-              <th class="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide hidden md:table-cell">Data</th>
-              <th class="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Alcance</th>
-              <th class="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide hidden md:table-cell">Engajamento</th>
+              <th class="text-left px-4 py-3 text-caption font-medium text-text-muted">Post</th>
+              <th class="text-left px-4 py-3 text-caption font-medium text-text-muted hidden md:table-cell">Data</th>
+              <th class="text-right px-4 py-3 text-caption font-medium text-text-muted">Alcance</th>
+              <th class="text-right px-4 py-3 text-caption font-medium text-text-muted hidden md:table-cell">Engajamento</th>
               <th class="px-4 py-3"></th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-border-subtle">
             <% @own_posts.each do |post| %>
-              <tr class="hover:bg-slate-50 transition-colors">
+              <tr class="hover:bg-surface-base transition-colors">
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-2">
-                    <span class="rounded-full text-xs px-2 py-0.5 font-medium <%= post.reel? ? 'bg-purple-100 text-purple-700' : post.carousel? ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600' %>">
+                    <span class="rounded-pill px-2 py-0.5 text-caption font-medium bg-semantic-neutral-bg text-semantic-neutral">
                       <%= post.post_type.capitalize %>
                     </span>
-                    <span class="text-slate-700 truncate max-w-xs"><%= truncate(post.caption.to_s, length: 50) %></span>
+                    <span class="text-text-body truncate max-w-xs"><%= truncate(post.caption.to_s, length: 50) %></span>
                   </div>
                 </td>
-                <td class="px-4 py-3 text-slate-500 hidden md:table-cell">
+                <td class="px-4 py-3 text-text-muted hidden md:table-cell">
                   <%= post.posted_at&.strftime("%d/%m/%Y") %>
                 </td>
-                <td class="px-4 py-3 text-right text-slate-700">
+                <td class="px-4 py-3 text-right text-text-body">
                   <%= number_with_delimiter(post.metrics["reach"]) %>
                 </td>
-                <td class="px-4 py-3 text-right text-slate-500 hidden md:table-cell">
+                <td class="px-4 py-3 text-right text-text-muted hidden md:table-cell">
                   <% if post.metrics["engagement_rate"] %>
                     <%= number_to_percentage(post.metrics["engagement_rate"].to_f * 100, precision: 1) %>
                   <% else %>
-                    &mdash;
+                    <span class="text-text-subtle">&mdash;</span>
                   <% end %>
                 </td>
                 <td class="px-4 py-3 text-right">
                   <%= link_to "Avaliar", edit_own_profile_own_post_path(@own_profile, post),
-                      class: "text-xs text-blue-600 hover:text-sky-400" %>
+                      class: "text-caption text-brand-primary hover:text-brand-primary-hover" %>
                 </td>
               </tr>
             <% end %>

@@ -1,42 +1,42 @@
 <div class="space-y-6">
   <div class="flex flex-wrap items-center justify-between gap-4">
-    <h1 class="text-2xl font-light text-slate-900">Meus Perfis</h1>
+    <h1 class="text-display text-text-body">Meus Perfis</h1>
     <%= link_to "Adicionar Perfil", new_own_profile_path,
-        class: "shrink-0 bg-blue-600 hover:bg-sky-400 text-white rounded-full px-6 py-2.5 font-medium transition-all hover:scale-105 inline-block" %>
+        class: "shrink-0 rounded-pill bg-brand-primary px-6 py-2.5 text-button text-text-on-dark transition-all duration-[180ms] ease-out hover:bg-brand-primary-hover hover:scale-[1.02] focus:outline-none focus:shadow-focus-strong inline-block" %>
   </div>
 
   <% if @own_profiles.empty? %>
     <div class="text-center py-16">
-      <p class="text-slate-500 text-lg font-light mb-6">Nenhum perfil cadastrado ainda.</p>
+      <p class="text-body text-text-muted mb-6">Nenhum perfil cadastrado ainda.</p>
       <%= link_to "Adicionar meu perfil", new_own_profile_path,
-          class: "bg-blue-600 hover:bg-sky-400 text-white rounded-full px-6 py-2.5 font-medium transition-all hover:scale-105 inline-block" %>
+          class: "rounded-pill bg-brand-primary px-6 py-2.5 text-button text-text-on-dark transition-all duration-[180ms] ease-out hover:bg-brand-primary-hover hover:scale-[1.02] focus:outline-none focus:shadow-focus-strong inline-block" %>
     </div>
   <% else %>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <% @own_profiles.each do |profile| %>
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <div class="rounded-card border border-border-subtle bg-surface-canvas p-6 shadow-card space-y-4">
           <div class="flex items-start justify-between">
             <div>
-              <p class="font-semibold text-slate-900">@<%= profile.instagram_handle %></p>
+              <p class="text-body font-semibold text-text-body">@<%= profile.instagram_handle %></p>
               <% if profile.full_name.present? %>
-                <p class="text-sm text-slate-500"><%= profile.full_name %></p>
+                <p class="text-body-sm text-text-muted"><%= profile.full_name %></p>
               <% end %>
             </div>
             <% if profile.token_valid? %>
               <% if profile.token_expiring_soon? %>
-                <span class="rounded-full text-xs px-2 py-0.5 font-medium bg-yellow-100 text-yellow-800">Token expira em breve</span>
+                <span class="inline-flex items-center gap-1.5 rounded-pill px-2 py-0.5 text-caption font-medium bg-semantic-warning-bg text-semantic-warning">Token expira em breve</span>
               <% else %>
-                <span class="rounded-full text-xs px-2 py-0.5 font-medium bg-green-100 text-green-800">Token ativo</span>
+                <span class="inline-flex items-center gap-1.5 rounded-pill px-2 py-0.5 text-caption font-medium bg-semantic-success-bg text-semantic-success">Token ativo</span>
               <% end %>
             <% else %>
-              <span class="rounded-full text-xs px-2 py-0.5 font-medium bg-red-100 text-red-800">Token inválido</span>
+              <span class="inline-flex items-center gap-1.5 rounded-pill px-2 py-0.5 text-caption font-medium bg-semantic-danger-bg text-semantic-danger">Token inválido</span>
             <% end %>
           </div>
           <div class="flex gap-2 pt-2">
             <%= link_to "Ver Dashboard", own_profile_path(profile),
-                class: "flex-1 text-center bg-blue-600 hover:bg-sky-400 text-white rounded-full px-4 py-2 text-sm font-medium transition-all" %>
+                class: "flex-1 text-center rounded-pill bg-brand-primary px-4 py-2 text-button text-text-on-dark transition-all duration-[180ms] ease-out hover:bg-brand-primary-hover hover:scale-[1.02] focus:outline-none focus:shadow-focus-strong" %>
             <%= button_to "Sincronizar", sync_own_profile_path(profile),
-                class: "flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full px-4 py-2 text-sm font-medium transition-all" %>
+                class: "flex-1 text-center rounded-pill bg-semantic-neutral-bg text-text-body hover:bg-surface-base px-4 py-2 text-button transition-colors" %>
           </div>
         </div>
       <% end %>

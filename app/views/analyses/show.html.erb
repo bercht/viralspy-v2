@@ -34,6 +34,17 @@
     </div>
   </header>
 
+  <% if @analysis.playbooks.any? %>
+    <div class="mb-4 flex flex-wrap items-center gap-2">
+      <span class="text-xs text-text-muted">Contribuindo para:</span>
+      <% @analysis.playbooks.each do |playbook| %>
+        <%= link_to playbook.name,
+                    playbook_path(playbook),
+                    class: "rounded-full bg-brand-primary/10 px-3 py-1 text-xs font-medium text-brand-primary hover:bg-brand-primary/20 transition-colors" %>
+      <% end %>
+    </div>
+  <% end %>
+
   <%= render "analyses/expiry_banner", analysis: @analysis %>
   <%= render "analyses/analysis_body", analysis: @analysis %>
 </div>

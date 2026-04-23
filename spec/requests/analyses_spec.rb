@@ -152,6 +152,44 @@ RSpec.describe "Analyses", type: :request, skip_tenant: true do
         expect(flash[:alert]).to eq(I18n.t("analyses.errors.no_playbook"))
       end
     end
+
+    context "com playbook_ids selecionados" do
+      let(:playbook_2) { ActsAsTenant.with_tenant(account) { create(:playbook, account: account) } }
+
+      it "cria AnalysisPlaybook para cada playbook selecionado com status pending" do
+        post competitor_analyses_path(competitor),
+             params: { analysis: { max_posts: 20, playbook_ids: [ playbook.id, playbook_2.id ] } }
+
+        ActsAsTenant.with_tenant(account) do
+          analysis = account.analyses.last
+          expect(analysis.playbooks).to include(playbook, playbook_2)
+          expect(analysis.analysis_playbooks.count).to eq(2)
+          expect(analysis.analysis_playbooks.all?(&:playbook_update_pending?)).to be true
+        end
+      end
+
+      it "cria análise sem AnalysisPlaybooks quando nenhum selecionado" do
+        post competitor_analyses_path(competitor),
+             params: { analysis: { max_posts: 20, playbook_ids: [] } }
+
+        analysis = Analysis.unscoped.last
+        expect(analysis.analysis_playbooks).to be_empty
+      end
+
+      it "não vincula Playbook de outro tenant" do
+        other_playbook = ActsAsTenant.with_tenant(other_account) { create(:playbook, account: other_account) }
+
+        expect {
+          post competitor_analyses_path(competitor),
+               params: { analysis: { max_posts: 20, playbook_ids: [ other_playbook.id ] } }
+        }.to change { Analysis.unscoped.count }.by(1)
+
+        ActsAsTenant.with_tenant(account) do
+          analysis = account.analyses.last
+          expect(analysis.playbooks).not_to include(other_playbook)
+        end
+      end
+    end
   end
 
   describe "GET /competitors/:competitor_id/analyses/:id" do

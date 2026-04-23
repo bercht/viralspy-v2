@@ -1,16 +1,16 @@
 <div class="min-h-screen flex flex-col md:flex-row">
 
   <%# ===== PAINEL ESQUERDO — Console Black (desktop only) ===== %>
-  <div class="hidden md:flex w-1/2 bg-black flex-col justify-center gap-8 p-12 lg:p-16">
+  <div class="hidden md:flex w-1/2 bg-surface-dark flex-col justify-center gap-8 p-12 lg:p-16">
 
     <%# Logo -%>
-    <%= link_to root_path, class: "text-white font-semibold text-lg tracking-tight" do %>
+    <%= link_to root_path, class: "text-text-on-dark font-semibold text-lg tracking-tight" do %>
       ViralSpy
     <% end %>
 
     <%# Copy central -%>
     <div>
-      <h1 class="text-4xl lg:text-[2.75rem] font-light text-white leading-tight tracking-tight mb-4">
+      <h1 class="text-4xl lg:text-[2.75rem] font-light text-text-on-dark leading-tight tracking-tight mb-4">
         Comece a decifrar<br>o Instagram<br>do seu nicho.
       </h1>
       <p class="text-base text-white/50 font-light leading-relaxed max-w-sm">
@@ -19,7 +19,7 @@
     </div>
 
     <%# Card de benefícios -%>
-    <div class="border border-[#0070cc]/40 rounded-xl p-5 bg-[#0070cc]/5 max-w-sm">
+    <div class="border border-brand-primary/40 rounded-xl p-5 bg-brand-primary/5 max-w-sm">
       <ul class="space-y-3">
         <% [
           "Primeira análise grátis",
@@ -27,10 +27,10 @@
           "Dados brutos do Instagram, sem filtro"
         ].each do |benefit| %>
           <li class="flex items-center gap-3">
-            <svg class="w-5 h-5 text-[#0070cc] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="w-5 h-5 text-brand-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
-            <span class="text-sm text-white/80 font-light"><%= benefit %></span>
+            <span class="text-sm text-text-on-dark-muted font-light"><%= benefit %></span>
           </li>
         <% end %>
       </ul>
@@ -39,28 +39,28 @@
   </div>
 
   <%# ===== PAINEL DIREITO — Paper White ===== %>
-  <div class="w-full md:w-1/2 bg-white flex flex-col justify-center px-6 py-10 md:px-10 lg:px-16">
+  <div class="w-full md:w-1/2 bg-surface-canvas flex flex-col justify-center px-6 py-10 md:px-10 lg:px-16">
 
     <%# Logo mobile-only — md:hidden: visível por padrão, oculto em md+ onde painel esquerdo já tem logo -%>
     <div class="md:hidden mb-6">
-      <%= link_to root_path, class: "text-[#0070cc] font-semibold text-lg tracking-tight" do %>
+      <%= link_to root_path, class: "text-brand-primary font-semibold text-lg tracking-tight" do %>
         ViralSpy
       <% end %>
     </div>
 
     <div class="w-full max-w-sm mx-auto">
 
-      <h2 class="text-2xl font-light text-[#000000] tracking-tight mb-2">
+      <h2 class="text-2xl font-light text-text-display tracking-tight mb-2">
         Criar conta
       </h2>
-      <p class="text-sm text-[#6b6b6b] font-light mb-8">Leva menos de 1 minuto.</p>
+      <p class="text-sm text-text-muted font-light mb-8">Leva menos de 1 minuto.</p>
 
       <%# Erros Devise — bg derivado do token Warning Red (#c81b3a), sem hex externos -%>
       <% if resource.errors.any? %>
-        <div class="mb-6 rounded-xl bg-[#c81b3a]/10 border border-[#c81b3a]/30 p-4">
+        <div class="mb-6 rounded-xl bg-semantic-danger-bg border border-semantic-danger/20 p-4">
           <ul class="space-y-1">
             <% resource.errors.full_messages.each do |msg| %>
-              <li class="text-sm text-[#c81b3a] font-light"><%= msg %></li>
+              <li class="text-sm text-semantic-danger font-light"><%= msg %></li>
             <% end %>
           </ul>
         </div>
@@ -71,50 +71,50 @@
         <%# Nome do negócio — parâmetro flat, não nested attribute -%>
         <div>
           <%= label_tag "user[account_name]", t("devise.registrations.account_name_label"),
-              class: "block text-xs font-medium text-[#6b6b6b] tracking-wide uppercase mb-2" %>
+              class: "block text-xs font-medium text-text-muted tracking-wide uppercase mb-2" %>
           <%= text_field_tag "user[account_name]", nil,
               required: true,
               autofocus: true,
               autocomplete: "organization",
               placeholder: "Ex: Marketing Pessoal, Nutrição Funcional",
-              class: "w-full border border-[#cccccc] rounded-xl px-4 py-3 text-sm text-[#1f1f1f] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#0070cc] focus:border-transparent transition-shadow duration-150" %>
-          <p class="text-xs text-[#6b6b6b] mt-1.5">Pode ser sua empresa, marca pessoal ou projeto.</p>
+              class: "w-full border border-border-default rounded-xl px-4 py-3 text-sm text-text-body placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-shadow duration-150" %>
+          <p class="text-xs text-text-muted mt-1.5">Pode ser sua empresa, marca pessoal ou projeto.</p>
         </div>
 
         <%# Nome e Sobrenome — grid 2 colunas em md+ -%>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <%= f.label :first_name, t("devise.registrations.first_name_label"),
-                class: "block text-xs font-medium text-[#6b6b6b] tracking-wide uppercase mb-2" %>
+                class: "block text-xs font-medium text-text-muted tracking-wide uppercase mb-2" %>
             <%= f.text_field :first_name,
                 required: true,
                 autocomplete: "given-name",
-                class: "w-full border border-[#cccccc] rounded-xl px-4 py-3 text-sm text-[#1f1f1f] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#0070cc] focus:border-transparent transition-shadow duration-150" %>
+                class: "w-full border border-border-default rounded-xl px-4 py-3 text-sm text-text-body placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-shadow duration-150" %>
           </div>
           <div>
             <%= f.label :last_name, t("devise.registrations.last_name_label"),
-                class: "block text-xs font-medium text-[#6b6b6b] tracking-wide uppercase mb-2" %>
+                class: "block text-xs font-medium text-text-muted tracking-wide uppercase mb-2" %>
             <%= f.text_field :last_name,
                 required: true,
                 autocomplete: "family-name",
-                class: "w-full border border-[#cccccc] rounded-xl px-4 py-3 text-sm text-[#1f1f1f] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#0070cc] focus:border-transparent transition-shadow duration-150" %>
+                class: "w-full border border-border-default rounded-xl px-4 py-3 text-sm text-text-body placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-shadow duration-150" %>
           </div>
         </div>
 
         <%# E-mail -%>
         <div>
           <%= f.label :email, t("devise.registrations.email_label"),
-              class: "block text-xs font-medium text-[#6b6b6b] tracking-wide uppercase mb-2" %>
+              class: "block text-xs font-medium text-text-muted tracking-wide uppercase mb-2" %>
           <%= f.email_field :email,
               required: true,
               autocomplete: "email",
-              class: "w-full border border-[#cccccc] rounded-xl px-4 py-3 text-sm text-[#1f1f1f] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#0070cc] focus:border-transparent transition-shadow duration-150" %>
+              class: "w-full border border-border-default rounded-xl px-4 py-3 text-sm text-text-body placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-shadow duration-150" %>
         </div>
 
         <%# Senha com toggle de visibilidade — controller próprio -%>
         <div>
           <%= f.label :password, t("devise.registrations.password_label"),
-              class: "block text-xs font-medium text-[#6b6b6b] tracking-wide uppercase mb-2" %>
+              class: "block text-xs font-medium text-text-muted tracking-wide uppercase mb-2" %>
           <div class="relative" data-controller="password-toggle"
                data-password-toggle-show-label-value="Mostrar senha"
                data-password-toggle-hide-label-value="Ocultar senha">
@@ -122,11 +122,11 @@
                 required: true,
                 autocomplete: "new-password",
                 "data-password-toggle-target": "input",
-                class: "w-full border border-[#cccccc] rounded-xl px-4 py-3 pr-12 text-sm text-[#1f1f1f] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#0070cc] focus:border-transparent transition-shadow duration-150" %>
+                class: "w-full border border-border-default rounded-xl px-4 py-3 pr-12 text-sm text-text-body placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-shadow duration-150" %>
             <button type="button"
                     data-action="click->password-toggle#toggle"
                     data-password-toggle-target="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b6b6b] hover:text-[#1f1f1f] transition-colors duration-150"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-body transition-colors duration-150"
                     aria-label="Mostrar senha">
               <svg data-password-toggle-target="iconShow" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -138,14 +138,14 @@
             </button>
           </div>
           <% if @minimum_password_length %>
-            <p class="text-xs text-[#6b6b6b] mt-1.5">Mínimo de <%= @minimum_password_length %> caracteres.</p>
+            <p class="text-xs text-text-muted mt-1.5">Mínimo de <%= @minimum_password_length %> caracteres.</p>
           <% end %>
         </div>
 
         <%# Confirmação de senha — controller próprio (estado independente do campo acima) -%>
         <div>
           <%= f.label :password_confirmation, t("devise.registrations.password_confirmation_label"),
-              class: "block text-xs font-medium text-[#6b6b6b] tracking-wide uppercase mb-2" %>
+              class: "block text-xs font-medium text-text-muted tracking-wide uppercase mb-2" %>
           <div class="relative" data-controller="password-toggle"
                data-password-toggle-show-label-value="Mostrar confirmação de senha"
                data-password-toggle-hide-label-value="Ocultar confirmação de senha">
@@ -153,11 +153,11 @@
                 required: true,
                 autocomplete: "new-password",
                 "data-password-toggle-target": "input",
-                class: "w-full border border-[#cccccc] rounded-xl px-4 py-3 pr-12 text-sm text-[#1f1f1f] placeholder-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#0070cc] focus:border-transparent transition-shadow duration-150" %>
+                class: "w-full border border-border-default rounded-xl px-4 py-3 pr-12 text-sm text-text-body placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-shadow duration-150" %>
             <button type="button"
                     data-action="click->password-toggle#toggle"
                     data-password-toggle-target="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b6b6b] hover:text-[#1f1f1f] transition-colors duration-150"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-body transition-colors duration-150"
                     aria-label="Mostrar confirmação de senha">
               <svg data-password-toggle-target="iconShow" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -172,21 +172,21 @@
 
         <%# Submit — scale-[1.02] intencional em botão full-width (1.2 quebraria layout) -%>
         <%= f.submit t("devise.registrations.new.submit"),
-            class: "w-full bg-[#0070cc] text-white rounded-full py-3 text-sm font-medium tracking-wide hover:bg-[#1eaedb] hover:scale-[1.02] hover:ring-2 hover:ring-[#0070cc] hover:ring-offset-2 transition-all duration-150 ease-in-out cursor-pointer mt-2" %>
+            class: "w-full bg-brand-primary text-text-on-dark rounded-full py-3 text-sm font-medium tracking-wide hover:bg-brand-primary-hover hover:scale-[1.02] hover:ring-2 hover:ring-brand-primary hover:ring-offset-2 transition-all duration-150 ease-in-out cursor-pointer mt-2" %>
 
       <% end %>
 
-      <p class="mt-6 text-center text-sm text-[#6b6b6b] font-light">
+      <p class="mt-6 text-center text-sm text-text-muted font-light">
         Já tem conta?
         <%= link_to "Entrar", new_session_path(resource_name),
-            class: "text-[#0070cc] hover:text-[#1eaedb] font-medium transition-colors duration-150" %>
+            class: "text-brand-primary hover:text-brand-primary-hover font-medium transition-colors duration-150" %>
       </p>
 
-      <p class="text-xs text-[#6b6b6b] text-center mt-8 leading-relaxed">
+      <p class="text-xs text-text-muted text-center mt-8 leading-relaxed">
         Ao criar uma conta você concorda com nossos
-        <%= link_to "termos de uso", "#", class: "underline underline-offset-2 hover:text-[#1f1f1f] transition-colors" %> <%# TODO: páginas legais %>
+        <%= link_to "termos de uso", "#", class: "underline underline-offset-2 hover:text-text-body transition-colors" %> <%# TODO: páginas legais %>
         e
-        <%= link_to "política de privacidade", "#", class: "underline underline-offset-2 hover:text-[#1f1f1f] transition-colors" %>. <%# TODO: páginas legais %>
+        <%= link_to "política de privacidade", "#", class: "underline underline-offset-2 hover:text-text-body transition-colors" %>. <%# TODO: páginas legais %>
       </p>
 
     </div>

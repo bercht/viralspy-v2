@@ -1,34 +1,39 @@
 <% if analysis.expired? %>
   <div id="analysis-expiry-<%= analysis.id %>"
-       class="border-l-4 border-red-600 bg-red-50 px-4 py-3
+       class="border-l-4 border-semantic-danger bg-semantic-danger-bg px-4 py-3
               flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-    <p class="text-sm font-medium text-gray-900">
+    <p class="text-body-sm text-text-body">
       Análise expirada em <%= l(analysis.expires_at, format: :short) %>.
       Os insights podem estar desatualizados.
     </p>
     <div class="flex flex-wrap gap-2">
       <%= link_to "Re-analisar",
             new_competitor_analysis_path(analysis.competitor),
-            class: "rounded-full bg-blue-600 px-4 py-1.5 text-sm font-medium text-white
-                    transition-all duration-150 hover:bg-blue-700 hover:scale-105" %>
+            class: "rounded-pill bg-brand-primary px-4 py-1.5 text-button text-text-on-dark
+                    transition-all duration-[180ms] ease-out
+                    hover:bg-brand-primary-hover hover:scale-[1.02]
+                    focus:outline-none focus:shadow-focus" %>
 
       <%= button_to "Manter por mais 30 dias",
             extend_expiry_competitor_analysis_path(analysis.competitor, analysis),
             method: :post,
-            class: "rounded-full border border-blue-600 px-4 py-1.5 text-sm font-medium
-                    text-blue-600 transition-all duration-150 hover:bg-blue-50" %>
+            class: "rounded-pill border border-brand-primary px-4 py-1.5 text-button text-brand-primary
+                    transition-all duration-[180ms] ease-out
+                    hover:bg-semantic-info-bg
+                    focus:outline-none focus:shadow-focus" %>
 
       <%= button_to "Descartar",
             discard_competitor_analysis_path(analysis.competitor, analysis),
             method: :delete,
             data: { turbo_confirm: "Descartar esta análise? Posts e sugestões serão removidos. O Playbook não é afetado." },
-            class: "text-sm font-medium text-red-600 underline transition-colors duration-150 hover:text-red-800" %>
+            class: "text-button text-semantic-danger underline transition-colors duration-[180ms]
+                    hover:text-semantic-danger/80" %>
     </div>
   </div>
 <% elsif analysis.expiring_soon? %>
   <div id="analysis-expiry-<%= analysis.id %>"
-       class="border-l-4 border-amber-500 bg-amber-50 px-4 py-2">
-    <p class="text-sm text-gray-900">
+       class="border-l-4 border-semantic-warning bg-semantic-warning-bg px-4 py-2">
+    <p class="text-body-sm text-text-body">
       Esta análise expira em <%= l(analysis.expires_at, format: :short) %>.
     </p>
   </div>

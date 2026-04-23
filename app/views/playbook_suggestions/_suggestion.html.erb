@@ -1,6 +1,6 @@
-<div id="<%= dom_id(suggestion) %>" class="bg-white border border-gray-200 rounded-lg p-4">
+<div id="<%= dom_id(suggestion) %>" class="bg-surface-canvas border border-border-subtle rounded-card p-4">
   <div class="flex items-start justify-between gap-2 mb-2">
-    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+    <span class="inline-flex items-center px-2 py-0.5 rounded-pill text-caption bg-semantic-neutral-bg text-semantic-neutral">
       <%= suggestion.content_type %>
     </span>
     <% if suggestion.draft? %>
@@ -9,27 +9,27 @@
             playbook_playbook_suggestion_path(playbook, suggestion),
             method: :patch,
             params: { status: "saved" },
-            class: "text-xs text-green-600 hover:text-green-800 font-medium" %>
+            class: "text-caption text-brand-primary hover:text-brand-primary-hover font-medium" %>
         <%= button_to "Descartar",
             playbook_playbook_suggestion_path(playbook, suggestion),
             method: :patch,
             params: { status: "discarded" },
-            class: "text-xs text-red-500 hover:text-red-700" %>
+            class: "text-caption text-semantic-danger hover:text-semantic-danger/80" %>
       </div>
     <% else %>
-      <span class="text-xs text-gray-400"><%= suggestion.saved? ? "Salvo" : "Descartado" %></span>
+      <span class="text-caption text-text-subtle"><%= suggestion.saved? ? "Salvo" : "Descartado" %></span>
     <% end %>
   </div>
   <% if suggestion.hook.present? %>
-    <p class="text-sm font-medium text-gray-900 mb-1"><%= suggestion.hook %></p>
+    <p class="mb-1 text-body-sm font-medium text-text-body"><%= suggestion.hook %></p>
   <% end %>
   <% if suggestion.caption_draft.present? %>
-    <p class="text-sm text-gray-600 mb-2"><%= suggestion.caption_draft %></p>
+    <p class="mb-2 text-body-sm text-text-muted"><%= suggestion.caption_draft %></p>
   <% end %>
   <% if suggestion.suggested_hashtags.any? %>
-    <p class="text-xs text-indigo-600"><%= suggestion.suggested_hashtags.map { |h| "##{h}" }.join(" ") %></p>
+    <p class="text-caption text-text-muted"><%= suggestion.suggested_hashtags.map { |h| "##{h}" }.join(" ") %></p>
   <% end %>
   <% if suggestion.rationale.present? %>
-    <p class="text-xs text-gray-400 mt-2 italic"><%= suggestion.rationale %></p>
+    <p class="mt-2 text-caption text-text-subtle italic"><%= suggestion.rationale %></p>
   <% end %>
 </div>

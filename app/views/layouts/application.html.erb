@@ -16,31 +16,37 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-screen bg-surface-base font-sans text-body text-text-body antialiased">
+  <body class="min-h-screen bg-white text-[#1f1f1f] antialiased font-sans">
     <% if user_signed_in? %>
       <%= render "shared/navbar" %>
     <% end %>
 
-    <%# Token Meta expiry warning — only when user is signed in %>
     <% if user_signed_in? && current_tenant.present? %>
       <% expiring = current_tenant.own_profiles.expiring_soon.first %>
       <% if expiring %>
-        <div class="bg-yellow-50 border-b border-yellow-200 px-4 py-3 text-sm text-yellow-800 flex items-center justify-between">
-          <span>
-            ⚠️ O token Meta do perfil <strong>@<%= expiring.instagram_handle %></strong>
+        <div class="bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-sm text-amber-800 flex items-center justify-between gap-4">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            O token Meta do perfil <strong class="font-semibold">@<%= expiring.instagram_handle %></strong>
             expira em <%= expiring.meta_token_expires_at&.strftime("%d/%m/%Y") %>.
           </span>
           <%= link_to "Atualizar token", edit_own_profile_path(expiring),
-              class: "underline font-medium hover:text-yellow-900" %>
+              class: "shrink-0 font-semibold underline hover:text-amber-900 transition-colors" %>
         </div>
       <% end %>
     <% end %>
 
-    <main class="mx-auto w-full max-w-6xl px-4 py-6 md:px-6 lg:px-8 lg:py-8">
+    <main class="mx-auto w-full max-w-[1600px] px-4 py-8 md:px-6 md:py-12 lg:px-12 lg:py-16 xl:px-16 xl:py-20">
       <div id="flash">
         <%= render "shared/flash" %>
       </div>
       <%= yield %>
     </main>
+
+    <% if user_signed_in? %>
+      <%= render "shared/footer" %>
+    <% end %>
   </body>
 </html>

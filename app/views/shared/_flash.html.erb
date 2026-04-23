@@ -1,16 +1,31 @@
 <% if flash.any? %>
-  <div class="fixed top-0 left-0 right-0 z-50 space-y-1 pointer-events-none">
+  <div class="max-w-3xl mx-auto mb-8 space-y-3">
     <% flash.each do |type, message| %>
-      <% classes = case type.to_sym
-         when :notice, :success
-           "border-l-4 border-[#0070cc] bg-[#f5f7fa] text-[#1f1f1f]"
-         when :alert, :error
-           "border-l-4 border-[#c81b3a] bg-[#fff5f5] text-[#1f1f1f]"
-         else
-           "border-l-4 border-[#0070cc] bg-[#f5f7fa] text-[#1f1f1f]"
+      <% bg_classes = case type.to_sym
+         when :notice, :success then "bg-[#0070cc] text-white"
+         when :alert, :error    then "bg-[#c81b3a] text-white"
+         else                        "bg-[#f5f7fa] text-[#1f1f1f] border border-[#e5e7eb]"
          end %>
-      <div class="pointer-events-auto px-4 py-3 text-sm font-medium w-full transition-opacity duration-500 <%= classes %>" data-controller="flash">
-        <%= message %>
+
+      <div class="rounded-xl px-4 py-3 shadow-[0_5px_9px_0_rgba(0,0,0,0.08)] flex items-start gap-3 <%= bg_classes %>"
+           data-controller="flash">
+
+        <%# Icon %>
+        <% if [:notice, :success].include?(type.to_sym) %>
+          <svg class="w-5 h-5 shrink-0 mt-0.5 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+          </svg>
+        <% elsif [:alert, :error].include?(type.to_sym) %>
+          <svg class="w-5 h-5 shrink-0 mt-0.5 opacity-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          </svg>
+        <% else %>
+          <svg class="w-5 h-5 shrink-0 mt-0.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        <% end %>
+
+        <span class="text-sm font-medium leading-relaxed"><%= message %></span>
       </div>
     <% end %>
   </div>

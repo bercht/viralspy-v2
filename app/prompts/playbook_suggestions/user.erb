@@ -63,6 +63,19 @@ Para imagens estáticas:
   }
 <% end %>
 
+<% if previous_suggestions.any? %>
+## Sugestões já geradas anteriormente para este playbook e content_type
+
+As ideias abaixo JÁ FORAM GERADAS. NÃO repita hooks, ângulos, estruturas narrativas ou temas próximos. Gere ideias genuinamente novas, explorando ângulos, formatos, emoções ou recortes que NÃO estão na lista abaixo. Se o playbook tiver poucos ângulos válidos, prefira combinações inéditas a repetir.
+
+<% previous_suggestions.each_with_index do |suggestion, index| %>
+<% rationale = suggestion[:rationale].to_s.gsub(/\s+/, " ").strip %>
+<%= index + 1 %>. Hook: "<%= suggestion[:hook] %>" — Rationale: <%= rationale.presence || "Sem rationale registrada." %>
+<% end %>
+
+---
+<% end %>
+
 Responda SOMENTE com JSON válido, sem preâmbulo, sem markdown, sem explicação extra.
 
 Formato esperado:

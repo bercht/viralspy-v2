@@ -2,6 +2,8 @@
 
 module Playbooks
   class GenerateSuggestionsService
+    HISTORY_LIMIT = 20
+
     def self.call(playbook:, content_type:, quantity:)
       new(playbook:, content_type:, quantity:).call
     end
@@ -34,7 +36,8 @@ module Playbooks
           playbook_purpose: @playbook.purpose.to_s,
           current_content: @playbook.current_content,
           content_type: @content_type,
-          quantity: @quantity
+          quantity: @quantity,
+          previous_suggestions: previous_suggestions
         }
       )
 
@@ -42,7 +45,7 @@ module Playbooks
         provider: provider,
         model: model,
         api_key: key,
-        messages: [{ role: "user", content: user_prompt }],
+        messages: [ { role: "user", content: user_prompt } ],
         json_mode: true,
         max_tokens: 2000,
         temperature: 0.8,
@@ -103,6 +106,34 @@ module Playbooks
           rationale: item["rationale"]
         )
       end
+    end
+
+    def previous_suggestions
+      @previous_suggestions ||= @playbook.playbook_suggestions
+        .visible
+        .where(content_type: @content_type)
+        .order(created_at: :desc)
+        .limit(HISTORY_LIMIT)
+        .select(:hook, :rationale, :caption_draft)
+        .filter_map do |suggestion|
+          hook = previous_suggestion_hook(suggestion)
+          next if hook.blank?
+
+          {
+            hook: hook,
+            rationale: suggestion.rationale.to_s
+          }
+        end
+    end
+
+    def previous_suggestion_hook(suggestion)
+      hook = suggestion.hook.to_s.strip
+      return hook if hook.present?
+
+      caption_fallback = suggestion.caption_draft.to_s.squish
+      return if caption_fallback.blank?
+
+      caption_fallback.first(80)
     end
   end
 end

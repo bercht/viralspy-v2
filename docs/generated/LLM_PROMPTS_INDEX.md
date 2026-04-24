@@ -109,6 +109,7 @@
 - `current_content` — String (markdown do playbook atual)
 - `content_type` — String (`"reel"`, `"carousel"`, `"image"`, `"story"`)
 - `quantity` — Integer
+- `previous_suggestions` — Array de Hashes `{ hook:, rationale: }` (pode ser vazio). Histórico das últimas 20 sugestões do mesmo `content_type`, excluindo `discarded`, ordenadas por `created_at DESC`.
 
 ---
 

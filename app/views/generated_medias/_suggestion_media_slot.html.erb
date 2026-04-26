@@ -7,7 +7,7 @@
     <div id="suggestion_<%= suggestion.id %>_errors"></div>
     <%= link_to "Gerar vídeo avatar",
           new_content_suggestion_video_path(suggestion),
-          class: "mt-2 inline-block rounded-md border border-blue-600 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1",
+          class: "mt-2 inline-block rounded-pill border border-brand-primary px-3 py-1.5 text-button font-medium text-brand-primary transition-all duration-[180ms] ease-out hover:scale-[1.02] hover:bg-brand-primary hover:text-text-on-dark focus:outline-none focus:shadow-focus",
           aria: { label: "Gerar vídeo avatar para esta sugestão" } %>
   <% end %>
 </div>
